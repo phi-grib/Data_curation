@@ -35,4 +35,4 @@ class Curator(object):
         self.smi_df = smiles_dataframe
         self.smi_field = smiles_field
         
-    def get_
+    def get_rdkit_mol(self)
