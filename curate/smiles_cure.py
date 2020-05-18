@@ -11,9 +11,10 @@
 
 import numpy as np
 import pandas as pd
+import rdkit
 
 from rdkit import Chem
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 from phitools import moleculeHelper as mh
 from standardiser import process_smiles as ps
