@@ -34,7 +34,7 @@ class Curator(object):
 
         self.smiles_str = smiles
         self.type_subs = {1:'normal',2:'metal_ion',3:'No non-salt/solvate components',4:'Multiple non-salt/solvate components'}
-        
+
     def get_rdkit_mol(self) -> rdkit.Chem.rdchem.Mol:
         """
             Returns mol object from rdkit
@@ -46,9 +46,78 @@ class Curator(object):
     
         return smiles_mol
 
+    def standardise_mol(self, smiles_mol: rdkit.Chem.rdchem.Mol) -> rdkit.Chem.rdchem.Mol:
+        """
+            Standardises SMILES.
+
+            :param smiles_mol:
+            
+            :return std_mol:
+        """
+
+        try:
+            std_mol = ps.std(smiles_mol, returnMetals=True)
+            for values in std_mol.values():
+                type_of_sub = values[-1]
+            
+            if len(std_mol) > 1:
+                new_mol = ps.std(mol)
+                smiles = list(new_mol.keys())[0]
+                for key in std_mol.keys():
+                    if key in ps._metals:
+                        subs_type = 2
+                        smiles_curated = struc
+                        break
+                    else:
+                        for id_, type_ in type_subs.items():
+                            if type_of_sub == type_:
+                                id_to_add = id_
+                            else:
+                                id_to_add = 1
+                        subs_type = id_to_add
+                        smiles_curated = struc
+                        break
+
+            elif not std_mol:
+                smi_ = Chem.MolToSmiles(mol)
+                for metal in ps._metals:
+                    if metal in smi_:
+                        smiles_curated = smi_
+                        subs_type = 2
+                        break
+                else:
+                    for id_, type_ in type_subs.items():
+                            if type_of_sub == type_:
+                                id_to_add = id_
+                            else:
+                                id_to_add = 1
+                    smiles_curated = smi_
+                    subs_type = id_to_add
+
+            else:
+                for smiles in std_mol:
+                    for metal in ps._metals:
+                        if metal in smiles:
+                            smiles_curated = smiles
+                            subs_type = 2
+                            continue
+                    else:
+                        for id_, type_ in type_subs.items():
+                            if type_of_sub == type_:
+                                id_to_add = id_
+                            else:
+                                id_to_add = 1
+                        smiles_curated = smiles
+                        subs_type = id_to_add
+        except:
+            smiles_curated = 'failed_standardization'
+            subs_type = None
+
+        return smiles_curated, subs_type
+
     def return_curate_smiles(self) -> Union[str,Tuple[str,bool]]:
         """
-            Standardises SMILES. Handles exceptions
+            Handles all the curation process.
 
             :return smiles, substance_type_id
         """
@@ -58,65 +127,7 @@ class Curator(object):
         if smi_mol is None:
             smiles = 'failed_structure_rdkit'
             subs_type = None
-        
         else:
-            try:
-                std_mol = ps.std(smi_mol, returnMetals=True)
-                type_of_sub = ''
-                for values in std_mol.values():
-                    type_of_sub = values[-1]
-            except:
-                smiles = 'failed_standardization'
-                subs_type = None
-            
-            if len(std_mol) > 1:
-                new_mol = ps.std(mol)
-                smiles = list(new_mol.keys())[0]
-                for key in std_mol.keys():
-                    if key in ps._metals:
-                        subs_type = 2
-                        smiles = struc
-                        break
-                    else:
-                        for id_, type_ in type_subs.items():
-                            if type_of_sub == type_:
-                                id_to_add = id_
-                            else:
-                                id_to_add = 1
-                        substance_structures.loc[substance_structures.index == idx, 'substance_type_id'] = id_to_add
-                        substance_structures.loc[substance_structures.index == idx, 'structure_curated'] = struc
-                        break
-
-            elif not std_mol:
-                smi_ = Chem.MolToSmiles(mol)
-                for metal in ps._metals:
-                    if metal in smi_:
-                        substance_structures.loc[substance_structures.index == idx, 'structure_curated'] = smi_
-                        substance_structures.loc[substance_structures.index == idx, 'substance_type_id'] = 2
-                        break
-                else:
-                    for id_, type_ in type_subs.items():
-                            if type_of_sub == type_:
-                                id_to_add = id_
-                            else:
-                                id_to_add = 1
-                    substance_structures.loc[substance_structures.index == idx, 'structure_curated'] = smi_
-                    substance_structures.loc[substance_structures.index == idx, 'substance_type_id'] = id_to_add
-
-            else:
-                for smiles in std_mol:
-                    for metal in ps._metals:
-                        if metal in smiles:
-                            substance_structures.loc[substance_structures.index == idx, 'structure_curated'] = smiles
-                            substance_structures.loc[substance_structures.index == idx, 'substance_type_id'] = 2
-                            continue
-                    else:
-                        for id_, type_ in type_subs.items():
-                            if type_of_sub == type_:
-                                id_to_add = id_
-                            else:
-                                id_to_add = 1
-                        substance_structures.loc[substance_structures.index == idx, 'structure_curated'] = smiles
-                        substance_structures.loc[substance_structures.index == idx, 'substance_type_id'] = id_to_add
+            smiles, subs_type = self.standardise_mol(smi_mol)
 
         return smiles, subs_type
