@@ -60,7 +60,7 @@ class Curator(object):
             for values in std_mol.values():
                 type_of_sub = values[-1]
         else:
-            type_of_sub = 1
+            type_of_sub = 'normal'
     
         return type_of_sub
 
@@ -104,6 +104,9 @@ class Curator(object):
             :param smiles_mol:
             
             :return std_mol:
+
+            TODO: check loops. Also, change this nested code for different function blocks that identify the kind of substance 
+            is given as input and also properly process the SMILES.
         """
 
         std_mol = self.standardise_mol(smiles_mol)
@@ -111,6 +114,7 @@ class Curator(object):
 
         if isinstance(std_mol, tuple):
             smiles_curated, subs_type = std_mol
+
         elif not std_mol:
             smi_ = Chem.MolToSmiles(smiles_mol)
             for metal in ps._metals:
@@ -121,6 +125,7 @@ class Curator(object):
             else:
                 smiles_curated = smi_
                 subs_type = self.get_sub_type_id(type_of_sub)
+
         elif len(std_mol) > 1:
             new_mol = ps.std(smiles_mol)
             smiles = list(new_mol.keys())[0]
@@ -133,6 +138,7 @@ class Curator(object):
                     subs_type = self.get_sub_type_id(type_of_sub)
                     smiles_curated = self.smiles
                     break
+
         else:
             for smiles in std_mol:
                 for metal in ps._metals:
