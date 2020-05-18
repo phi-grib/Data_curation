@@ -25,7 +25,7 @@ class Curator(object):
         Initializes the class with a SMILES input and applies standardization and other functions to curate the data
     """
 
-    def __init__(self, smiles: str):
+    def __init__(self):
         """
             Initialized class with SMILES string
 
@@ -33,17 +33,16 @@ class Curator(object):
             :param smiles_field: Column name in the DF containing SMILES
         """
 
-        self.smiles_str = smiles
         self.type_subs = {1:'normal',2:'metal_ion',3:'No non-salt/solvate components',4:'Multiple non-salt/solvate components'}
 
-    def get_rdkit_mol(self) -> rdkit.Chem.rdchem.Mol:
+    def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
         """
             Returns mol object from rdkit
 
             :return smiles_mol:
         """
 
-        smiles_mol = Chem.MolFromSmiles(self.smiles_str)
+        smiles_mol = Chem.MolFromSmiles(smiles)
     
         return smiles_mol
 
@@ -116,14 +115,14 @@ class Curator(object):
 
         return smiles_curated, subs_type
 
-    def return_curate_smiles(self) -> Union[str,Tuple[str,bool]]:
+    def return_curate_smiles(self, smiles: str) -> Union[str,Tuple[str,bool]]:
         """
             Handles all the curation process.
 
             :return smiles, substance_type_id
         """
 
-        smi_mol = self.get_rdkit_mol()
+        smi_mol = self.get_rdkit_mol(smiles)
 
         if smi_mol is None:
             smiles = 'failed_structure_rdkit'
