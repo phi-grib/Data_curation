@@ -33,7 +33,7 @@ class Curator(object):
             :param smiles_field: Column name in the DF containing SMILES
         """
 
-        self.type_subs = {1:'normal',2:'metal_ion',3:'No non-salt/solvate components',4:'Multiple non-salt/solvate components'}
+        self.type_subs = {1:'normal', 2:'metal_ion', 3:'No non-salt/solvate components', 4:'Multiple non-salt/solvate components'}
 
     def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
         """
@@ -42,11 +42,62 @@ class Curator(object):
             :return smiles_mol:
         """
 
-        smiles_mol = Chem.MolFromSmiles(smiles)
+        self.smiles = smiles
+        smiles_mol = Chem.MolFromSmiles(self.smiles)
     
         return smiles_mol
 
-    def standardise_mol(self, smiles_mol: rdkit.Chem.rdchem.Mol) -> rdkit.Chem.rdchem.Mol:
+    def get_type_of_sub(self, std_mol: rdkit.Chem.rdchem.Mol) -> Optional[str]:
+        """
+            Gets the type of substance obtained by process smiles
+
+            :param std_mol:
+
+            :return type_of_sub:
+        """
+
+        if isinstance(std_mol,dict):
+            for values in std_mol.values():
+                type_of_sub = values[-1]
+        else:
+            type_of_sub = 1
+    
+        return type_of_sub
+
+    def get_sub_type_id(self, type_of_sub: str) -> int:
+        """
+            Gets the substance type id according to the dictionary. If there's no coincidence, returns 1 (normal)
+
+            :param type_:
+
+            :return sub_type_id:
+        """
+
+        for id_, type_ in self.type_subs.items():
+            if type_of_sub == type_:
+                sub_type_id = id_
+            else:
+                sub_type_id = 1
+        
+        return sub_type_id
+
+    def standardise_mol(self, smiles_mol: rdkit.Chem.rdchem.Mol) -> Union[dict,tuple]:
+        """
+            Standardises SMILES. If not, returns failed.
+
+            :param smiles_mol:
+
+            :return std_mol:
+        """
+
+        try:
+            std_mol = ps.std(smiles_mol, returnMetals=True)
+        except:
+            std_mol = ('failed_standardization', None)
+
+            return std_mol
+
+    def process_smiles_mol(self, smiles_mol: rdkit.Chem.rdchem.Mol) -> rdkit.Chem.rdchem.Mol:
         """
             Standardises SMILES.
 
@@ -55,63 +106,43 @@ class Curator(object):
             :return std_mol:
         """
 
-        try:
-            std_mol = ps.std(smiles_mol, returnMetals=True)
-            for values in std_mol.values():
-                type_of_sub = values[-1]
-            
-            if len(std_mol) > 1:
-                new_mol = ps.std(mol)
-                smiles = list(new_mol.keys())[0]
-                for key in std_mol.keys():
-                    if key in ps._metals:
-                        subs_type = 2
-                        smiles_curated = struc
-                        break
-                    else:
-                        for id_, type_ in type_subs.items():
-                            if type_of_sub == type_:
-                                id_to_add = id_
-                            else:
-                                id_to_add = 1
-                        subs_type = id_to_add
-                        smiles_curated = struc
-                        break
+        std_mol = self.standardise_mol(smiles_mol)
+        type_of_sub = self.get_type_of_sub(std_mol)
 
-            elif not std_mol:
-                smi_ = Chem.MolToSmiles(mol)
-                for metal in ps._metals:
-                    if metal in smi_:
-                        smiles_curated = smi_
-                        subs_type = 2
-                        break
-                else:
-                    for id_, type_ in type_subs.items():
-                            if type_of_sub == type_:
-                                id_to_add = id_
-                            else:
-                                id_to_add = 1
+        if isinstance(std_mol, tuple):
+            smiles_curated, subs_type = std_mol
+        elif not std_mol:
+            smi_ = Chem.MolToSmiles(smiles_mol)
+            for metal in ps._metals:
+                if metal in smi_:
                     smiles_curated = smi_
-                    subs_type = id_to_add
-
+                    subs_type = 2
+                    break
             else:
-                for smiles in std_mol:
-                    for metal in ps._metals:
-                        if metal in smiles:
-                            smiles_curated = smiles
-                            subs_type = 2
-                            continue
-                    else:
-                        for id_, type_ in type_subs.items():
-                            if type_of_sub == type_:
-                                id_to_add = id_
-                            else:
-                                id_to_add = 1
+                smiles_curated = smi_
+                subs_type = self.get_sub_type_id(type_of_sub)
+        elif len(std_mol) > 1:
+            new_mol = ps.std(smiles_mol)
+            smiles = list(new_mol.keys())[0]
+            for key in std_mol.keys():
+                if key in ps._metals:
+                    subs_type = 2
+                    smiles_curated = self.smiles
+                    break
+                else:
+                    subs_type = self.get_sub_type_id(type_of_sub)
+                    smiles_curated = self.smiles
+                    break
+        else:
+            for smiles in std_mol:
+                for metal in ps._metals:
+                    if metal in smiles:
                         smiles_curated = smiles
-                        subs_type = id_to_add
-        except:
-            smiles_curated = 'failed_standardization'
-            subs_type = None
+                        subs_type = 2
+                        continue
+                else:
+                    smiles_curated = smiles
+                    subs_type = self.get_sub_type_id(type_of_sub)
 
         return smiles_curated, subs_type
 
@@ -128,6 +159,6 @@ class Curator(object):
             smiles = 'failed_structure_rdkit'
             subs_type = None
         else:
-            smiles, subs_type = self.standardise_mol(smi_mol)
+            smiles, subs_type = self.process_smiles_mol(smi_mol)
 
         return smiles, subs_type
