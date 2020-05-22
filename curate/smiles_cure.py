@@ -34,6 +34,7 @@ class Curator(object):
         """
 
         self.type_subs = {1:'normal', 2:'metal_ion', 3:'No non-salt/solvate components', 4:'Multiple non-salt/solvate components'}
+        self.threads_ = {1:'non salt', 2:'salt', 3:'metal_ion', 4:'inorganic', 5:'peptide'}
 
     def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
         """
@@ -168,3 +169,39 @@ class Curator(object):
             smiles, subs_type = self.process_smiles_mol(smi_mol)
 
         return smiles, subs_type
+
+    #### Substance type filters
+    
+    def check_molecular_weight(self, molecule: str) -> bool:
+        """
+            Checks MW of the molecule.
+            Range betwn 75 kDa to 150 kDa.
+            More than 150 kDa is considered too big and removed.
+
+            :param molecule:
+
+            :return bool:
+        """
+
+        pass
+    
+    def check_organometallic(self, molecule: str) -> Optional[str]:
+        """
+            Checks if the molecule has metal ions.
+
+            :param molecule:
+
+            :return metal_molecule:
+        """
+        pass
+
+    def check_peptide(self, molecule: str) -> Optional[str]:
+        """
+            Checks if molecule is a peptide.
+
+            :param molecule:
+
+            :return peptide_molecule:
+        """
+
+        pass
