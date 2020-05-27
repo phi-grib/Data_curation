@@ -73,7 +73,7 @@ class Curator(object):
             checker = self.check_related_mixture(self.smiles)
 
         if checker:
-            print(checker)
+            print(self.smiles, checker)
         
 
 
@@ -89,7 +89,7 @@ class Curator(object):
         """
         
         metal_molecule = False
-        for metal in ps.metals_:
+        for metal in ps._metals:
             if metal in molecule:
                 metal_molecule = 'metal'
 
