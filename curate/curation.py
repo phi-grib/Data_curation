@@ -64,15 +64,15 @@ class Curator(object):
             :return filtered_smiles:
         """
 
-        checker = self.check_organometallic(self.smiles)
+        checker = self.check_inorganic(self.smiles)
         if not checker:
-            checker = self.check_inorganic(self.smiles)
+            checker = self.check_organometallic(self.smiles)
         if not checker:
             checker = self.check_isomeric_mixture(self.smiles)
         if not checker:
             checker = self.check_related_mixture(self.smiles)
 
-        if checker:
+        if checker == 'metal':
             print(self.smiles, checker)
         
 
@@ -104,9 +104,12 @@ class Curator(object):
             :return inorganic_molecule:
         """
         
-        inorganic_molecule = False
+        if 'C' in molecule or 'c' in molecule and '[' not in molecule and ']' not in molecule:
+            inorganic_molecule = False
+        else:
+            inorganic_molecule = 'inorganic'
 
-        pass
+        return inorganic_molecule
 
     def check_isomeric_mixture(self, molecule: str) -> bool:
         """
