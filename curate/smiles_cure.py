@@ -106,15 +106,8 @@ class Curator(object):
 
         elif len(std_mol) > 1:
             print(Chem.MolToSmiles(smiles_mol), std_mol)
-            new_mol = ps.std(smiles_mol)
-            smiles = list(new_mol.keys())[0]
             for key in std_mol.keys():
-                if key in ps._metals:
-                    smiles_curated = self.smiles
-                    break
-                else:
-                    smiles_curated = self.smiles
-                    break
+                checker = self.check_organometallic(key)
 
         else:
             for smiles in std_mol:
@@ -174,7 +167,16 @@ class Curator(object):
             :return metal_molecule:
         """
 
-        pass
+        for metal in ps.metals_:
+            if metal in molecule:
+                metal_molecule = True
+        
+        if metal_molecule:
+            bool_ = True
+        else:
+            bool_ = False
+
+        return bool_
 
     def check_peptide(self, molecule: str) -> Optional[str]:
         """
