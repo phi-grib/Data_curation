@@ -64,10 +64,10 @@ class Curator(object):
         """
 
         sub_type = self.check_organic_inorganic(self.smiles)
-        if sub_type = 'organic:'
+        if sub_type == 'organic':
             checker = self.check_organometallic(self.smiles)
         
-        elif sub_type = 'inorganic':
+        elif sub_type == 'inorganic':
             checker = self.check_isomeric_mixture(self.smiles)
             if not checker:
                 checker = self.check_related_mixture(self.smiles)
@@ -109,12 +109,15 @@ class Curator(object):
         """
         
         metal_molecule = False
+        metals = None
         try:
             mol, metals = ps.disconnect(self.smiles_mol)
         except:
             print('errooooooooor',self.smiles, self.smiles_mol)
-        # if metals:
-        #     print(self.smiles, Chem.MolToSmiles(mol), metals)
+        if metals:
+            print('organometallic',self.smiles, Chem.MolToSmiles(mol), metals)
+        else:
+            print('not metallic',self.smiles)
         for metal in ps._metals:
             if metal in molecule:
                 if ('C' in molecule or 'c' in molecule):
