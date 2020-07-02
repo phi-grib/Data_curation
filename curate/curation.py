@@ -34,7 +34,7 @@ class Curator(object):
             :param smiles_field: Column name in the DF containing SMILES
         """
 
-        self.threads_ = {1:'non salt', 2:'salt', 3:'organometallic', 4:'inorganic',
+        self.threads_ = {1:'organic', 2:'salt', 3:'organometallic', 4:'inorganic',
         5:'peptide',6:'isomeric_mixture',7:'related_to_mixtures'}
 
     def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
@@ -71,9 +71,6 @@ class Curator(object):
             checker = self.check_isomeric_mixture(self.smiles)
             if not checker:
                 checker = self.check_related_mixture(self.smiles)
-
-        # if checker == 'organometallic':
-        #     print(self.smiles, checker)
         
 
 
@@ -115,13 +112,8 @@ class Curator(object):
         except:
             print('errooooooooor',self.smiles, self.smiles_mol)
         if metals:
+            metal_molecule = 'organometallic'
             print('organometallic',self.smiles, Chem.MolToSmiles(mol), metals)
-        else:
-            print('not metallic',self.smiles)
-        for metal in ps._metals:
-            if metal in molecule:
-                if ('C' in molecule or 'c' in molecule):
-                    metal_molecule = 'organometallic'
 
         return metal_molecule
 
