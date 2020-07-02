@@ -44,9 +44,7 @@ class Curator(object):
         """
 
         self.smiles = smiles
-        smiles_mol = Chem.MolFromSmiles(self.smiles)
-    
-        return smiles_mol
+        self.smiles_mol = Chem.MolFromSmiles(self.smiles)
 
     def filter_smiles(self) -> Union[rdkit.Chem.rdchem.Mol, str]:
         """
@@ -64,16 +62,16 @@ class Curator(object):
             :return filtered_smiles:
         """
 
-        checker = self.check_inorganic(self.smiles)
+        checker = self.check_organometallic(self.smiles)
         if not checker:
-            checker = self.check_organometallic(self.smiles)
+            checker = self.check_inorganic(self.smiles)
         if not checker:
             checker = self.check_isomeric_mixture(self.smiles)
         if not checker:
             checker = self.check_related_mixture(self.smiles)
 
-        if checker == 'metal':
-            print(self.smiles, checker)
+        # if checker == 'organometallic':
+        #     print(self.smiles, checker)
         
 
 
@@ -89,9 +87,16 @@ class Curator(object):
         """
         
         metal_molecule = False
+        try:
+            mol, metals = ps.disconnect(self.smiles_mol)
+        except:
+            print('errooooooooor',self.smiles, self.smiles_mol)
+        if metals:
+            print(self.smiles, Chem.MolToSmiles(mol), metals)
         for metal in ps._metals:
             if metal in molecule:
-                metal_molecule = 'metal'
+                if ('C' in molecule or 'c' in molecule):
+                    metal_molecule = 'organometallic'
 
         return metal_molecule
 
@@ -104,7 +109,7 @@ class Curator(object):
             :return inorganic_molecule:
         """
         
-        if 'C' in molecule or 'c' in molecule and '[' not in molecule and ']' not in molecule:
+        if 'C' in molecule or 'c' in molecule:
             inorganic_molecule = False
         else:
             inorganic_molecule = 'inorganic'
