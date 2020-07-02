@@ -11,6 +11,7 @@
 
 import numpy as np
 import pandas as pd
+import re
 import rdkit
 
 from rdkit import Chem
@@ -62,13 +63,14 @@ class Curator(object):
             :return filtered_smiles:
         """
 
-        checker = self.check_organometallic(self.smiles)
-        if not checker:
-            checker = self.check_inorganic(self.smiles)
-        if not checker:
+        sub_type = self.check_organic_inorganic(self.smiles)
+        if sub_type = 'organic:'
+            checker = self.check_organometallic(self.smiles)
+        
+        elif sub_type = 'inorganic':
             checker = self.check_isomeric_mixture(self.smiles)
-        if not checker:
-            checker = self.check_related_mixture(self.smiles)
+            if not checker:
+                checker = self.check_related_mixture(self.smiles)
 
         # if checker == 'organometallic':
         #     print(self.smiles, checker)
@@ -76,6 +78,26 @@ class Curator(object):
 
 
     #### Checkers
+
+    def check_organic_inorganic(self, molecule: str) -> str:
+        """
+            Checks if there's a carbon atom in the molecule by filtering which elements that include a C or a c are not carbon 
+            but others such as Ca (calcium), Cu (copper) or Cs (cessium).
+
+            :param molecule:
+
+            :return substance_type:
+        """
+
+        C_upper = re.compile(r'C[^saeroudnfl]')
+        c_lower = re.compile(r'[^SATM]c')
+
+        if re.search(C_upper, molecule) or re.search(c_lower, molecule):
+            substance_type = 'organic'
+        else:
+            substance_type = 'inorganic'
+
+        return substance_type
 
     def check_organometallic(self, molecule: str) -> bool:
         """
@@ -91,30 +113,14 @@ class Curator(object):
             mol, metals = ps.disconnect(self.smiles_mol)
         except:
             print('errooooooooor',self.smiles, self.smiles_mol)
-        if metals:
-            print(self.smiles, Chem.MolToSmiles(mol), metals)
+        # if metals:
+        #     print(self.smiles, Chem.MolToSmiles(mol), metals)
         for metal in ps._metals:
             if metal in molecule:
                 if ('C' in molecule or 'c' in molecule):
                     metal_molecule = 'organometallic'
 
         return metal_molecule
-
-    def check_inorganic(self, molecule: str) -> bool:
-        """
-            Checks if the molecule is inorganic.
-
-            :param molecule:
-
-            :return inorganic_molecule:
-        """
-        
-        if 'C' in molecule or 'c' in molecule:
-            inorganic_molecule = False
-        else:
-            inorganic_molecule = 'inorganic'
-
-        return inorganic_molecule
 
     def check_isomeric_mixture(self, molecule: str) -> bool:
         """
