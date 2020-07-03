@@ -103,7 +103,7 @@ class Curator(object):
 
         return substance_type
 
-    def check_organometallic(self, molecule: str) -> bool:
+    def check_organometallic(self, molecule: str) -> Optional[str]:
         """
             Checks if the molecule has metal ions.
 
@@ -127,7 +127,7 @@ class Curator(object):
 
         return metal_molecule
 
-    def check_peptide(self, molecule: str) -> bool:
+    def check_peptide(self, molecule: str) -> Optional[str]:
         """
             Checks if molecule is a peptide
 
