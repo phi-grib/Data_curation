@@ -35,7 +35,7 @@ class Curator(object):
         """
 
         self.threads_ = {1:'organic', 2:'salt', 3:'organometallic', 4:'inorganic',
-        5:'peptide',6:'isomeric_mixture',7:'related_to_mixtures'}
+        5:'peptide',6:'inorganic_metal',7:'related_to_mixtures'}
 
     def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
         """
@@ -72,7 +72,7 @@ class Curator(object):
         elif sub_type == 'inorganic':
             checker = self.check_inorganic_metal(self.smiles)
             if not checker:
-                checker = self.check_isomeric_mixture(self.smiles)
+                checker = self.check_salt(self.smiles)
             elif not checker:
                 checker = self.check_related_mixture(self.smiles)
         
@@ -164,18 +164,23 @@ class Curator(object):
         
         return metal
 
-    def check_isomeric_mixture(self, molecule: str) -> bool:
+    def check_salt(self, molecule: str) -> str:
         """
-            Checks if the molecule is an isomeric mixture.
+            Checks if the molecule is salt
 
             :param molecule:
 
-            :return isomeric_mixture_molecule:
+            :return salt:
         """
 
-        isomeric_mixture_molecule = False
+        remover = Chem.SaltRemover.SaltRemover()
+        
+        salt = False
 
-        pass
+        if '.' in molecule:
+            salt = 'salt'
+
+        return salt
 
     def check_related_mixture(self, molecule: str) -> bool:
         """
