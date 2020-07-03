@@ -47,7 +47,7 @@ class Curator(object):
         self.smiles = smiles
         self.smiles_mol = Chem.MolFromSmiles(self.smiles)
 
-    def filter_smiles(self) -> Union[rdkit.Chem.rdchem.Mol, str]:
+    def filter_smiles(self) -> str:
         """
             Filters SMILES by checking different aspects:
                 - organometallic
@@ -66,13 +66,20 @@ class Curator(object):
         sub_type = self.check_organic_inorganic(self.smiles)
         if sub_type == 'organic':
             checker = self.check_organometallic(self.smiles)
-        
+            if not checker:
+                checker = self.check_peptide(self.smiles)
+
         elif sub_type == 'inorganic':
             checker = self.check_isomeric_mixture(self.smiles)
             if not checker:
                 checker = self.check_related_mixture(self.smiles)
         
-
+        if not checker:
+            substance_type = sub_type
+        else:
+            substance_type = checker
+        
+        return substance_type
 
     #### Checkers
 
@@ -107,15 +114,37 @@ class Curator(object):
         
         metal_molecule = False
         metals = None
+
         try:
             mol, metals = ps.disconnect(self.smiles_mol)
         except:
-            print('errooooooooor',self.smiles, self.smiles_mol)
+            for metal in ps._metals:
+                if metal in self.smiles:
+                    metals = metal
+
         if metals:
             metal_molecule = 'organometallic'
-            print('organometallic',self.smiles, Chem.MolToSmiles(mol), metals)
 
         return metal_molecule
+
+    def check_peptide(self, molecule: str) -> bool:
+        """
+            Checks if molecule is a peptide
+
+            :param molecule:
+
+            :return peptide_mol:
+        """
+
+        peptide_mol = None
+
+        l_peptide_pattern = re.compile(r'N\[C@@H\].+C\(=O\)O')
+        r_peptide_pattern = re.compile(r'N\[C@H\].+C\(=O\)O')
+        
+        if re.search(l_peptide_pattern, molecule) or re.search(r_peptide_pattern, molecule):
+            peptide_mol = 'peptide'
+        
+        return peptide_mol
 
     def check_isomeric_mixture(self, molecule: str) -> bool:
         """
