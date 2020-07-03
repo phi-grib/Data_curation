@@ -70,8 +70,10 @@ class Curator(object):
                 checker = self.check_peptide(self.smiles)
 
         elif sub_type == 'inorganic':
-            checker = self.check_isomeric_mixture(self.smiles)
+            checker = self.check_inorganic_metal(self.smiles)
             if not checker:
+                checker = self.check_isomeric_mixture(self.smiles)
+            elif not checker:
                 checker = self.check_related_mixture(self.smiles)
         
         if not checker:
@@ -145,6 +147,22 @@ class Curator(object):
             peptide_mol = 'peptide'
         
         return peptide_mol
+
+    def check_inorganic_metal(self, molecule: str) -> Optional[str]:
+        """
+            Checks if molecule is only an elemental metal.
+
+            :param molecule:
+
+            :return metal:
+        """
+
+        metal = None
+        
+        if molecule in ps._metals:
+            metal = 'inorganic_metal'
+        
+        return metal
 
     def check_isomeric_mixture(self, molecule: str) -> bool:
         """
