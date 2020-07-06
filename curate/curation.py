@@ -84,7 +84,7 @@ class Curator(object):
             :return filtered_smiles:
         """
 
-        sub_type = self.check_organic_inorganic(self.smiles)
+        sub_type = self.check_organic_inorganic(self.smiles, self.smiles_mol)
         
         if sub_type == 'organic':
             checker = self.check_organometallic(self.smiles)
@@ -106,13 +106,29 @@ class Curator(object):
         if self.smiles_mol is None:
             final_smi = self.smiles
         else:
-            final_smi = Chem.MolToSmiles(self.smiles_mol)
+            fixed_smi = Chem.MolToSmiles(self.smiles_mol)
+            final_smi = self.canonicalize_smiles(fixed_smi)
 
         return substance_type, final_smi
 
+    def canonicalize_smiles(self, smiles: str) -> Chem.Mol:
+        """
+            Uses SmilesFixer() object to correct some errors in SMILES structures
+
+            :param smiles:
+
+            :return fixed_smiles:
+        """
+
+        fixer = SmilesFixer()
+
+        fixed_smiles = fixer.fix_smiles(smiles)
+
+        return fixed_smiles
+
     #### Checkers
 
-    def check_organic_inorganic(self, molecule: str) -> str:
+    def check_organic_inorganic(self, molecule: str, mol_object: Chem.Mol) -> str:
         """
             Checks if there's a carbon atom in the molecule by filtering which elements that include a C or a c are not carbon 
             but others such as Ca (calcium), Cu (copper) or Cs (cessium). Also, a compound is considered to be organic when it has 
