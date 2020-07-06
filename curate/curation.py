@@ -17,6 +17,7 @@ import rdkit
 from rdkit import Chem
 from typing import Optional, Union, Tuple
 
+from canonicalization import SmilesFixer
 from phitools import moleculeHelper as mh
 from standardiser import process_smiles as ps
 
@@ -45,7 +46,27 @@ class Curator(object):
         """
 
         self.smiles = smiles
-        self.smiles_mol = Chem.MolFromSmiles(self.smiles)
+        self.smiles_mol = self.smiles_to_rdkit_mol(self.smiles)
+
+    def smiles_to_rdkit_mol(self, smiles: str) -> Optional[Chem.Mol]:
+        """
+            Converts a SMILES string to a RDKit molecule.
+
+            :param smiles: SMILES string of the molecule
+
+            :returns mol: RDKit Mol, None if the SMILES string is invalid
+        """
+
+        mol = Chem.MolFromSmiles(smiles)
+
+        #  Sanitization check (detects invalid valence)
+        if mol is not None:
+            try:
+                Chem.SanitizeMol(mol)
+            except ValueError:
+                return None
+
+        return mol 
 
     def filter_smiles(self) -> str:
         """
@@ -64,6 +85,7 @@ class Curator(object):
         """
 
         sub_type = self.check_organic_inorganic(self.smiles)
+        
         if sub_type == 'organic':
             checker = self.check_organometallic(self.smiles)
             if not checker:
@@ -81,14 +103,16 @@ class Curator(object):
         else:
             substance_type = checker
         
-        return substance_type
+        return substance_type, Chem.MolToSmiles(self.smiles_mol)
 
     #### Checkers
 
     def check_organic_inorganic(self, molecule: str) -> str:
         """
             Checks if there's a carbon atom in the molecule by filtering which elements that include a C or a c are not carbon 
-            but others such as Ca (calcium), Cu (copper) or Cs (cessium).
+            but others such as Ca (calcium), Cu (copper) or Cs (cessium). Also, a compound is considered to be organic when it has 
+            a Carbon atom bound to a Hydrogen. This means that grafite, CO2, CO, NaCN etc... are considered inorganic.
+            https://www.britannica.com/science/inorganic-compound
 
             :param molecule:
 
@@ -173,8 +197,8 @@ class Curator(object):
             :return salt:
         """
 
-        remover = Chem.SaltRemover.SaltRemover()
-        
+        # remover = Chem.SaltRemover.SaltRemover()
+
         salt = False
 
         if '.' in molecule:
