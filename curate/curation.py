@@ -17,7 +17,7 @@ import rdkit
 from rdkit import Chem
 from typing import Optional, Union, Tuple
 
-from canonicalization import SmilesFixer
+from .canonicalization import SmilesFixer
 from phitools import moleculeHelper as mh
 from standardiser import process_smiles as ps
 
@@ -103,7 +103,12 @@ class Curator(object):
         else:
             substance_type = checker
         
-        return substance_type, Chem.MolToSmiles(self.smiles_mol)
+        if self.smiles_mol is None:
+            final_smi = self.smiles
+        else:
+            final_smi = Chem.MolToSmiles(self.smiles_mol)
+
+        return substance_type, final_smi
 
     #### Checkers
 
