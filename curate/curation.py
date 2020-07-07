@@ -58,19 +58,24 @@ class Curator(object):
         """
 
         mol = Chem.MolFromSmiles(smiles)
-
         #  Sanitization check (detects invalid valence)
         if mol is None:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
+            for atom in mol.GetAtoms():
+                atom.SetNoImplicit(True)
+            # Chem.SanitizeMol(mol)
 
         return mol 
 
     def filter_smiles(self) -> str:
         """
             Filters SMILES by checking different aspects:
+                - organic
                 - organometallic
+                - peptide
                 - inorganic
-                - isomeric mixture
+                - inorganic metal
+                - salt
                 - related to mixtures
             
             If SMILES passes these filters (meaning it's NOT any of those above)
@@ -100,14 +105,14 @@ class Curator(object):
         else:
             substance_type = checker
         
-        if self.smiles_mol is None:
-            final_smi = self.smiles
-        else:
-            fixed_smi = Chem.MolToSmiles(self.smiles_mol)
-            try:
-                final_smi = self.canonicalize_smiles(fixed_smi, removeMap = True)
-            except AttributeError:
-                final_smi = self.canonicalize_smiles(fixed_smi, removeMap = False)
+        # if self.smiles_mol is None:
+        #     final_smi = self.smiles
+        # else:
+        fixed_smi = Chem.MolToSmiles(self.smiles_mol)
+        try:
+            final_smi = self.canonicalize_smiles(fixed_smi, removeMap = True)
+        except AttributeError:
+            final_smi = self.canonicalize_smiles(fixed_smi, removeMap = False)
 
         return substance_type, final_smi
 
@@ -145,8 +150,17 @@ class Curator(object):
         hs_pattern = re.compile(r'(\(\[H\]\))?(\[H\])?[Cc](\(\[H\]\))?')
 
         if re.search(C_upper, molecule) or re.search(c_lower, molecule):
-            mol_hs = Chem.AddHs(mol_object)
-            smi_hs = Chem.MolToSmiles(mol_hs)
+            try:
+                mol_hs = Chem.AddHs(mol_object)
+                smi_hs = Chem.MolToSmiles(mol_hs)
+            except:
+                final_smi = self.canonicalize_smiles(molecule, removeMap = False)
+                print(molecule)
+                print(final_smi)
+                # mol_hs = Chem.AddHs(mol_object)
+                # smi_hs = Chem.MolToSmiles(mol_hs)
+                # print(smi_hs)
+                raise
             if re.search(hs_pattern, smi_hs):
                 substance_type = 'organic'
             else:
@@ -226,7 +240,7 @@ class Curator(object):
 
         # remover = Chem.SaltRemover.SaltRemover()
 
-        salt = False
+        salt = None
 
         if '.' in molecule:
             salt = 'salt'
@@ -242,6 +256,6 @@ class Curator(object):
             :return related_to_mixture_molecule:
         """
 
-        related_to_mixture_molecule = False
+        related_to_mixture_molecule = None
 
         pass
