@@ -60,11 +60,8 @@ class Curator(object):
         mol = Chem.MolFromSmiles(smiles)
 
         #  Sanitization check (detects invalid valence)
-        if mol is not None:
-            try:
-                Chem.SanitizeMol(mol)
-            except ValueError:
-                return None
+        if mol is None:
+            mol = Chem.MolFromSmiles(smiles, sanitize=False)
 
         return mol 
 
@@ -107,11 +104,14 @@ class Curator(object):
             final_smi = self.smiles
         else:
             fixed_smi = Chem.MolToSmiles(self.smiles_mol)
-            final_smi = self.canonicalize_smiles(fixed_smi)
+            try:
+                final_smi = self.canonicalize_smiles(fixed_smi, removeMap = True)
+            except AttributeError:
+                final_smi = self.canonicalize_smiles(fixed_smi, removeMap = False)
 
         return substance_type, final_smi
 
-    def canonicalize_smiles(self, smiles: str) -> Chem.Mol:
+    def canonicalize_smiles(self, smiles: str, removeMap: bool) -> Chem.Mol:
         """
             Uses SmilesFixer() object to correct some errors in SMILES structures
 
@@ -121,8 +121,7 @@ class Curator(object):
         """
 
         fixer = SmilesFixer()
-
-        fixed_smiles = fixer.fix_smiles(smiles)
+        fixed_smiles = fixer.fix_smiles(smiles, removeMap)
 
         return fixed_smiles
 
@@ -143,8 +142,15 @@ class Curator(object):
         C_upper = re.compile(r'C[^saeroudnfl]')
         c_lower = re.compile(r'[^SATM]c')
 
+        hs_pattern = re.compile(r'(\(\[H\]\))?(\[H\])?[Cc](\(\[H\]\))?')
+
         if re.search(C_upper, molecule) or re.search(c_lower, molecule):
-            substance_type = 'organic'
+            mol_hs = Chem.AddHs(mol_object)
+            smi_hs = Chem.MolToSmiles(mol_hs)
+            if re.search(hs_pattern, smi_hs):
+                substance_type = 'organic'
+            else:
+                substance_type = 'inorganic'
         else:
             substance_type = 'inorganic'
 
