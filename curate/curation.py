@@ -154,9 +154,7 @@ class Curator(object):
                 mol_hs = Chem.AddHs(mol_object)
                 smi_hs = Chem.MolToSmiles(mol_hs)
             except:
-                final_smi = self.canonicalize_smiles(molecule, removeMap = False)
                 print(molecule)
-                print(final_smi)
                 # mol_hs = Chem.AddHs(mol_object)
                 # smi_hs = Chem.MolToSmiles(mol_hs)
                 # print(smi_hs)
