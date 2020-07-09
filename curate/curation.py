@@ -61,10 +61,15 @@ class Curator(object):
         #  Sanitization check (detects invalid valence)
         if mol is None:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
-            for atom in mol.GetAtoms():
-                atom.SetNoImplicit(True)
-            # Chem.SanitizeMol(mol)
-
+            for i,atom in enumerate(mol.GetAtoms()):
+                mol.GetAtomWithIdx(i).SetNumExplicitHs(0)
+                # atom.SetNoImplicit(True)
+            try:
+                Chem.SanitizeMol(mol)
+            except ValueError:
+                print(smiles, Chem.MolToSmiles(mol))
+                raise
+                
         return mol 
 
     def filter_smiles(self) -> str:
@@ -155,9 +160,9 @@ class Curator(object):
                 smi_hs = Chem.MolToSmiles(mol_hs)
             except:
                 print(molecule)
-                # mol_hs = Chem.AddHs(mol_object)
-                # smi_hs = Chem.MolToSmiles(mol_hs)
-                # print(smi_hs)
+                mol_hs = Chem.AddHs(mol_object, explicitOnly=True)
+                smi_hs = Chem.MolToSmiles(mol_hs)
+                print(smi_hs)
                 raise
             if re.search(hs_pattern, smi_hs):
                 substance_type = 'organic'
