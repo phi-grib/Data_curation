@@ -15,6 +15,7 @@ import re
 import rdkit
 
 from rdkit import Chem
+from rdkit.Chem import rdMolHash
 from typing import Optional, Union, Tuple
 
 from .canonicalization import SmilesFixer
@@ -61,9 +62,9 @@ class Curator(object):
         #  Sanitization check (detects invalid valence)
         if mol is None:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
-                
-        return mol 
 
+        return mol 
+        
     def filter_smiles(self) -> str:
         """
             Filters SMILES by checking different aspects:
