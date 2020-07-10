@@ -15,7 +15,7 @@ import re
 import rdkit
 
 from rdkit import Chem
-from rdkit.Chem import rdMolHash
+from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
 
 from .canonicalization import SmilesFixer
@@ -228,12 +228,16 @@ class Curator(object):
             :return salt:
         """
 
-        # remover = Chem.SaltRemover.SaltRemover()
+        remover = SaltRemover()
 
         salt = None
-
-        if '.' in molecule:
-            salt = 'salt'
+        
+        res, deleted = remover.StripMolWithDeleted(self.smiles_mol)
+        nosalt_smi = Chem.MolToSmiles(res)
+        salt_smi = [Chem.MolToSmiles(molec) for molec in deleted]
+        print('smiles',self.smiles,'nosalt', nosalt_smi, 'salt', salt_smi)
+        # if '.' in molecule:
+        #     salt = 'salt'
 
         return salt
 
