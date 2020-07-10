@@ -61,14 +61,6 @@ class Curator(object):
         #  Sanitization check (detects invalid valence)
         if mol is None:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
-            for i,atom in enumerate(mol.GetAtoms()):
-                mol.GetAtomWithIdx(i).SetNumExplicitHs(0)
-                # atom.SetNoImplicit(True)
-            try:
-                Chem.SanitizeMol(mol)
-            except ValueError:
-                print(smiles, Chem.MolToSmiles(mol))
-                raise
                 
         return mol 
 
@@ -92,7 +84,8 @@ class Curator(object):
         """
 
         sub_type = self.check_organic_inorganic(self.smiles, self.smiles_mol)
-        
+        checker = None
+
         if sub_type == 'organic':
             checker = self.check_organometallic(self.smiles)
             if not checker:
@@ -110,9 +103,6 @@ class Curator(object):
         else:
             substance_type = checker
         
-        # if self.smiles_mol is None:
-        #     final_smi = self.smiles
-        # else:
         fixed_smi = Chem.MolToSmiles(self.smiles_mol)
         try:
             final_smi = self.canonicalize_smiles(fixed_smi, removeMap = True)
@@ -158,16 +148,12 @@ class Curator(object):
             try:
                 mol_hs = Chem.AddHs(mol_object)
                 smi_hs = Chem.MolToSmiles(mol_hs)
+                if re.search(hs_pattern, smi_hs):
+                    substance_type = 'organic'
+                else:
+                    substance_type = 'inorganic'
             except:
-                print(molecule)
-                mol_hs = Chem.AddHs(mol_object, explicitOnly=True)
-                smi_hs = Chem.MolToSmiles(mol_hs)
-                print(smi_hs)
-                raise
-            if re.search(hs_pattern, smi_hs):
-                substance_type = 'organic'
-            else:
-                substance_type = 'inorganic'
+                substance_type = 'no_sanitizable'
         else:
             substance_type = 'inorganic'
 
