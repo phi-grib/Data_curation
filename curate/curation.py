@@ -36,8 +36,8 @@ class Curator(object):
             :param smiles_field: Column name in the DF containing SMILES
         """
 
-        self.threads_ = {1:'organic', 2:'salt', 3:'organometallic', 4:'inorganic',
-        5:'peptide',6:'inorganic_metal',7:'related_to_mixtures'}
+        self.threads_ = {1:'organic', 2:'organic_salt', 3:'organometallic', 4:'inorganic',
+        5:'peptide',6:'inorganic_metal',7:'inorganic_salt'}
 
     def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
         """
@@ -91,13 +91,13 @@ class Curator(object):
             checker = self.check_organometallic(self.smiles)
             if not checker:
                 checker = self.check_peptide(self.smiles)
+            if not checker:
+                checker = self.check_salt(self.smiles, sub_type)
 
         elif sub_type == 'inorganic':
             checker = self.check_inorganic_metal(self.smiles)
             if not checker:
-                checker = self.check_salt(self.smiles)
-            elif not checker:
-                checker = self.check_related_mixture(self.smiles)
+                checker = self.check_salt(self.smiles, sub_type)
         
         if not checker:
             substance_type = sub_type
@@ -219,9 +219,9 @@ class Curator(object):
         
         return metal
 
-    def check_salt(self, molecule: str) -> str:
+    def check_salt(self, molecule: str, subType: str) -> str:
         """
-            Checks if the molecule is salt
+            Checks if the molecule is salt.
 
             :param molecule:
 
@@ -229,27 +229,11 @@ class Curator(object):
         """
 
         remover = SaltRemover()
-
         salt = None
         
         res, deleted = remover.StripMolWithDeleted(self.smiles_mol)
-        nosalt_smi = Chem.MolToSmiles(res)
-        salt_smi = [Chem.MolToSmiles(molec) for molec in deleted]
-        print('smiles',self.smiles,'nosalt', nosalt_smi, 'salt', salt_smi)
-        # if '.' in molecule:
-        #     salt = 'salt'
+        
+        if len(deleted) >= 1:
+            salt = '_'.join([subType,'salt'])
 
         return salt
-
-    def check_related_mixture(self, molecule: str) -> bool:
-        """
-            Checks if the molecule is related to mixtures.
-
-            :param molecule:
-
-            :return related_to_mixture_molecule:
-        """
-
-        related_to_mixture_molecule = None
-
-        pass
