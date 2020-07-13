@@ -31,9 +31,6 @@ class Curator(object):
     def __init__(self):
         """
             Initialized class with SMILES string
-
-            :param smiles_dataframe: Dataframe containing the input SMILES
-            :param smiles_field: Column name in the DF containing SMILES
         """
 
         self.threads_ = {1:'organic', 2:'organic_salt', 3:'organometallic', 4:'inorganic',
@@ -47,7 +44,7 @@ class Curator(object):
         """
 
         self.smiles = smiles
-        self.smiles_mol = self.smiles_to_rdkit_mol(self.smiles)
+        self.smiles_mol = self.smiles_to_rdkit_mol(smiles)
 
     def smiles_to_rdkit_mol(self, smiles: str) -> Optional[Chem.Mol]:
         """
@@ -73,8 +70,8 @@ class Curator(object):
                 - peptide
                 - inorganic
                 - inorganic metal
-                - salt
-                - related to mixtures
+                - organic salt
+                - inorganic salt
             
             If SMILES passes these filters (meaning it's NOT any of those above)
             curation process continues.
