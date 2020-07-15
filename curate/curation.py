@@ -132,6 +132,9 @@ class Curator(object):
             a Carbon atom bound to a Hydrogen. This means that grafite, CO2, CO, NaCN etc... are considered inorganic.
             https://www.britannica.com/science/inorganic-compound
 
+            TODO: add halogen alkanes in filter, since they're also organic although they don't have hydrogens, only C and alkane 
+            elements: Eg: CCl4, CI4...
+
             :param molecule:
 
             :return substance_type:
@@ -140,22 +143,73 @@ class Curator(object):
         C_upper = re.compile(r'C[^saeroudnfl]')
         c_lower = re.compile(r'[^SATM]c')
 
-        hs_pattern = re.compile(r'(\(\[H\]\))?(\[H\])?[Cc](\(\[H\]\))?')
-
         if re.search(C_upper, molecule) or re.search(c_lower, molecule):
-            try:
-                mol_hs = Chem.AddHs(mol_object)
-                smi_hs = Chem.MolToSmiles(mol_hs)
-                if re.search(hs_pattern, smi_hs):
-                    substance_type = 'organic'
-                else:
-                    substance_type = 'inorganic'
-            except:
-                substance_type = 'no_sanitizable'
+            h_ = self.hydrogen_check(mol_object)
+            if h_ == 'organic':
+                substance_type = h_
+            else:
+                hal_check = self.halogen_check(molecule)
+                substance_type = hal_check
         else:
             substance_type = 'inorganic'
 
         return substance_type
+
+    def hydrogen_check(self, molecule_object: Chem.Mol) -> Union[bool,str]:
+        """
+            This function checks the presence of Hydrogen atoms in a molecule with
+            Carbons.
+
+            :param molecule_object:
+
+            :return h_check:
+        """
+
+        # Hydrogen check
+        # hs_pattern = re.compile(r'(\(\[H\]\))?(\[H\])?[Cc](\(\[H\]\))?')
+        hs_pattern_1 = re.compile(r'\(\[H\]\).?[Cc]')
+        hs_pattern_2 = re.compile(r'\[H\].?[Cc]')
+        hs_pattern_3 = re.compile(r'[Cc]\(\[H\]\)')
+
+        try:
+            mol_hs = Chem.AddHs(molecule_object)
+            smi_hs = Chem.MolToSmiles(mol_hs)
+            if re.search(hs_pattern_1, smi_hs) or re.search(hs_pattern_2, smi_hs) or re.search(hs_pattern_3, smi_hs):
+                # This pattern here will always be true since C or c will be present even if there is no H surrounding them. 
+                # Need to check that at least ONE H is near the C
+                h_check = 'organic'
+            else:
+                h_check = False
+        except:
+            h_check = 'no_sanitizable'
+        
+        return h_check
+
+    def halogen_check(self, molecule_string: str) -> str:
+        """
+            This function checks the presence of halogen elements in the substance
+            once the Carbon atom has been identified.
+
+            :param molecule_string: SMILES string of the substance
+
+            :return hal_check
+        """
+
+        # halogen check
+        hal_check = 'inorganic'
+        halogen_elements = ['Cl','Br']
+        i_pattern = re.compile(r'I[^rn]')
+        f_pattern = re.compile(r'F[^rem]')
+        
+        if re.search(i_pattern, molecule_string) or re.search(f_pattern, molecule_string):
+            hal_check = 'organic'
+        
+        if hal_check == 'inorganic':
+            for element in halogen_elements:
+                if element in molecule_string:
+                    hal_check = 'organic'
+
+        return hal_check
 
     def check_organometallic(self, molecule: str) -> Optional[str]:
         """
@@ -228,8 +282,12 @@ class Curator(object):
         remover = SaltRemover()
         salt = None
         
-        res, deleted = remover.StripMolWithDeleted(self.smiles_mol)
-        
+        try:
+            res, deleted = remover.StripMolWithDeleted(self.smiles_mol)
+        except:
+            salt = 'no_sanitizable'
+            return salt
+            
         if len(deleted) >= 1:
             salt = '_'.join([subType,'salt'])
 
