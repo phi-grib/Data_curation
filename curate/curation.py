@@ -33,9 +33,6 @@ class Curator(object):
             Initialized class with SMILES string
         """
 
-        self.threads_ = {1:'organic', 2:'organic_salt', 3:'organometallic', 4:'inorganic',
-        5:'peptide',6:'inorganic_metal',7:'inorganic_salt'}
-
     def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
         """
             Returns mol object from rdkit
@@ -287,7 +284,7 @@ class Curator(object):
         except:
             salt = 'no_sanitizable'
             return salt
-            
+
         if len(deleted) >= 1:
             salt = '_'.join([subType,'salt'])
 
