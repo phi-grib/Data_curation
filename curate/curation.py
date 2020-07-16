@@ -75,7 +75,7 @@ class Curator(object):
             If not, we keep that SMILES as the curated one and get the 
             substance type to store it in the database.
 
-            :return filtered_smiles:
+            :return substance_type, final_smi:
         """
 
         sub_type = self.check_organic_inorganic(self.smiles, self.smiles_mol)
@@ -129,9 +129,6 @@ class Curator(object):
             a Carbon atom bound to a Hydrogen. This means that grafite, CO2, CO, NaCN etc... are considered inorganic.
             https://www.britannica.com/science/inorganic-compound
 
-            TODO: add halogen alkanes in filter, since they're also organic although they don't have hydrogens, only C and alkane 
-            elements: Eg: CCl4, CI4...
-
             :param molecule:
 
             :return substance_type:
@@ -163,7 +160,6 @@ class Curator(object):
         """
 
         # Hydrogen check
-        # hs_pattern = re.compile(r'(\(\[H\]\))?(\[H\])?[Cc](\(\[H\]\))?')
         hs_pattern_1 = re.compile(r'\(\[H\]\).?[Cc]')
         hs_pattern_2 = re.compile(r'\[H\].?[Cc]')
         hs_pattern_3 = re.compile(r'[Cc]\(\[H\]\)')
