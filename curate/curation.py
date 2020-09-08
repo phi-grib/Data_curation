@@ -101,8 +101,12 @@ class Curator(object):
         fixed_smi = Chem.MolToSmiles(self.smiles_mol)
         try:
             final_smi = self.canonicalize_smiles(fixed_smi, removeMap = True)
-        except AttributeError:
-            final_smi = self.canonicalize_smiles(fixed_smi, removeMap = False)
+        except (AttributeError, Chem.AtomValenceException, Chem.KekulizeException) as e:
+            if 'kekulize' in str(e) or 'AtomValenceException' in str(e):
+                ### TODO: need to fix kekulization error
+                final_smi = None
+            else:
+                final_smi = self.canonicalize_smiles(fixed_smi, removeMap = False)
 
         return substance_type, final_smi
 
