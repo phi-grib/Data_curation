@@ -102,7 +102,7 @@ class Curator(object):
         try:
             final_smi = self.canonicalize_smiles(fixed_smi, removeMap = True)
         except (AttributeError, Chem.AtomValenceException, Chem.KekulizeException) as e:
-            if 'kekulize' in str(e) or 'AtomValenceException' in str(e):
+            if 'kekulize' in str(e) or 'Explicit valence' in str(e):
                 ### TODO: need to fix kekulization error
                 final_smi = None
             else:
