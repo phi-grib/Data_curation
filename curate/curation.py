@@ -289,3 +289,22 @@ class Curator(object):
             salt = '_'.join([subType,'salt'])
 
         return salt
+
+    ##### Function to call from the API
+
+    def get_filtered_SMILES_and_substance_type(self, smiles: str) -> Optional[str]:
+        """
+            Function that converts SMILES to mol object of RDKit 
+            and applies the filters. Returns substance type and a curated SMILES
+            if possible
+
+            :param smiles: SMILES string from the compound of interest
+
+            :return substance_type: Substance type defined from the filters
+            :return sanitized_smiles: Curated SMILES of the compound of interest. None if any error happened
+        """
+
+        self.get_rdkit_mol(smiles)
+        substance_type, sanitized_smiles = self.filter_smiles()   
+
+        return substance_type, sanitized_smiles
