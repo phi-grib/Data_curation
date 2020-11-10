@@ -85,6 +85,14 @@ def get_number_of_processed_vs_unprocessed(smiles_dataframe: pd.DataFrame) -> pd
 
 def get_total_of_smiles_per_type_of_substance(smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
     """
+        This function returns the amount of substance types found of each kind
+        after curating the SMILES.
+
+        :param smiles_dataframe:
+
+        :return subs_count:
     """
 
-    
+    subs_count = smiles_df.groupby('substance_type_name')['substance_type_name'].count()
+
+    return subs_count
