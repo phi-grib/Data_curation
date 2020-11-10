@@ -93,6 +93,6 @@ def get_total_of_smiles_per_type_of_substance(smiles_dataframe: pd.DataFrame) ->
         :return subs_count:
     """
 
-    subs_count = smiles_df.groupby('substance_type_name')['substance_type_name'].count()
+    subs_count = smiles_dataframe.groupby('substance_type_name')['substance_type_name'].count()
 
     return subs_count
