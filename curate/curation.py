@@ -13,7 +13,9 @@ import numpy as np
 import pandas as pd
 import re
 import rdkit
+import sys
 
+from io import StringIO
 from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
@@ -99,16 +101,26 @@ class Curator(object):
             substance_type = checker
         
         fixed_smi = Chem.MolToSmiles(self.smiles_mol)
-        try:
-            final_smi = self.canonicalize_smiles(fixed_smi, removeMap = True)
-        except (AttributeError, Chem.AtomValenceException, Chem.KekulizeException) as e:
-            if 'kekulize' in str(e) or 'Explicit valence' in str(e):
-                ### TODO: need to fix kekulization error
-                final_smi = None
-            else:
-                final_smi = self.canonicalize_smiles(fixed_smi, removeMap = False)
+        final_smi = self.check_errors(fixed_smi)
 
         return substance_type, final_smi
+
+    def check_errors(self, smi: str) -> str:
+        """
+            This function processes the SMILES in order no canonicalize it and detect any errors.
+            If errors are detected, the returned SMILES is not sanitized.
+
+            :param smi: SMILES string of the compound
+
+            :return final_smi: canonicalized SMILES
+        """
+
+        try:
+            final_smi = self.canonicalize_smiles(smi, removeMap = True)
+        except Exception:
+            final_smi = self.canonicalize_smiles(smi, removeMap = False)
+
+        return final_smi
 
     def canonicalize_smiles(self, smiles: str, removeMap: bool) -> Chem.Mol:
         """
