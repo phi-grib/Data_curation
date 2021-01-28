@@ -13,14 +13,12 @@ import numpy as np
 import pandas as pd
 import re
 import rdkit
-import sys
 
-from io import StringIO
+from chembl_structure_pipeline import standardizer
 from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
 
-from .canonicalization import SmilesFixer
 from phitools import moleculeHelper as mh
 from standardiser import process_smiles as ps
 
@@ -100,8 +98,7 @@ class Curator(object):
         else:
             substance_type = checker
         
-        fixed_smi = Chem.MolToSmiles(self.smiles_mol)
-        final_smi = self.check_errors(fixed_smi)
+        final_smi = self.check_errors(self.smiles_mol)
 
         return substance_type, final_smi
 
@@ -115,10 +112,8 @@ class Curator(object):
             :return final_smi: canonicalized SMILES
         """
 
-        try:
-            final_smi = self.canonicalize_smiles(smi, removeMap = True)
-        except Exception:
-            final_smi = self.canonicalize_smiles(smi, removeMap = False)
+        final_smi, exclude = standardizer.standardize_mol(smi)
+        final_smi = Chem.MolToSmiles(final_smi)
 
         return final_smi
 
