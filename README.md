@@ -12,7 +12,6 @@ Still under construction.
 
 Future features to add:
 - Mixture checking
-- Sanitization error handler
 - Optimizing the filtering function. Now it's a bit nested, which makes it more difficult to update and mantain for other developers
 
 Usage example:<br>
