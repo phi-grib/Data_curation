@@ -102,9 +102,9 @@ class Selection(object):
         """
 
         if algorithm == 'oversampling':
-            sampler = RandomOverSampler(random_state=0)
+            sampler = RandomOverSampler(random_state=42)
         elif algorithm == 'subsampling':
-            sampler = RandomUnderSampler(random_state=0)
+            sampler = RandomUnderSampler(random_state=42)
         
         y_train = df['activity']
         x_train = df.drop(columns='activity')
