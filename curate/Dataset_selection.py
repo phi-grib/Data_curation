@@ -15,8 +15,6 @@ from rdkit.Chem import PandasTools
 from sklearn.model_selection import train_test_split
 from typing import Union, Optional, Tuple
 
-# from UpdateDB.imbalance_correction.imb_cor_functions import random_subsampler, random_oversampler, smoteen_resample_sets
-
 class Selection(object):
     """
         This object aims to authomatise the dataset selection from CII database to build the models.
