@@ -117,20 +117,6 @@ class Curator(object):
 
         return final_smi
 
-    def canonicalize_smiles(self, smiles: str, removeMap: bool) -> Chem.Mol:
-        """
-            Uses SmilesFixer() object to correct some errors in SMILES structures
-
-            :param smiles:
-
-            :return fixed_smiles:
-        """
-
-        fixer = SmilesFixer()
-        fixed_smiles = fixer.fix_smiles(smiles, removeMap)
-
-        return fixed_smiles
-
     #### Checkers
 
     def check_organic_inorganic(self, molecule: str, mol_object: Chem.Mol) -> str:
