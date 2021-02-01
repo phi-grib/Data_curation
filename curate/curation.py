@@ -52,10 +52,12 @@ class Curator(object):
             :returns mol: RDKit Mol, None if the SMILES string is invalid
         """
 
+        self.no_san = False
         mol = Chem.MolFromSmiles(smiles)
         #  Sanitization check (detects invalid valence)
         if mol is None:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
+            self.no_san = True
 
         return mol 
         
@@ -78,7 +80,10 @@ class Curator(object):
             :return substance_type, final_smi:
         """
 
-        sub_type = self.check_organic_inorganic(self.smiles, self.smiles_mol)
+        if self.no_san:
+            sub_type = 'no_sanitizable'
+        else:
+            sub_type = self.check_organic_inorganic(self.smiles, self.smiles_mol)
         checker = None
 
         if sub_type == 'organic':
@@ -87,11 +92,12 @@ class Curator(object):
                 checker = self.check_peptide(self.smiles)
             if not checker:
                 checker = self.check_salt(self.smiles, sub_type)
-
         elif sub_type == 'inorganic':
             checker = self.check_inorganic_metal(self.smiles)
             if not checker:
                 checker = self.check_salt(self.smiles, sub_type)
+        elif sub_type == 'no_sanitizable':
+            pass
         
         if not checker:
             substance_type = sub_type
@@ -143,7 +149,7 @@ class Curator(object):
                 substance_type = hal_check
         else:
             substance_type = 'inorganic'
-
+        
         return substance_type
 
     def hydrogen_check(self, molecule_object: Chem.Mol) -> Union[bool,str]:
@@ -161,17 +167,14 @@ class Curator(object):
         hs_pattern_2 = re.compile(r'\[H\].?[Cc]')
         hs_pattern_3 = re.compile(r'[Cc]\(\[H\]\)')
 
-        try:
-            mol_hs = Chem.AddHs(molecule_object)
-            smi_hs = Chem.MolToSmiles(mol_hs)
-            if re.search(hs_pattern_1, smi_hs) or re.search(hs_pattern_2, smi_hs) or re.search(hs_pattern_3, smi_hs):
-                # This pattern here will always be true since C or c will be present even if there is no H surrounding them. 
-                # Need to check that at least ONE H is near the C
-                h_check = 'organic'
-            else:
-                h_check = False
-        except:
-            h_check = 'no_sanitizable'
+        mol_hs = Chem.AddHs(molecule_object)
+        smi_hs = Chem.MolToSmiles(mol_hs)
+        if re.search(hs_pattern_1, smi_hs) or re.search(hs_pattern_2, smi_hs) or re.search(hs_pattern_3, smi_hs):
+            # This pattern here will always be true since C or c will be present even if there is no H surrounding them. 
+            # Need to check that at least ONE H is near the C
+            h_check = 'organic'
+        else:
+            h_check = False
         
         return h_check
 
@@ -272,11 +275,7 @@ class Curator(object):
         remover = SaltRemover()
         salt = None
         
-        try:
-            res, deleted = remover.StripMolWithDeleted(self.smiles_mol)
-        except:
-            salt = 'no_sanitizable'
-            return salt
+        res, deleted = remover.StripMolWithDeleted(self.smiles_mol)
 
         if len(deleted) >= 1:
             salt = '_'.join([subType,'salt'])
