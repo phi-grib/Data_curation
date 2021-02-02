@@ -82,6 +82,12 @@ class Curator(object):
 
         if self.no_san:
             sub_type = 'no_sanitizable'
+            sub_type_ns = self.check_organic_inorganic(self.smiles, self.smiles_mol, no_sanitizable=True)
+            checker = self.check_organometallic(self.smiles)
+            if checker:
+                checker = '_'.join([sub_type,checker])
+            else:
+                sub_type = '_'.join([sub_type,sub_type_ns])
         else:
             sub_type = self.check_organic_inorganic(self.smiles, self.smiles_mol)
         checker = None
@@ -96,13 +102,6 @@ class Curator(object):
             checker = self.check_inorganic_metal(self.smiles)
             if not checker:
                 checker = self.check_salt(self.smiles, sub_type)
-        elif sub_type == 'no_sanitizable':
-            sub_type_ns = self.check_organic_inorganic(self.smiles, self.smiles_mol, no_sanitizable=True)
-            checker = self.check_organometallic(self.smiles)
-            if checker:
-                checker = '_'.join([sub_type,checker])
-            else:
-                sub_type = '_'.join([sub_type,sub_type_ns])
         
         if not checker:
             substance_type = sub_type
