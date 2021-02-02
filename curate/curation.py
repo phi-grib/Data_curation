@@ -97,7 +97,12 @@ class Curator(object):
             if not checker:
                 checker = self.check_salt(self.smiles, sub_type)
         elif sub_type == 'no_sanitizable':
-            pass
+            sub_type_ns = self.check_organic_inorganic(self.smiles, self.smiles_mol, no_sanitizable=True)
+            checker = self.check_organometallic(self.smiles)
+            if checker:
+                checker = '_'.join([sub_type,checker])
+            else:
+                sub_type = '_'.join([sub_type,sub_type_ns])
         
         if not checker:
             substance_type = sub_type
@@ -125,7 +130,7 @@ class Curator(object):
 
     #### Checkers
 
-    def check_organic_inorganic(self, molecule: str, mol_object: Chem.Mol) -> str:
+    def check_organic_inorganic(self, molecule: str, mol_object: Chem.Mol, no_sanitizable=False) -> str:
         """
             Checks if there's a carbon atom in the molecule by filtering which elements that include a C or a c are not carbon 
             but others such as Ca (calcium), Cu (copper) or Cs (cessium). Also, a compound is considered to be organic when it has 
@@ -141,12 +146,15 @@ class Curator(object):
         c_lower = re.compile(r'[^SATM]c')
 
         if re.search(C_upper, molecule) or re.search(c_lower, molecule):
-            h_ = self.hydrogen_check(mol_object)
-            if h_ == 'organic':
-                substance_type = h_
+            if no_sanitizable:
+                substance_type = 'organic'
             else:
-                hal_check = self.halogen_check(molecule)
-                substance_type = hal_check
+                h_ = self.hydrogen_check(mol_object)
+                if h_ == 'organic':
+                    substance_type = h_
+                else:
+                    hal_check = self.halogen_check(molecule)
+                    substance_type = hal_check
         else:
             substance_type = 'inorganic'
         
