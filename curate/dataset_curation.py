@@ -58,9 +58,9 @@ class DataCuration(object):
             :return substance_types:
         """
 
-        substance_types = {1:'organic', 2:'organic_salt', 3:'organometallic',  4:'peptide', 5:'inorganic',
-                            6:'inorganic_metal',7:'inorganic_salt', 8:'no_sanitizable',9:'no_sanitizable_organic',
-                            10:'no_sanitizable_inorganic',11:'no_sanitizable_organometallic'}
+        substance_types = {'id':[1,2,3,4,5,6,7,8,9,10,11], 'type':['organic', 'organic_salt','organometallic',
+                            'peptide','inorganic', 'inorganic_metal','inorganic_salt','no_sanitizable',
+                            'no_sanitizable_organic','no_sanitizable_inorganic','no_sanitizable_organometallic']}
         substance_types = pd.DataFrame(substance_types, columns=['id','type'])
         
         return substance_types
@@ -74,7 +74,7 @@ class DataCuration(object):
             :return curated_data: dataframe containing the curated information
         """
         
-        import .curation as cur
+        from curate import curation as cur
         data_cur = cur.Curator()
 
         curated_data = self.input_data.copy()
@@ -83,7 +83,7 @@ class DataCuration(object):
             smi = row[structure_column]
             data_cur.get_rdkit_mol(smi)
             sub_type, san_smi = data_cur.filter_smiles()
-            sub_type_id = threads_.loc[threads_['type'] == sub_type, 'id'].values[0]
+            sub_type_id = self.substance_types.loc[self.substance_types['type'] == sub_type, 'id'].values[0]
             curated_data.ix[i,'structure_curated'] = san_smi
             curated_data.ix[i,'substance_type_id'] = sub_type_id
             curated_data.ix[i,'substance_type_name'] = sub_type
