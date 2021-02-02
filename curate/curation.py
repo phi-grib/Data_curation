@@ -6,7 +6,7 @@
     all phi projects if needed.
 
     Created by: Eric March Vila (eric.march@upf.edu)
-    On: 27/05/2020, 12:16 AM
+    On: 27/05/2020, 12:16 PM
 """
 
 import numpy as np
@@ -30,7 +30,7 @@ class Curator(object):
 
     def __init__(self):
         """
-            Initialized class with SMILES string
+            Emtpy class initialization
         """
 
     def get_rdkit_mol(self, smiles: str) -> rdkit.Chem.rdchem.Mol:
