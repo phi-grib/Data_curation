@@ -117,12 +117,12 @@ class DataCuration(object):
         
         return substance_types
     
-    def curate_data(self, structure_column: str, remove_problematic: bool = None) -> pd.DataFrame:
+    def curate_data(self, structure_column: str, problem_struc: bool= None) -> pd.DataFrame:
         """
             Check SMILES column to get a curated SMILES and the type of substance.
 
             :param structure_column: string with the column name that contains the SMILES
-            :param remove_problematic: it allows the user to get rid of problematic structures for QSAR modelling
+            :param problem_struc: it allows the user to get rid of problematic structures for QSAR modelling. 
 
             :return curated_data: dataframe containing the curated information
         """
@@ -141,7 +141,7 @@ class DataCuration(object):
             curated_data.ix[i,'substance_type_id'] = sub_type_id
             curated_data.ix[i,'substance_type_name'] = sub_type
         
-        if remove_problematic:
+        if problem_struc:
             curated_data, problematic_structures = self.remove_problematic_structures(curated_data)
             self.problematic_structures = problematic_structures
         
@@ -156,12 +156,14 @@ class DataCuration(object):
 
             :return data_cleaned: data without problematic structures
             :return problematic_structures: data with the problematic structures
+
+            TODO: add option to select specific substance types to be removed.
         """
 
         problem_struc_list = ['organometallic','no_sanitizable', 'inorganic_salt', 
                                 'inorganic','inorganic_metal','no_sanitizable_organic',
                                 'no_sanitizable_inorganic','no_sanitizable_organometallic']
-                                
+
         data_cleaned = data.loc[~data['type'].isin(problem_struc_list)]
         problematic_structures = data.loc[data['type'].isin(problem_struc_list)]
 
