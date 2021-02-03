@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import sys
 
+from rdkit import Chem
 from typing import Optional, Union, Tuple
 
 class DataCuration(object):
@@ -46,8 +47,14 @@ class DataCuration(object):
         elif isinstance(data_input,str):
             if data_input.endswith('.xlsx'):
                 i_data = pd.read_excel(data_input)
+            elif data_input.endswith('.csv'):
+                i_data = pd.read_csv(data_input, sep=',')
+            elif data_input.endswith('.tsv'):
+                i_data = pd.read_csv(data_input, sep='\t')
+            elif data_input.endswith('.sdf'):
+                i_data = Chem.PandasTools.LoadSDF(data_input)
             else:
-                sys.stderr.write('Please provide a file with a proper Excel format (.xlsx)')
+                sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf)\n')
         
         return i_data
     
@@ -85,15 +92,12 @@ class DataCuration(object):
         output_name_format = '.'.join([outfile_name.split('.')[0],'sdf'])
         copy_curated_data = self.curated_data.copy()
 
-        from rdkit import Chem
-        from rdkit.Chem import PandasTools
-
-        PandasTools.AddMoleculeColumnToFrame(copy_curated_data,'structure_curated')
+        Chem.PandasTools.AddMoleculeColumnToFrame(copy_curated_data,'structure_curated')
         no_mol = copy_curated_data[copy_curated_data['ROMol'].isna()]
         copy_curated_data.drop(no_mol.index, axis=0, inplace=True)
         copy_curated_data['ROMol'] = [Chem.AddHs(x) for x in copy_curated_data['ROMol'].values.tolist()]
 
-        PandasTools.WriteSDF(copy_curated_data, output_name_format, molColName='ROMol', properties=list(copy_curated_data.columns), idName='name')
+        Chem.PandasTools.WriteSDF(copy_curated_data, output_name_format, molColName='ROMol', properties=list(copy_curated_data.columns), idName='name')
 
         if no_mol.empty is False:
             no_mol.to_excel('Non_processed_molecules.xlsx')
