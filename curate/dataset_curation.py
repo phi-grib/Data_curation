@@ -47,9 +47,55 @@ class DataCuration(object):
             if data_input.endswith('.xlsx'):
                 i_data = pd.read_excel(data_input)
             else:
-                sys.stderr.write('Please provide with a file with a proper Excel format (.xlsx)')
+                sys.stderr.write('Please provide a file with a proper Excel format (.xlsx)')
         
         return i_data
+    
+    def get_output_file(self, outfile_name: str, outfile_type: str):
+        """
+            Saves the curated data into a specific file format.
+            Requires output file name and type of file (Excel, CSV, TSV, sdf)
+
+            :param outfile_name: name of the output file
+            :param outfile_type: format for the output file {.xlsx, .csv, .tsv, .sdf}
+
+            :return output_file:
+        """
+
+        if 'sdf' in outfile_type.lower():
+            self.write_sdf(outfile_name)
+        elif 'xlsx' in outfile_type.lower() or 'excel' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_name.split('.')[0],'xlsx'])
+            self.curated_data.to_excel(output_name_format)
+        elif 'csv' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_name.split('.')[0],'csv'])
+            self.curated_data.to_csv(output_name_format, sep=',')
+        elif 'tsv' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_name.split('.')[0],'tsv'])
+            self.curated_data.to_csv(output_name_format, sep='\t')
+
+    def write_sdf(self, outfile_name: str):
+        """
+            Prepares curated data to be converted into sdf file using
+            PandasTools
+
+            :param outfile_name: output file name
+
+            TODO: handle molecules that can't be processed
+        """
+
+        output_name_format = '.'.join([outfile_name.split('.')[0],'sdf'])
+        copy_curated_data = self.curated_data.copy()
+
+        from rdkit import Chem
+        from rdkit.Chem import PandasTools
+
+        PandasTools.AddMoleculeColumnToFrame(copy_curated_data,'structure_curated')
+        no_mol = copy_curated_data[copy_curated_data['ROMol'].isna()]
+        copy_curated_data.drop(no_mol.index, axis=0, inplace=True)
+        copy_curated_data['ROMol'] = [Chem.AddHs(x) for x in copy_curated_data['ROMol'].values.tolist()]
+
+        PandasTools.WriteSDF(copy_curated_data, output_name_format, molColName='ROMol', properties=list(copy_curated_data.columns), idName='name')
 
     def get_substance_types(self) -> pd.DataFrame:
         """
@@ -88,4 +134,4 @@ class DataCuration(object):
             curated_data.ix[i,'substance_type_id'] = sub_type_id
             curated_data.ix[i,'substance_type_name'] = sub_type
         
-        return curated_data
+        self.curated_data = curated_data
