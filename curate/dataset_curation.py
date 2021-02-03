@@ -77,11 +77,9 @@ class DataCuration(object):
     def write_sdf(self, outfile_name: str):
         """
             Prepares curated data to be converted into sdf file using
-            PandasTools
+            PandasTools. Returns non processed molecules in excel format.
 
             :param outfile_name: output file name
-
-            TODO: handle molecules that can't be processed
         """
 
         output_name_format = '.'.join([outfile_name.split('.')[0],'sdf'])
@@ -96,6 +94,9 @@ class DataCuration(object):
         copy_curated_data['ROMol'] = [Chem.AddHs(x) for x in copy_curated_data['ROMol'].values.tolist()]
 
         PandasTools.WriteSDF(copy_curated_data, output_name_format, molColName='ROMol', properties=list(copy_curated_data.columns), idName='name')
+
+        if no_mol.empty is False:
+            no_mol.to_excel('Non_processed_molecules.xlsx')
 
     def get_substance_types(self) -> pd.DataFrame:
         """
