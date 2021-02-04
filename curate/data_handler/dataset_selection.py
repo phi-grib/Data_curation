@@ -5,13 +5,11 @@
 
 import numpy as np
 import pandas as pd
+import sys
 
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem import PandasTools
 from sklearn.model_selection import train_test_split
 from typing import Union, Optional, Tuple
 
@@ -21,26 +19,35 @@ class Selection(object):
         It also includes the imbalance correction, which is applied if the user needs to.
     """
 
-    def __init__(self, dataframe: pd.DataFrame, train_prop: float, test_prop: float):
+    def __init__(self, dataframe: pd.DataFrame, train_prop: float, test_prop: float, activity_field: str):
         """
             Initializes class
 
             :param dataframe:
             :param train_prop:
             :param test_prop:
-            :param imbalance_algorithm: default is None. Otherwise, it can be Oversampling, Subsampling or SMOTEEN
+            :param activity_field: column name with the activity data
         """
 
-        self.main_data = dataframe
-        self.train_prop = train_prop
-        self.test_prop = test_prop
-    
+        train_test_proportion = train_prop + test_prop
+        if train_test_proportion != 1.0:
+            sys.stderr.write('Please introduce a valid proportion of train and test set. The sum of both should be equal to 1.0.\n')
+            sys.exit()
+        else:
+            self.train_prop = train_prop
+            self.test_prop = test_prop
+
+        self.main_data = dataframe  
+        self.activity_field = activity_field
+
     ### Selection main function
 
     def split_main_dataset(self, imbalance_algorithm: str = None) -> pd.DataFrame:
         """
             This is the main function that returns the training set and the test set
             after applying the different proportions and the imbalance correction to the main set
+            
+            :param imbalance_algorithm: default is None. Otherwise, it can be Oversampling, Subsampling or SMOTEEN
 
             :return train_set, test_set:
         """
@@ -71,8 +78,8 @@ class Selection(object):
             :return train_set, test_set:
         """
 
-        y = df['activity']
-        x = df.drop(columns='activity')
+        y = df[self.activity_field]
+        x = df.drop(columns=self.activity_field)
         
         X_train, X_test, y_train, y_test = train_test_split(x, y, train_size=train_prop, test_size=test_prop, stratify = y, random_state=42)
         
@@ -106,15 +113,15 @@ class Selection(object):
         elif algorithm == 'subsampling':
             sampler = RandomUnderSampler(random_state=42)
         
-        y_train = df['activity']
-        x_train = df.drop(columns='activity')
+        y_train = df[self.activity_field]
+        x_train = df.drop(columns=self.activity_field)
         
         regular_cols = x_train.columns
         
         x_train_resampled, y_train_resampled = sampler.fit_resample(x_train, y_train)
         
         resampled_train_set = pd.DataFrame(data=x_train_resampled, columns=regular_cols)
-        resampled_train_set.loc[:,'activity'] = y_train_resampled
+        resampled_train_set.loc[:,self.activity_field] = y_train_resampled
         
         return resampled_train_set
 
@@ -140,11 +147,11 @@ class Selection(object):
         elif algorithm == 'subsampling':
             sampler = RandomUnderSampler(random_state=0)
         
-        y_train = train_['activity']
-        x_train = train_.drop(columns='activity')
+        y_train = train_[self.activity_field]
+        x_train = train_.drop(columns=self.activity_field)
 
-        y_test = test_['activity']
-        x_test = test_.drop(columns='activity')
+        y_test = test_[self.activity_field]
+        x_test = test_.drop(columns=self.activity_field)
         
         regular_cols = x_train.columns
         
@@ -152,10 +159,10 @@ class Selection(object):
         x_test_resampled, y_test_resampled = sampler.fit_resample(x_test, y_test)
         
         resampled_train_set = pd.DataFrame(data=x_train_resampled, columns=regular_cols)
-        resampled_train_set.loc[:,'activity'] = y_train_resampled
+        resampled_train_set.loc[:,self.activity_field] = y_train_resampled
         
         resampled_test_set = pd.DataFrame(data=x_test_resampled, columns=regular_cols)
-        resampled_test_set.loc[:,'activity'] = y_test_resampled
+        resampled_test_set.loc[:,self.activity_field] = y_test_resampled
         
         return resampled_train_set, resampled_test_set
 
@@ -171,7 +178,7 @@ class Selection(object):
             :return positive_doubled_df:
         """
 
-        pos_cond = df[df['activity'] == 1]
+        pos_cond = df[df[self.activity_field] == 1]
         positive_doubled_df = pd.concat([df,pos_cond], ignore_index=True, axis=0)
         
         return positive_doubled_df
@@ -188,7 +195,7 @@ class Selection(object):
             :return doubled_df:
         """
 
-        neg_cond = df[df['activity'] == 0]
+        neg_cond = df[df[self.activity_field] == 0]
         negative_doubled_df = pd.concat([df,neg_cond], ignore_index=True, axis=0)
         
         return negative_doubled_df
@@ -207,9 +214,9 @@ class Selection(object):
         """
 
         if condition == 'positive':
-            cond_df = df[df['activity'] == 1]
+            cond_df = df[df[self.activity_field] == 1]
         elif condition == 'negative':
-            cond_df = df[df['activity'] == 0]
+            cond_df = df[df[self.activity_field] == 0]
 
         triple_cond_df = pd.concat([df, cond_df, cond_df], ignore_index=True, axis=0)
 
@@ -226,8 +233,8 @@ class Selection(object):
             :return x_reshaped, y_:
         """
 
-        y_ = dataset['activity']
-        x_ = dataset.drop(columns='activity')
+        y_ = dataset[self.activity_field]
+        x_ = dataset.drop(columns=self.activity_field)
         x_reshaped = self.reshape_datasets(x_)
         
         return x_reshaped, y_

@@ -142,12 +142,11 @@ class DataCuration(object):
             curated_data.ix[i,'substance_type_name'] = sub_type
         
         if remove_problematic:
-            curated_data, problematic_structures = self.remove_problematic_structures(curated_data)
-            self.problematic_structures = problematic_structures
-        
-        self.curated_data = curated_data
+            self.remove_problematic_structures(curated_data)
+        else:
+            self.curated_data = curated_data
     
-    def remove_problematic_structures(self, data: pd.DataFrame) -> pd.DataFrame:
+    def remove_problematic_structures(self, data: pd.DataFrame = None) -> pd.DataFrame:
         """
             Remove problematic structures from main dataset.
             Returns cleaned dataset and problematic structures a part.
@@ -160,14 +159,15 @@ class DataCuration(object):
             TODO: add option to select specific substance types to be removed.
         """
 
+        if not data:
+            data = self.input_data
+        
         problem_struc_list = ['organometallic','no_sanitizable', 'inorganic_salt', 
                                 'inorganic','inorganic_metal','no_sanitizable_organic',
                                 'no_sanitizable_inorganic','no_sanitizable_organometallic']
 
-        data_cleaned = data.loc[~data['type'].isin(problem_struc_list)]
-        problematic_structures = data.loc[data['type'].isin(problem_struc_list)]
-
-        return data_cleaned, problematic_structures
+        self.curated_data = data.loc[~data['type'].isin(problem_struc_list)]
+        self.problematic_structures = data.loc[data['type'].isin(problem_struc_list)]
 
     def split_dataset(self):
         pass
