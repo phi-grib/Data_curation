@@ -117,12 +117,12 @@ class DataCuration(object):
         
         return substance_types
     
-    def curate_data(self, structure_column: str, problem_struc: bool= None) -> pd.DataFrame:
+    def curate_data(self, structure_column: str, remove_problematic: bool = None) -> pd.DataFrame:
         """
             Check SMILES column to get a curated SMILES and the type of substance.
 
             :param structure_column: string with the column name that contains the SMILES
-            :param problem_struc: it allows the user to get rid of problematic structures for QSAR modelling. 
+            :param remove_problematic: it allows the user to get rid of problematic structures for QSAR modelling. 
 
             :return curated_data: dataframe containing the curated information
         """
@@ -141,7 +141,7 @@ class DataCuration(object):
             curated_data.ix[i,'substance_type_id'] = sub_type_id
             curated_data.ix[i,'substance_type_name'] = sub_type
         
-        if problem_struc:
+        if remove_problematic:
             curated_data, problematic_structures = self.remove_problematic_structures(curated_data)
             self.problematic_structures = problematic_structures
         
