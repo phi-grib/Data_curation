@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", 'r') as f:
     long_description = f.read()
@@ -12,5 +12,5 @@ setup(
    author='Eric March Vila',
    author_email='eric.march@upf.edu',
    url='https://github.com/phi-grib/Data_curation',
-   packages=['curate']
+   packages=find_packages()
 )

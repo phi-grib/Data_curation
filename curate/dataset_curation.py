@@ -127,7 +127,7 @@ class DataCuration(object):
             :return curated_data: dataframe containing the curated information
         """
         
-        from curate import structure_curation as cur
+        from curate.chem import structure_curation as cur
         data_cur = cur.Curator()
 
         curated_data = self.input_data.copy()
