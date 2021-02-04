@@ -91,17 +91,48 @@ class DataCuration(object):
         """
 
         output_name_format = '.'.join([outfile_name.split('.')[0],'sdf'])
-        copy_curated_data = self.curated_data.copy()
+        cur_data = self.prepare_data_for_sdf(copy=True)
 
-        PandasTools.AddMoleculeColumnToFrame(copy_curated_data,'structure_curated')
-        no_mol = copy_curated_data[copy_curated_data['ROMol'].isna()]
-        copy_curated_data.drop(no_mol.index, axis=0, inplace=True)
-        copy_curated_data['ROMol'] = [Chem.AddHs(x) for x in copy_curated_data['ROMol'].values.tolist()]
+        PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName='name')
 
-        PandasTools.WriteSDF(copy_curated_data, output_name_format, molColName='ROMol', properties=list(copy_curated_data.columns), idName='name')
+    def prepare_data_for_sdf(self, copy: bool = False):
+        """
+            Prepares the data to be converted to sdf.
+            If copy, it copies the dataframe so it's not overwritten with new columns before being processed as sdf.
+            Else, it directly uses self.curated_data. This option is used mostly in jupyter or CLI mode to keep the new columns
+            in the python object so it can be manipulated directly in the backend.
 
+            :param copy: boolean accepting True or False
+
+            :return cur_data: dataframe with new columns added before being converted into sdf.
+        """
+
+        if copy:
+            copy_curated_data = self.curated_data.copy()
+            cur_data,= self.add_mol_column_to_df(copy_curated_data)
+            return cur_data
+        else:
+            self.add_mol_column_to_df(self.curated_data)
+
+    def add_mol_column_to_df(self, data):
+        """
+            Applies PandasTools functionalities to process the structure into a valid format for the sdf transformation.
+
+            :param data: dataframe to be modified
+
+            :return data: modified data
+            :return no_mol: data that hasn't been modified
+        """
+
+        PandasTools.AddMoleculeColumnToFrame(data,'structure_curated')
+        no_mol = data[data['ROMol'].isna()]
+        data.drop(no_mol.index, axis=0, inplace=True)
+        data['ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
+        
         if no_mol.empty is False:
             no_mol.to_excel('Non_processed_molecules.xlsx')
+
+        return data
 
     def get_substance_types(self) -> pd.DataFrame:
         """
