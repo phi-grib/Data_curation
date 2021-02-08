@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from typing import Union, Optional, Tuple
 
 class Selection(object):
+    
     """
         This object aims to authomatise the dataset selection from CII database to build the models.
         It also includes the imbalance correction, which is applied if the user needs to.

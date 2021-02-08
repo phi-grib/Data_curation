@@ -14,6 +14,7 @@ from rdkit.Chem import PandasTools
 from typing import Optional, Union, Tuple
 
 class DataCuration(object):
+
     """
         Main class for handling inputs from users.
         Internally, it will curate the data in the following way:
@@ -200,5 +201,12 @@ class DataCuration(object):
         self.curated_data = data.loc[~data['type'].isin(problem_struc_list)]
         self.problematic_structures = data.loc[data['type'].isin(problem_struc_list)]
 
-    def split_dataset(self):
-        pass
+    def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str):
+        """
+        """
+
+        from curate.data_handler import dataset_selection as datasel
+        
+        curated_data_object = datasel.Selection(self.curated_data, train_proportion, test_proportion, activity_field)
+
+        return curated_data_object
