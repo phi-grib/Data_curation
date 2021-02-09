@@ -205,6 +205,12 @@ class DataCuration(object):
         """
             Split the curated dataset into training and test sets using the proportion provided by the user.
             It allows to apply resampling algorithms if desired.
+
+            :param train_proportion: training set proportion of the main dataset
+            :param test_proportion: test set proportion of the main dataset
+            :param activity_field: column name that inclues the activity
+            :param imbalance_algorithm: oversampling, subsampling, smoteen
+
         """
 
         from curate.data_handler import dataset_selection as datasel

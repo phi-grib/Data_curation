@@ -62,7 +62,7 @@ class Selection(object):
             elif imbalance_algorithm.lower() == 'subsampling':
                 train_set, test_set = self.random_oversampler_subsampler(train_set, test_set, 'subsampling')
             elif imbalance_algorithm.lower() == 'smoteen':
-                train_set, test_set = self.smoteen_resample_sets(train_set, test_set)
+                train_set, test_set = self.smoteen_sets(train_set, test_set)
 
         return train_set, test_set
 
@@ -95,7 +95,7 @@ class Selection(object):
     def random_oversampler_subsampler_single_dataframe(self, df: pd.DataFrame, sampler: imblearn.base.BaseSampler) -> pd.DataFrame:
         """
             This function applies either Random Subsampling or Random Oversampling.
-            Only for one dataframe used as training or test set.
+            Only for one dataframe is passed as input
 
             Random Undersampling
             https://imbalanced-learn.readthedocs.io/en/stable/under_sampling.html
@@ -103,8 +103,7 @@ class Selection(object):
             Random Oversampling
             https://imbalanced-learn.readthedocs.io/en/stable/over_sampling.html
 
-            :param train_:
-            :param test_:
+            :param df: trainig or test set input
             :param sampler: selected sampler. (Oversampling, Subsampling)
 
             :return resampled_train_set:
@@ -124,13 +123,7 @@ class Selection(object):
 
     def random_oversampler_subsampler(self, train_: pd.DataFrame, test_: pd.DataFrame, algorithm: str) -> pd.DataFrame:
         """
-            This function applies either Random Subsampling or Random Oversampling.
-
-            Random Undersampling
-            https://imbalanced-learn.readthedocs.io/en/stable/under_sampling.html
-
-            Random Oversampling
-            https://imbalanced-learn.readthedocs.io/en/stable/over_sampling.html
+            This function returns resampled training and test sets
 
             :param train_:
             :param test_:
@@ -209,7 +202,7 @@ class Selection(object):
 
     def process_datasets(self, dataset: pd.DataFrame) -> Tuple[np.ndarray, pd.DataFrame]:
         """
-            this function is used to reshape the dataset in order to prepare it for SMOTEEN.
+            This function is used to reshape the dataset in order to prepare it for SMOTEEN.
 
             :param dataset:
 
@@ -261,7 +254,7 @@ class Selection(object):
         
         return proper_dataset
                 
-    def smoteen_resample_sets(self, train_: pd.DataFrame, test_: pd.DataFrame) -> pd.DataFrame:
+    def smoteen_sets(self, train_: pd.DataFrame, test_: pd.DataFrame) -> pd.DataFrame:
         """
             This function applies SMOTEEN once train and test set are split.
 
@@ -270,27 +263,15 @@ class Selection(object):
 
             :return resampled_train_set, resampled_test_set:
         """
+        
+        resampled_train_set = self.smoteen_resample_set(train_)
+        resampled_test_set = self.smoteen_resample_set(test_)
 
-        smote_enn = SMOTEENN(random_state=42)
-        
-        x_train_index_reshape, y_train = self.process_datasets(train_)
-        x_test_index_reshape, y_test = self.process_datasets(test_)
-
-        x_train_resampled, y_train_resampled = smote_enn.fit_resample(x_train_index_reshape, y_train)
-        x_test_resampled, y_test_resampled = smote_enn.fit_resample(x_test_index_reshape, y_test)
-        
-        x_train_res_flatten = x_train_resampled.flatten()
-        x_test_res_flatten = x_test_resampled.flatten()
-        
-        resampled_train_set = self.get_proper_datasets(train_, x_train_res_flatten)
-        resampled_test_set = self.get_proper_datasets(test_, x_test_res_flatten)
-        
         return resampled_train_set, resampled_test_set
 
-    def resample_main_set(self, main_set:pd.DataFrame) -> pd.DataFrame:
+    def smoteen_resample_set(self, main_set:pd.DataFrame) -> pd.DataFrame:
         """
-            This function applies SMOTEEN to the whole dataset before splitting into train and test sets.
-            It is deprecated since we found that is better to apply it after splitting, but we keep the function.
+            Appliaction of SMOTEEN to the input main_set.
 
             :param main_set:
 
