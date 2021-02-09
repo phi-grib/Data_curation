@@ -3,6 +3,7 @@
     On: 21/09/2020, 13:45 PM
 """
 
+import imblearn
 import numpy as np
 import pandas as pd
 import sys
@@ -57,7 +58,7 @@ class Selection(object):
 
         if imbalance_algorithm:
             if imbalance_algorithm.lower() == 'oversampling':
-                train_set, test_set = self.random_oversampler_subsampler(train_set,test_set, 'oversampling')
+                train_set, test_set = self.random_oversampler_subsampler(train_set, test_set, 'oversampling')
             elif imbalance_algorithm.lower() == 'subsampling':
                 train_set, test_set = self.random_oversampler_subsampler(train_set, test_set, 'subsampling')
             elif imbalance_algorithm.lower() == 'smoteen':
@@ -91,7 +92,7 @@ class Selection(object):
     
     ### Imbalance correction
 
-    def random_oversampler_subsampler_single_dataframe(self, df: pd.DataFrame, algorithm: str) -> pd.DataFrame:
+    def random_oversampler_subsampler_single_dataframe(self, df: pd.DataFrame, sampler: imblearn.base.BaseSampler) -> pd.DataFrame:
         """
             This function applies either Random Subsampling or Random Oversampling.
             Only for one dataframe used as training or test set.
@@ -104,16 +105,11 @@ class Selection(object):
 
             :param train_:
             :param test_:
-            :param algorithm: this can either be 'oversampling' or 'subsampling'
+            :param sampler: selected sampler. (Oversampling, Subsampling)
 
             :return resampled_train_set:
         """
 
-        if algorithm == 'oversampling':
-            sampler = RandomOverSampler(random_state=42)
-        elif algorithm == 'subsampling':
-            sampler = RandomUnderSampler(random_state=42)
-        
         y_train = df[self.activity_field]
         x_train = df.drop(columns=self.activity_field)
         
@@ -144,26 +140,12 @@ class Selection(object):
         """
 
         if algorithm == 'oversampling':
-            sampler = RandomOverSampler(random_state=0)
+            sampler = RandomOverSampler(random_state=42)
         elif algorithm == 'subsampling':
-            sampler = RandomUnderSampler(random_state=0)
+            sampler = RandomUnderSampler(random_state=42)
         
-        y_train = train_[self.activity_field]
-        x_train = train_.drop(columns=self.activity_field)
-
-        y_test = test_[self.activity_field]
-        x_test = test_.drop(columns=self.activity_field)
-        
-        regular_cols = x_train.columns
-        
-        x_train_resampled, y_train_resampled = sampler.fit_resample(x_train, y_train)
-        x_test_resampled, y_test_resampled = sampler.fit_resample(x_test, y_test)
-        
-        resampled_train_set = pd.DataFrame(data=x_train_resampled, columns=regular_cols)
-        resampled_train_set.loc[:,self.activity_field] = y_train_resampled
-        
-        resampled_test_set = pd.DataFrame(data=x_test_resampled, columns=regular_cols)
-        resampled_test_set.loc[:,self.activity_field] = y_test_resampled
+        resampled_train_set = self.random_oversampler_subsampler_single_dataframe(train_, sampler)
+        resampled_test_set = self.random_oversampler_subsampler_single_dataframe(test_, sampler)
         
         return resampled_train_set, resampled_test_set
 

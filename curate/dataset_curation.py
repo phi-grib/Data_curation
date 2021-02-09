@@ -96,7 +96,7 @@ class DataCuration(object):
 
         PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName='name')
 
-    def prepare_data_for_sdf(self, copy: bool = False):
+    def prepare_data_for_sdf(self, copy: bool = False) -> Optional[pd.DataFrame]:
         """
             Prepares the data to be converted to sdf.
             If copy, it copies the dataframe so it's not overwritten with new columns before being processed as sdf.
@@ -201,12 +201,13 @@ class DataCuration(object):
         self.curated_data = data.loc[~data['type'].isin(problem_struc_list)]
         self.problematic_structures = data.loc[data['type'].isin(problem_struc_list)]
 
-    def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str):
+    def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str, imbalance_algorithm: str = None):
         """
+            Split the curated dataset into training and test sets using the proportion provided by the user.
+            It allows to apply resampling algorithms if desired.
         """
 
         from curate.data_handler import dataset_selection as datasel
         
         curated_data_object = datasel.Selection(self.curated_data, train_proportion, test_proportion, activity_field)
-
-        return curated_data_object
+        self.train, self.test = curated_data_object.split_main_dataset(imbalance_algorithm=imbalance_algorithm)
