@@ -110,12 +110,12 @@ class DataCuration(object):
 
         if copy:
             copy_curated_data = self.curated_data.copy()
-            cur_data,= self.add_mol_column_to_df(copy_curated_data)
+            cur_data = self.add_mol_column_to_df(copy_curated_data)
             return cur_data
         else:
             self.add_mol_column_to_df(self.curated_data)
 
-    def add_mol_column_to_df(self, data):
+    def add_mol_column_to_df(self, data: pd.DataFrame) -> pd.DataFrame:
         """
             Applies PandasTools functionalities to process the structure into a valid format for the sdf transformation.
 
@@ -128,7 +128,7 @@ class DataCuration(object):
         PandasTools.AddMoleculeColumnToFrame(data,'structure_curated')
         no_mol = data[data['ROMol'].isna()]
         data.drop(no_mol.index, axis=0, inplace=True)
-        data['ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
+        data.loc[:,'ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
         
         if no_mol.empty is False:
             no_mol.to_excel('Non_processed_molecules.xlsx')
