@@ -201,19 +201,27 @@ class DataCuration(object):
         self.curated_data = data.loc[~data['type'].isin(problem_struc_list)]
         self.problematic_structures = data.loc[data['type'].isin(problem_struc_list)]
 
-    def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str, imbalance_algorithm: str = None):
+    def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str):
         """
             Split the curated dataset into training and test sets using the proportion provided by the user.
-            It allows to apply resampling algorithms if desired.
 
             :param train_proportion: training set proportion of the main dataset
             :param test_proportion: test set proportion of the main dataset
             :param activity_field: column name that inclues the activity
-            :param imbalance_algorithm: oversampling, subsampling, smoteen
-
         """
 
         from curate.data_handler import dataset_selection as datasel
         
         curated_data_object = datasel.Selection(self.curated_data, train_proportion, test_proportion, activity_field)
-        self.train, self.test = curated_data_object.split_main_dataset(imbalance_algorithm=imbalance_algorithm)
+        self.train, self.test = curated_data_object.split_main_dataset()
+    
+    def correct_imbalance(self, dataset: pd.DataFrame, activity_field: str, imbalance_algorithm: str):
+        """
+        """
+
+        from curate.data_handler import dataset_imbalance_correction as imb
+
+        imb_object = imb.ImbalanceData(dataset, activity_field, imbalance_algorithm)
+        corrected_dataset = imb_object.imbalance_correction()
+        
+        return corrected_dataset
