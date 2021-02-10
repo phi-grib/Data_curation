@@ -215,13 +215,28 @@ class DataCuration(object):
         curated_data_object = datasel.Selection(self.curated_data, train_proportion, test_proportion, activity_field)
         self.train, self.test = curated_data_object.split_main_dataset()
     
-    def correct_imbalance(self, dataset: pd.DataFrame, activity_field: str, imbalance_algorithm: str):
+    def correct_imbalance(self, dataset: Union[pd.DataFrame,str], activity_field: str, imbalance_algorithm: str) -> Optional[pd.DataFrame]:
         """
+            Applies imbalance correction algorithms to the desired dataset.
+            Input dataset can be the training set, the test set or an external pandas dataframe.
+            Activity field and name of algorithm must be provided.
+
+            :param dataset: it accepts two kins of inputs: a string being either 'train' or 'test' or a pandas dataframe.
+            :param activity_field: string containing the name of the column with the activity data.
+            :param imbalance_algorithm: string containing the name of the imbalance algorithm to use. {oversampling, subsampling, smoteenn, smotetomek}
+
+            :return corrected_dataset: if the input is a dataframe, it returns the corrected version of the dataset.
         """
 
         from curate.data_handler import dataset_imbalance_correction as imb
 
-        imb_object = imb.ImbalanceData(dataset, activity_field, imbalance_algorithm)
-        corrected_dataset = imb_object.imbalance_correction()
-        
-        return corrected_dataset
+        if 'train' in dataset:
+            imb_object = imb.ImbalanceData(self.train, activity_field, imbalance_algorithm)
+            self.train_corrected = imb_object.imbalance_correction()
+        elif 'test' in dataset:
+            imb_object = imb.ImbalanceData(self.test, activity_field, imbalance_algorithm)
+            self.test_corrected = imb_object.imbalance_correction()
+        else:
+            imb_object = imb.ImbalanceData(dataset, activity_field, imbalance_algorithm)
+            corrected_dataset = imb_object.imbalance_correction()
+            return corrected_dataset

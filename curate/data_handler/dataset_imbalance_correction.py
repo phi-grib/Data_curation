@@ -78,7 +78,7 @@ class ImbalanceData(object):
             :return resampled_set
         """
         
-        if self.imbalance_algorithm.lower() == 'smoteenn' or self.imbalance_algorithm.lower() == 'smotetomek':
+        if self.imbalance_algorithm.lower() in ('smoteenn','smotetomek'):
             x_, y_ = self.process_datasets(self.imbalanced_data)
         else:
             y_ = self.imbalanced_data[self.activity_field]
@@ -87,7 +87,7 @@ class ImbalanceData(object):
         
         x_resampled, y_resampled = self.sampler.fit_resample(x_, y_)
         
-        if self.imbalance_algorithm.lower() == 'smoteenn' or self.imbalance_algorithm.lower() == 'smotetomek':
+        if self.imbalance_algorithm.lower() in ('smoteenn','smotetomek'):
             x_flatten = x_resampled.flatten()
             resampled_set = self.get_proper_datasets(self.imbalanced_data, x_flatten)
         else:
