@@ -152,7 +152,7 @@ class ImbalanceData(object):
 
         return triple_cond_df
 
-    #### SMOTEEN/SMOTETomekpart
+    #### SMOTEEN/SMOTETomek part
 
     def process_datasets(self, dataset: pd.DataFrame) -> Tuple[np.ndarray, pd.DataFrame]:
         """
