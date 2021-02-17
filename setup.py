@@ -15,6 +15,6 @@ setup(
     download_url='https://github.com/phi-grib/Data_curation.git',
     packages=find_packages(),
     entry_points={
-       'console_scripts': ['curate=curate.curate_src:main'],
+       'console_scripts': ['datacur=curate.curate_src:main'],
     }
 )

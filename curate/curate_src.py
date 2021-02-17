@@ -6,6 +6,9 @@
 """
 
 import argparse
+import os
+import pathlib
+import sys
 
 def main():
 
@@ -17,13 +20,31 @@ def main():
                         required=False)
 
     parser.add_argument('-o', '--outfile',
-                        help='Output file',
+                        help='Output file name',
                         required=False)
     
-    args = parser.parse_args()
+    parser.add_argument('-f', '--format',
+                        help='Format of the output file',
+                        choices=['xlsx', 'csv', 'tsv', 'sdf'],
+                        required=False)
 
-    print(args.infile)
-    print(args.outfile)
+    parser.add_argument('-c', '--command',
+                        action='store',
+                        choices=['curate', 'split'],
+                        help='Action type: \'curate\' or \'split\'',
+                        required=True)
     
+    args = parser.parse_args()
+    
+    if args.infile is not None:
+        if not os.path.isfile(args.infile):
+            sys.stderr.write('Input file {} not found\n'.format(args.infile))
+            return
+
+    if args.command == 'curate':
+        if (args.outfile is None) or (args.infile is None):
+            sys.stderr.write('datacur curate : input and output file arguments are compulsory')
+            return
+
 if __name__ == '__main__':
     main()
