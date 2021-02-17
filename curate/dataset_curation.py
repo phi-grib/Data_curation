@@ -94,7 +94,12 @@ class DataCuration(object):
         output_name_format = '.'.join([outfile_name.split('.')[0],'sdf'])
         cur_data = self.prepare_data_for_sdf(copy=True)
 
-        PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName='name')
+        if 'name' not in cur_data.columns:
+            idname = None
+        else:
+            idname = 'name'
+    
+        PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName=idname)
 
     def prepare_data_for_sdf(self, copy: bool = False) -> Optional[pd.DataFrame]:
         """

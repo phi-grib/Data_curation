@@ -10,6 +10,8 @@ import os
 import pathlib
 import sys
 
+import curate.dataset_curation as datacur
+
 def main():
 
     parser = argparse.ArgumentParser(
@@ -34,6 +36,15 @@ def main():
                         help='Action type: \'curate\' or \'split\'',
                         required=True)
     
+    parser.add_argument('-s', '--smiles_col',
+                        help='Column name where the SMILES string is found.',
+                        required=False)
+    
+    parser.add_argument('-r', '--remove',
+                        help='Remove problematic structures after SMILES curation',
+                        required=False)
+
+    
     args = parser.parse_args()
     
     if args.infile is not None:
@@ -42,9 +53,23 @@ def main():
             return
 
     if args.command == 'curate':
-        if (args.outfile is None) or (args.infile is None):
-            sys.stderr.write('datacur curate : input and output file arguments are compulsory')
+        if (args.outfile is None) or (args.infile is None) or (args.format is None):
+            sys.stderr.write('datacur curate : input, output and output format arguments are compulsory\n')
             return
+
+        if args.smiles_col is None:
+            smiles_ = 'structure'
+        else:
+            smiles_ = args.smiles_col
+
+        if args.remove is None:
+            remove_prob = None
+        else:
+            remove_prob = True
+
+        curating = datacur.DataCuration(data_input=args.infile)
+        curating.curate_data(structure_column=smiles_, remove_problematic=remove_prob)
+        curating.get_output_file(outfile_name=args.outfile, outfile_type=args.format)
 
 if __name__ == '__main__':
     main()
