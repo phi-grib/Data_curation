@@ -20,3 +20,10 @@ def main():
                         help='Output file',
                         required=False)
     
+    args = parser.parse_args()
+
+    print(args.infile)
+    print(args.outfile)
+    
+if __name__ == '__main__':
+    main()

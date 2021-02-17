@@ -43,7 +43,7 @@ class DataCuration(object):
 
             :return i_data: input data to be curated
         """
-
+        
         if isinstance(data_input,pd.DataFrame):
             i_data = data_input
         elif isinstance(data_input,str):
