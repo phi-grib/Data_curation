@@ -173,13 +173,12 @@ class DataCuration(object):
             smi = row[structure_column]
             data_cur.get_rdkit_mol(smi)
             sub_type, san_smi = data_cur.filter_smiles()
-            sub_type_id = self.substance_types.loc[self.substance_types['type'] == sub_type, 'id'].values[0]
             curated_data.ix[i,'structure_curated'] = san_smi
-            curated_data.ix[i,'substance_type_id'] = sub_type_id
             curated_data.ix[i,'substance_type_name'] = sub_type
         
         if remove_problematic:
             self.remove_problematic_structures(curated_data)
+            self.problematic_structures.to_excel('Problematic_structures_removed.xlsx')
         else:
             self.curated_data = curated_data
     
@@ -196,15 +195,15 @@ class DataCuration(object):
             TODO: add option to select specific substance types to be removed.
         """
 
-        if not data:
+        if data.empty:
             data = self.input_data
         
-        problem_struc_list = ['organometallic','no_sanitizable', 'inorganic_salt', 
-                                'inorganic','inorganic_metal','no_sanitizable_organic',
-                                'no_sanitizable_inorganic','no_sanitizable_organometallic']
+        problem_struc_list = ['organometallic', 'no_sanitizable', 'inorganic_salt', 
+                              'inorganic', 'inorganic_metal', 'no_sanitizable_organic',
+                              'no_sanitizable_inorganic', 'no_sanitizable_organometallic']
 
-        self.curated_data = data.loc[~data['type'].isin(problem_struc_list)]
-        self.problematic_structures = data.loc[data['type'].isin(problem_struc_list)]
+        self.curated_data = data.loc[~data['substance_type_name'].isin(problem_struc_list)]
+        self.problematic_structures = data.loc[data['substance_type_name'].isin(problem_struc_list)]
 
     def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str):
         """

@@ -41,6 +41,7 @@ def main():
                         required=False)
     
     parser.add_argument('-r', '--remove',
+                        action='store_true',
                         help='Remove problematic structures after SMILES curation',
                         required=False)
 
@@ -62,13 +63,8 @@ def main():
         else:
             smiles_ = args.smiles_col
 
-        if args.remove is None:
-            remove_prob = None
-        else:
-            remove_prob = True
-
         curating = datacur.DataCuration(data_input=args.infile)
-        curating.curate_data(structure_column=smiles_, remove_problematic=remove_prob)
+        curating.curate_data(structure_column=smiles_, remove_problematic=args.remove)
         curating.get_output_file(outfile_name=args.outfile, outfile_type=args.format)
 
 if __name__ == '__main__':
