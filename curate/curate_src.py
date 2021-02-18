@@ -7,7 +7,6 @@
 
 import argparse
 import os
-import pathlib
 import sys
 
 import curate.dataset_curation as datacur
@@ -45,7 +44,6 @@ def main():
                         help='Remove problematic structures after SMILES curation',
                         required=False)
 
-    
     args = parser.parse_args()
     
     if args.infile is not None:
