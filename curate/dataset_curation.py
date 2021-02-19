@@ -26,12 +26,13 @@ class DataCuration(object):
         TODO:More features will be implemented
     """
     
-    def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str):
+    def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, separator: str = None):
         """
             Initialize class getting substance types for structure curation.
         """
 
         self.substance_types = self.get_substance_types()
+        self.separator = separator
         self.input_data = self.process_input(data_input)
         self.identifier = molecule_identifier
         self.structure_column = structure_column
@@ -52,9 +53,13 @@ class DataCuration(object):
             if data_input.endswith('.xlsx'):
                 i_data = pd.read_excel(data_input)
             elif data_input.endswith('.csv'):
-                i_data = pd.read_csv(data_input, sep=',')
+                if not self.separator:
+                    self.separator = ','
+                i_data = pd.read_csv(data_input, sep=self.separator)
             elif data_input.endswith('.tsv'):
-                i_data = pd.read_csv(data_input, sep='\t')
+                if not self.separator:
+                    self.separator = '\t'
+                i_data = pd.read_csv(data_input, sep=self.separator)
             elif data_input.endswith('.sdf'):
                 i_data = PandasTools.LoadSDF(data_input)
             else:
@@ -62,19 +67,6 @@ class DataCuration(object):
         
         return i_data
     
-    def get_metadata(self) -> list:
-        """
-            Checks the columns of the input data and returns all that are 
-            not the SMILES. Everything but the structure is considered metadata.
-
-            :return metadata: returns a list with the metadata, which are the 
-            column names of the input data without the SMILES
-        """
-
-        metadata = self.input_data.loc[:, self.input_data.columns != self.structure_column].columns
-
-        return metadata
-
     def get_output_file(self, outfile_name: str, outfile_type: str):
         """
             Saves the curated data into a specific file format.

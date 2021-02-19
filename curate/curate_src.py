@@ -45,6 +45,10 @@ def main():
                         help='Column name where the SMILES string is found.',
                         required=False)
     
+    parser.add_argument('-sep', '--separator',
+                        help='If added, takes this argument as the file separator',
+                        required=False)
+
     parser.add_argument('-r', '--remove',
                         action='store_true',
                         help='Remove problematic structures after SMILES curation',
@@ -72,7 +76,12 @@ def main():
         else:
             smiles_ = args.smiles_col
 
-        curating = datacur.DataCuration(data_input=args.infile, molecule_identifier=id_, structure_column=smiles_)
+        if args.separator:
+            sep = args.separator
+        else:
+            sep = None
+
+        curating = datacur.DataCuration(data_input=args.infile, molecule_identifier=id_, structure_column=smiles_, separator=sep)
         curating.curate_data(remove_problematic=args.remove)
         curating.get_output_file(outfile_name=args.outfile, outfile_type=args.format)
 
