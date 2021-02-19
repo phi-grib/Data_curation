@@ -9,6 +9,7 @@ import json
 import os
 import pathlib
 import sys
+import time
 
 def get_metadata(data: pd.DataFrame, structure_colname: str) -> list:
     """
@@ -38,3 +39,52 @@ def convert_to_json(data: pd.DataFrame) -> json:
     json_data = data.to_json(orient='index')
 
     return json_data
+
+def set_curation_repository(path: str = None):
+    """
+        Set the path to the curation repository
+
+        :param path: string indicating the path of the curation repository
+    """
+
+    pass
+
+#### Functions to represent simple statistics after the curation
+
+def get_number_of_processed_vs_unprocessed(smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
+    """
+        This function returns a dataframe with the number of total SMILES, the ones
+        that have been processed by the code and the ones that haven't.
+
+        Is it expected to receive an input from the API using the output of the previous
+        function get_list_of_filtered_SMILES_and_substance_type()
+
+        :param smiles_dataframe:
+
+        :return smiles_stats_df:
+    """
+
+    unprocessed_smiles = smiles_dataframe[smiles_dataframe['structure_curated'].isna()]
+    processed_smiles = smiles_dataframe[~smiles_dataframe['structure_curated'].isna()]
+
+    smiles_stats_dict = {'Total SMILES':len(smiles_dataframe.index), 
+                         'Processed SMILES':len(processed_smiles.index), 
+                         'Unable to process':len(unprocessed_smiles.index)}
+    
+    smiles_stats_df = pd.DataFrame(data=smiles_stats_dict)
+
+    return smiles_stats_df
+
+def get_total_of_smiles_per_type_of_substance(smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
+    """
+        This function returns the amount of substance types found of each kind
+        after curating the SMILES.
+
+        :param smiles_dataframe:
+
+        :return subs_count:
+    """
+
+    subs_count = smiles_dataframe.groupby('substance_type_name')['substance_type_name'].count()
+
+    return subs_count
