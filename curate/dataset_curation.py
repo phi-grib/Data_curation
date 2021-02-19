@@ -26,13 +26,15 @@ class DataCuration(object):
         TODO:More features will be implemented
     """
     
-    def __init__(self, data_input: Union[pd.DataFrame,str]):
+    def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str):
         """
             Initialize class getting substance types for structure curation.
         """
 
         self.substance_types = self.get_substance_types()
         self.input_data = self.process_input(data_input)
+        self.identifier = molecule_identifier
+        self.structure_column = structure_column
 
     def process_input(self, data_input: Union[pd.DataFrame,str]) -> pd.DataFrame:
         """
@@ -60,6 +62,19 @@ class DataCuration(object):
         
         return i_data
     
+    def get_metadata(self) -> list:
+        """
+            Checks the columns of the input data and returns all that are 
+            not the SMILES. Everything but the structure is considered metadata.
+
+            :return metadata: returns a list with the metadata, which are the 
+            column names of the input data without the SMILES
+        """
+
+        metadata = self.input_data.loc[:, self.input_data.columns != self.structure_column].columns
+
+        return metadata
+
     def get_output_file(self, outfile_name: str, outfile_type: str):
         """
             Saves the curated data into a specific file format.
@@ -93,13 +108,8 @@ class DataCuration(object):
 
         output_name_format = '.'.join([outfile_name.split('.')[0],'sdf'])
         cur_data = self.prepare_data_for_sdf(copy=True)
-
-        if 'name' not in cur_data.columns:
-            idname = None
-        else:
-            idname = 'name'
-    
-        PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName=idname)
+        
+        PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName=self.identifier)
 
     def prepare_data_for_sdf(self, copy: bool = False) -> Optional[pd.DataFrame]:
         """
@@ -154,11 +164,10 @@ class DataCuration(object):
         
         return substance_types
     
-    def curate_data(self, structure_column: str, remove_problematic: bool = None) -> pd.DataFrame:
+    def curate_data(self, remove_problematic: bool = None) -> pd.DataFrame:
         """
             Check SMILES column to get a curated SMILES and the type of substance.
 
-            :param structure_column: string with the column name that contains the SMILES
             :param remove_problematic: it allows the user to get rid of problematic structures for QSAR modelling. 
 
             :return curated_data: dataframe containing the curated information
@@ -168,9 +177,9 @@ class DataCuration(object):
         data_cur = cur.Curator()
 
         curated_data = self.input_data.copy()
-
+        
         for i, row in curated_data.iterrows():
-            smi = row[structure_column]
+            smi = row[self.structure_column]
             data_cur.get_rdkit_mol(smi)
             sub_type, san_smi = data_cur.filter_smiles()
             curated_data.ix[i,'structure_curated'] = san_smi
@@ -198,7 +207,7 @@ class DataCuration(object):
         if data.empty:
             data = self.input_data
         
-        problem_struc_list = ['organometallic', 'no_sanitizable', 'inorganic_salt', 
+        problem_struc_list =  ['organometallic', 'no_sanitizable', 'inorganic_salt', 
                               'inorganic', 'inorganic_metal', 'no_sanitizable_organic',
                               'no_sanitizable_inorganic', 'no_sanitizable_organometallic']
 

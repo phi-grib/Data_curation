@@ -14,7 +14,8 @@ import curate.dataset_curation as datacur
 def main():
 
     parser = argparse.ArgumentParser(
-                                    description='Curation tool CLI for handling structure curation and data selection from input files.\n')
+                                    description='Curation tool CLI for handling structure \
+                                        curation and data selection from input files.\n')
 
     parser.add_argument('-i', '--infile',
                         help='Input file.',
@@ -35,6 +36,11 @@ def main():
                         help='Action type: \'curate\' or \'split\'',
                         required=True)
     
+    parser.add_argument('-id', '--id_column',
+                        help='Column name containing the molecular identifiers.\
+                            CAS number is recommended, although other ids can be passed',
+                        required=False)
+
     parser.add_argument('-s', '--smiles_col',
                         help='Column name where the SMILES string is found.',
                         required=False)
@@ -55,14 +61,19 @@ def main():
         if (args.outfile is None) or (args.infile is None) or (args.format is None):
             sys.stderr.write('datacur curate : input, output and output format arguments are compulsory\n')
             return
+        
+        if args.id_column is None:
+            id_ = 'name'
+        else:
+            id_ = args.id_column
 
         if args.smiles_col is None:
             smiles_ = 'structure'
         else:
             smiles_ = args.smiles_col
 
-        curating = datacur.DataCuration(data_input=args.infile)
-        curating.curate_data(structure_column=smiles_, remove_problematic=args.remove)
+        curating = datacur.DataCuration(data_input=args.infile, molecule_identifier=id_, structure_column=smiles_)
+        curating.curate_data(remove_problematic=args.remove)
         curating.get_output_file(outfile_name=args.outfile, outfile_type=args.format)
 
 if __name__ == '__main__':
