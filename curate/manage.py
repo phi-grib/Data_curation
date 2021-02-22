@@ -5,7 +5,6 @@
     On: 18/02/2021, 17:49 PM
 """
 
-import json
 import os
 import pathlib
 import sys
@@ -27,16 +26,18 @@ def get_metadata(data: pd.DataFrame, structure_colname: str) -> list:
 
     return metadata
 
-def convert_to_json(data: pd.DataFrame) -> json:
+def convert_to_json(data: pd.DataFrame, filename: str = None) -> str:
     """
-        Converts into JSON the input dataframe
+        Converts into JSON the input dataframe.
+        If filename is provided, json is written as a file.
 
-        :param data:
+        :param data: dataframe to be converted.
+        :param filename: filename where to dump the JSON.
 
-        :return json_data:
+        :return json_data: JSON string from pandas dataframe
     """
 
-    json_data = data.to_json(orient='index')
+    json_data = data.to_json(path_or_buf= filename, orient='index')
 
     return json_data
 
