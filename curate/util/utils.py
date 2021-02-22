@@ -116,3 +116,13 @@ def set_repositories(curation_path: str):
     
     write_config(configuration)
 
+def curation_repository_path() -> str:
+    """
+        Returns the path to the root of the curation repository,
+        containing all curations.
+    """
+
+    success, config = read_config()
+    cur_path = config['curation_repository_path']
+    
+    return cur_path
