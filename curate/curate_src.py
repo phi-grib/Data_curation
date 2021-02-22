@@ -33,13 +33,15 @@ def main():
                         required=False)
 
     parser.add_argument('-a', '--action',
+                        action='store',
                         help='Manage action.',
+                        choices=['silent'],
                         required=False)
     
     parser.add_argument('-c', '--command',
                         action='store',
                         choices=['curate', 'split', 'config'],
-                        help='Action type: \'curate\' or \'split\' or \'config\'.',
+                        help='command type: \'curate\' or \'split\' or \'config\'.',
                         required=True)
     
     parser.add_argument('-d', '--directory',

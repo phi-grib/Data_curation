@@ -14,6 +14,8 @@ setup(
     url='https://github.com/phi-grib/Data_curation',
     download_url='https://github.com/phi-grib/Data_curation.git',
     packages=find_packages(),
+    # If any package contains *.txt or *.rst files, include them:
+    package_data={'': ['*.yaml', '*.yml']},
     entry_points={
        'console_scripts': ['datacur=curate.curate_src:main'],
     }
