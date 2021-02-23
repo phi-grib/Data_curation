@@ -26,7 +26,7 @@ class DataCuration(object):
         TODO:More features will be implemented
     """
     
-    def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, separator: str = None):
+    def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, separator: str = None):
         """
             Initialize class getting substance types for structure curation.
         """
@@ -36,7 +36,8 @@ class DataCuration(object):
         self.input_data = self.process_input(data_input)
         self.identifier = molecule_identifier
         self.structure_column = structure_column
-
+        self.output_dir = output_dir
+        
     def process_input(self, data_input: Union[pd.DataFrame,str]) -> pd.DataFrame:
         """
             Checks if input is an Excel file and converts it into pandas dataframe.
@@ -67,7 +68,7 @@ class DataCuration(object):
         
         return i_data
     
-    def get_output_file(self, outfile_name: str, outfile_type: str):
+    def get_output_file(self, outfile_name: str, outfile_type: str, data: pd.DataFrame = None):
         """
             Saves the curated data into a specific file format.
             Requires output file name and type of file (Excel, CSV, TSV, sdf)
@@ -78,17 +79,22 @@ class DataCuration(object):
             :return output_file:
         """
 
+        if data is None:
+            data = self.curated_data.copy()
+
+        outfile_full_path = '/'.join([self.output_dir,outfile_name])
+
         if 'sdf' in outfile_type.lower():
-            self.write_sdf(outfile_name)
+            self.write_sdf(outfile_full_path)
         elif 'xlsx' in outfile_type.lower() or 'excel' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_name.split('.')[0],'xlsx'])
-            self.curated_data.to_excel(output_name_format)
+            output_name_format = '.'.join([outfile_full_path.split('.')[0],'xlsx'])
+            data.to_excel(output_name_format)
         elif 'csv' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_name.split('.')[0],'csv'])
-            self.curated_data.to_csv(output_name_format, sep=',')
+            output_name_format = '.'.join([outfile_full_path.split('.')[0],'csv'])
+            data.to_csv(output_name_format, sep=',')
         elif 'tsv' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_name.split('.')[0],'tsv'])
-            self.curated_data.to_csv(output_name_format, sep='\t')
+            output_name_format = '.'.join([outfile_full_path.split('.')[0],'tsv'])
+            data.to_csv(output_name_format, sep='\t')
 
     def write_sdf(self, outfile_name: str):
         """
@@ -138,7 +144,8 @@ class DataCuration(object):
         data.loc[:,'ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
         
         if no_mol.empty is False:
-            no_mol.to_excel('Non_processed_molecules.xlsx')
+            self.get_output_file(outfile_name='Non_processed_molecules', outfile_type='xlsx', data=no_mol)
+            # no_mol.to_excel('Non_processed_molecules.xlsx')
 
         return data
 
@@ -179,7 +186,7 @@ class DataCuration(object):
         
         if remove_problematic:
             self.remove_problematic_structures(curated_data)
-            self.problematic_structures.to_excel('Problematic_structures_removed.xlsx')
+            self.get_output_file(outfile_name='Problematic_structures_removed', outfile_type='xlsx', data=self.problematic_structures)
         else:
             self.curated_data = curated_data
     
