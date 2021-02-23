@@ -9,7 +9,7 @@ import argparse
 import os
 import sys
 
-import curate.dataset_curation as datacur
+import curate.context as context
 
 from curate.util import utils, config
 
@@ -74,9 +74,7 @@ def main():
             return
     
     if args.command != 'config':
-        if not utils.config_test():
-            sys.stderr.write("Please, set up a curation repository path.\n")
-            sys.exit()
+        utils.config_test()
 
     if args.command == 'curate':
         if (args.outfile is None) or (args.infile is None) or (args.format is None):
@@ -98,9 +96,13 @@ def main():
         else:
             sep = None
 
-        curating = datacur.DataCuration(data_input=args.infile, molecule_identifier=id_, structure_column=smiles_, separator=sep)
-        curating.curate_data(remove_problematic=args.remove)
-        curating.get_output_file(outfile_name=args.outfile, outfile_type=args.format)
+        context.curation_cmd(data_input=args.infile,
+                             molecule_identifier=id_,
+                             structure_column=smiles_,
+                             separator=sep,
+                             remove_problematic=args.remove,
+                             outfile_name=args.outfile,
+                             outfile_type=args.format)
     
     elif args.command == 'config':
         success, results = config.configure(args.directory, (args.action == 'silent'))

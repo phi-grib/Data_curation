@@ -40,7 +40,7 @@ def isSingleThread() -> Union[str, bool]:
 def config_test() -> bool:
     """ 
         Checks if datacur has been configured
-        reading the config.yml and checking the config_status flag
+        reading the config.yml and checking the config_status flag.
     """
 
     success, config = read_config()
@@ -49,10 +49,9 @@ def config_test() -> bool:
         if isinstance(config['config_status'], bool):
             if config['config_status']:
                 if os.path.isdir(config['curation_repository_path']):
-                    return True
-
-    else:
-        return False
+                    return
+    
+    sys.exit()
 
 def read_config() -> Union[Tuple[bool, str], Tuple[bool, dict]]:
     """

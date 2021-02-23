@@ -48,7 +48,11 @@ def set_curation_repository(path: str = None):
         :param path: string indicating the path of the curation repository
     """
 
-    pass
+    utils.set_curation_repository(path)
+
+    sys.stderr.write('Model repository updated to {}'.format(path))
+
+    return True, 'curation repository updated'
 
 #### Functions to represent simple statistics after the curation
 
