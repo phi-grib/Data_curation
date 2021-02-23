@@ -119,6 +119,8 @@ def curation_repository_path() -> str:
     """
         Returns the path to the root of the curation repository,
         containing all curations.
+
+        :return cur_path: path to curation repository
     """
 
     success, config = read_config()
