@@ -1,6 +1,6 @@
 admin_email: admin@domain.org
 admin_name: Admin Name
-config_status: false
+config_status: true
+curation_repository_path: /home/eric/phi_lab/curation
 homepage: homepage@domain.org
-curation_repository_path: /home/username/curation_repo
 provider: My Organization

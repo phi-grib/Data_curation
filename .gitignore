@@ -26,7 +26,11 @@ share/python-wheels/
 .installed.cfg
 *.egg
 *.vscode*
-curate/*.yaml
+
+#config file
+curate/config.yaml
+curate/config.yml
+
 
 MANIFEST
 
