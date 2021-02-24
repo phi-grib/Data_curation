@@ -145,7 +145,6 @@ class DataCuration(object):
         
         if no_mol.empty is False:
             self.get_output_file(outfile_name='Non_processed_molecules', outfile_type='xlsx', data=no_mol)
-            # no_mol.to_excel('Non_processed_molecules.xlsx')
 
         return data
 
