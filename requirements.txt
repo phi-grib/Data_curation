@@ -1,3 +1,4 @@
 git+https://github.com/phi-grib/phitools.git
 git+https://github.com/EMVGaron/standardiser
 git+https://github.com/phi-grib/EPA_simplified.git
+git+https://github.com/phi-grib/Data_curation.git
