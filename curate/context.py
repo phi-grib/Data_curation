@@ -24,7 +24,6 @@ def curation_cmd(**kwargs: dict):
     import curate.dataset_curation as datacur
     
     output_dir = utils.curation_repository_path()
-    # outfile_path = output_file_to_proper_dir(kwargs['outfile_name'])
 
     curating = datacur.DataCuration(data_input=kwargs['data_input'], 
                                     molecule_identifier=kwargs['molecule_identifier'],
