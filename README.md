@@ -10,9 +10,10 @@ This tool has been designed for Linux. It hasn't been tested for macOS configura
 It needs a suitable conda working environment where to be installed. 
 
 * `git clone https://github.com/phi-grib/Data_curation.git`
-* `conda activate <working_environment>`
-* `cd Data_curation`
-* `python setup.py install`
+* `cd Data_curation/`
+* `conda env create -f environment.yml`
+* `conda activate datacuration`
+* `pip install -r requirements.txt`
 
 Now you can use the code for automatically curating and classifiying compounds from its structure.
 Still under construction.
