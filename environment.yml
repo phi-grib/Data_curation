@@ -146,8 +146,5 @@ dependencies:
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.4.5=h9ceee32_0
   - pip:
-    - epa==0.1
-    - phitools==0.2
     - pyyaml==5.4.1
-    - standardiser==0.1.7
 prefix: /home/eric/miniconda3/envs/datacuration
