@@ -28,8 +28,8 @@ share/python-wheels/
 *.vscode*
 
 #config file
-curate/config.yaml
-curate/config.yml
+*/config.yaml
+*/config.yml
 
 
 MANIFEST
