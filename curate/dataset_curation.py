@@ -180,9 +180,11 @@ class DataCuration(object):
             smi = row[self.structure_column]
             data_cur.get_rdkit_mol(smi)
             sub_type, san_smi = data_cur.filter_smiles()
-            curated_data.ix[i,'structure_curated'] = san_smi
-            curated_data.ix[i,'substance_type_name'] = sub_type
-        
+            # curated_data.ix[i,'structure_curated'] = san_smi
+            # curated_data.ix[i,'substance_type_name'] = sub_type
+            curated_data.loc[curated_data.index == i,'structure_curated'] = san_smi
+            curated_data.loc[curated_data.index == i,'substance_type_name'] = sub_type
+
         if remove_problematic:
             self.remove_problematic_structures(curated_data)
             self.get_output_file(outfile_name='Problematic_structures_removed', outfile_type='xlsx', data=self.problematic_structures)
