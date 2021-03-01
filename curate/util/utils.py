@@ -127,3 +127,28 @@ def curation_repository_path() -> str:
     cur_path = config['curation_repository_path']
     
     return cur_path
+
+def set_curation_repository(path: str = None):
+    """
+        Set the curation repository path.
+        This is the dir where datacur is going to create and load curated datasets.
+        if path is None, curation dir will be set to the default in the
+        datacur root directory.
+
+        :param path: string indicating the path of the curation repository
+    """
+
+    source_dir = os.path.dirname(os.path.dirname(__file__)) 
+    with open(os.path.join(source_dir,'config.yaml'),'r') as f:
+        configuration = yaml.safe_load(f)
+
+    if path is None:  # set to default path
+        model_root_path = os.path.join(
+            pathlib.Path(__file__).resolve().parents[1],
+            'curation/')
+        configuration['curation_repository_path'] = str(model_root_path)
+    else:
+        new_path = pathlib.Path(path)
+        configuration['curation_repository_path'] = str(new_path.resolve())
+
+    write_config(configuration)

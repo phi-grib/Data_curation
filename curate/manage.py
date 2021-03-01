@@ -6,9 +6,12 @@
 """
 
 import os
+import pandas as pd
 import pathlib
 import sys
 import time
+
+from curate.util import utils
 
 def get_metadata(data: pd.DataFrame, structure_colname: str) -> list:
     """
@@ -37,7 +40,7 @@ def convert_to_json(data: pd.DataFrame, filename: str = None) -> str:
         :return json_data: JSON string from pandas dataframe
     """
 
-    json_data = data.to_json(path_or_buf= filename, orient='index')
+    json_data = data.to_json(path_or_buf = filename, orient = 'index')
 
     return json_data
 
