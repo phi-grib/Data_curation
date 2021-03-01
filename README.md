@@ -31,7 +31,14 @@ Then activate the environment:
 ```bash
 conda activate datacuration
 ```
-And install the pip dependencies. Datacuration is included there:
+
+Install Data curation:
+
+```bash
+python setup.py install
+```
+
+And install the pip dependencies:
 
 ``` bash
 pip install -r requirements.txt
