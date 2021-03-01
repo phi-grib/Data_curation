@@ -80,29 +80,41 @@ Data curation provides a command-line interface (CLI), curate.py, which allows f
 
 You can run the following commands from any terminal, in a computer where Data curation has been installed and the environment (datacuration) was activated (`source activate datacuration` in Linux).
 
+Firs of all, we need to define an endpoint for our curated files:
+
+```sh
+datacur -c manage -a new -e myEndpoint
+```
+
+This creates a new entry in the curation repository. From now on, all our curation results will be stored there. In order to check the contents of the repository we can use the following command:
+
+```sh
+datacur -c manage -a list
+```
+Now the curation repository is totally configured and ready to store the outputs.
 Let's curate a sample file:
 
 ```sh
-datacur -i sample_file.xlsx -o output_file -f xlsx -c curate -r
+datacur -i sample_file.xlsx -e myEndpoint -o output_file -f xlsx -c curate -r
 ```
 
 This will take the input file sample_file.xlsx and return output_file.xlsx since we specified the format using -f option. With -r we asked the program to remove problematic structures and store them in a separate file for further revision. Since we haven't specified SMILES column nor ID column, the program uses a predifined name for each, being 'structure' for SMILES and 'name' for ID. If we want to specify those columns, which is recommended, we have to type:
 
 ```sh
-datacur -i sample_file.xlsx -o output_file -f xlsx -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.xlsx -e myEndpoint -o output_file -f xlsx -c curate -s smiles_colname -id id_colname -r
 ```
 
 In that case, our input is an Excel file and the code handles this internally using Pandas option read_excel().
 If we want to use another accepted format, like csv or tsv and we know we have a specific separator that is not a comma nor a tab, we can also specify the separator using the -sep option:
 
 ```sh
-datacur -i sample_file.csv -o output_file -sep ':' -f xlsx -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.csv -e myEndpoint -o output_file -sep ':' -f xlsx -c curate -s smiles_colname -id id_colname -r
 ```
 
 Also, if we want an sdf file to use it directly in a QSAR modelling tool, like Flame, we can put that in the -f option:
 
 ```sh
-datacur -i sample_file.xlsx -o output_file -f sdf -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.xlsx -e myEndpoint -o output_file -f sdf -c curate -s smiles_colname -id id_colname -r
 ```
 
 The tool is still under construction, but thus far it works with the specified options from above.
@@ -112,6 +124,7 @@ The tool is still under construction, but thus far it works with the specified o
 | Command | Description |
 | --- | --- |
 | -i/ --infile |  Name of the input file used by the command. |
+| -e/ --endpoint |  Name of the endpoint of our curation files. |
 | -o/ --outfile | Name of the output file. |
 | -f/ --format | Output file formats that can be provided. Acceptable values are *xlsx*, *csv*, *tsv* and *sdf*. |
 | -a/ --action | Management action to be carried out. Acceptable value is *silent*. |
