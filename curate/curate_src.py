@@ -23,6 +23,10 @@ def main():
                         help='Input file.',
                         required=False)
 
+    parser.add_argument('-e', '--endpoint',
+                        help='Endpoint curation name.',
+                        required=False)
+
     parser.add_argument('-o', '--outfile',
                         help='Output file name.',
                         required=False)
@@ -35,13 +39,13 @@ def main():
     parser.add_argument('-a', '--action',
                         action='store',
                         help='Manage action.',
-                        choices=['silent'],
+                        choices=['silent','new','list','remove'],
                         required=False)
     
     parser.add_argument('-c', '--command',
                         action='store',
-                        choices=['curate', 'split', 'config'],
-                        help='command type: \'curate\' or \'split\' or \'config\'.',
+                        choices=['curate', 'split', 'config', 'manage'],
+                        help='command type: \'curate\' or \'split\' or \'config\' or \'manage\'.',
                         required=True)
     
     parser.add_argument('-d', '--directory',
@@ -77,8 +81,8 @@ def main():
         utils.config_test()
 
     if args.command == 'curate':
-        if (args.outfile is None) or (args.infile is None) or (args.format is None):
-            sys.stderr.write("datacur curate : input, output and output format arguments are compulsory\n")
+        if (args.outfile is None) or (args.infile is None) or (args.format is None) or (args.endpoint is None):
+            sys.stderr.write("datacur curate : input, output, output format and endpoint arguments are compulsory\n")
             return
         
         if args.id_column is None:
@@ -102,12 +106,18 @@ def main():
                              separator=sep,
                              remove_problematic=args.remove,
                              outfile_name=args.outfile,
-                             outfile_type=args.format)
+                             outfile_type=args.format,
+                             endpoint=args.endpoint)
     
     elif args.command == 'config':
         success, results = config.configure(args.directory, (args.action == 'silent'))
         if not success:
             sys.stderr.write("{}, configuration unchanged\n".format(results))
+    
+    elif args.command == 'manage':
+        success, results = context.manage_cmd(args)
+        if not success:
+            sys.stderr.write(results)
 
 if __name__ == '__main__':
     main()

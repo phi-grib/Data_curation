@@ -128,6 +128,19 @@ def curation_repository_path() -> str:
     
     return cur_path
 
+def curation_tree_path(curation_path: str) -> str:
+    """
+        Returns the path to the curation given as argument, containg all versions
+
+        :param curation_path: directories to curation path endpoint
+
+        :return path_to_return: complete tree path to specific curation endpoint
+    """
+
+    path_to_return = os.path.join(curation_repository_path(), curation_path)
+
+    return path_to_return
+
 def set_curation_repository(path: str = None):
     """
         Set the curation repository path.

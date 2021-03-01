@@ -4,6 +4,12 @@
     Created by: Eric March Vila (eric.march@upf.edu)
     On: 23/02/2021, 13:16 PM
 """
+import os
+import sys
+
+import curate.manage as manage
+
+from typing import Tuple
 
 from curate.util import utils
 
@@ -23,7 +29,11 @@ def curation_cmd(**kwargs: dict):
     
     import curate.dataset_curation as datacur
     
-    output_dir = utils.curation_repository_path()
+    # safety check if curation endpoint exists
+    output_dir = utils.curation_tree_path(kwargs['endpoint'])
+    if not os.path.isdir(output_dir):
+        sys.stderr.write("Endpoint name not found in model repository.\n")
+        return
 
     curating = datacur.DataCuration(data_input=kwargs['data_input'], 
                                     molecule_identifier=kwargs['molecule_identifier'],
@@ -35,6 +45,28 @@ def curation_cmd(**kwargs: dict):
 
     curating.get_output_file(outfile_name=kwargs['outfile_name'],
                              outfile_type=kwargs['outfile_type'])
+
+def manage_cmd(arguments: dict) -> Tuple[bool, str]:
+    """
+        Calls diverse maintenance commands
+
+        :param arguments: arguments from argparser
+
+        :return bool:
+        :return str:
+    """
+
+    if arguments.action == 'new':
+        success, results = manage.action_new(arguments.endpoint)
+    elif arguments.action == 'list':
+        success, results = manage.action_list(arguments.endpoint)
+    elif arguments.action == 'remove':
+        success, results = manage.action_remove(arguments.endpoint)
+    else: 
+        success = False
+        results = "Specified manage action is not defined"
+
+    return success, results
 
 def output_file_to_proper_dir(outfile_name: str) -> str:
     """
