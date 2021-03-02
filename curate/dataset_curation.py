@@ -65,7 +65,8 @@ class DataCuration(object):
                 i_data = PandasTools.LoadSDF(data_input)
             else:
                 sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf)\n')
-        
+                sys.exit()
+                
         return i_data
     
     def get_output_file(self, outfile_name: str, outfile_type: str, data: pd.DataFrame = None):

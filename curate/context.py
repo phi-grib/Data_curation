@@ -9,11 +9,11 @@ import sys
 
 import curate.manage as manage
 
-from typing import Tuple
+from typing import Tuple, Optional
 
 from curate.util import utils
 
-def curation_cmd(**kwargs: dict):
+def curation_cmd(**kwargs: dict) -> Optional[bool]:
     """
         Instantiate curate objectt using kwargs from argument parser.
 

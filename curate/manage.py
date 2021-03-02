@@ -58,7 +58,7 @@ def set_curation_repository(path: str = None):
 
     sys.stderr.write('Model repository updated to {}'.format(path))
 
-    return True, 'curation repository updated'
+    return True, 'curation repository updated\n'
 
 #### Functions to represent simple statistics after the curation
 
@@ -136,6 +136,21 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     
     return True, "new endpoint {} created\n".format(curation_path)
 
+def get_creation_date(endpoint_path: str) -> str:
+    """
+        Returns the creation date of the selected endpoint dir in the curation repository.
+
+        :param endpoint_path: complete path to endpoint directory.
+
+        :return creation_date: string with the creation date of the endpoint dir.
+    """
+
+    import datetime
+
+    creation_date = datetime.datetime.fromtimestamp(os.stat(endpoint_path).st_mtime).strftime("%d-%b-%Y")
+    
+    return creation_date
+
 def action_list(curation_dir: str) -> Tuple[bool, str]:
     """
         In no argument is provided lists all models present at the repository 
@@ -151,12 +166,14 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
         num_curs = 0
         sys.stderr.write('Curation endpoints found in repository:\n')
         for x in os.listdir(rdir):
-            xpath = os.path.join(rdir,x) 
+            xpath = os.path.join(rdir,x)
             # discard if the item is not a directory
             if not os.path.isdir(xpath):
                 continue
             num_curs += 1
-            sys.stderr.write("\t"+x)
+            creation_date = get_creation_date(xpath)
+            sys.stderr.write("\n{} {}\n".format(x, creation_date))
+            
         sys.stderr.write("\nRetrieved list of curation endpoints from {}\n".format(rdir))
         return True, "{} endpoints found\n".format(num_curs)
 
