@@ -117,6 +117,12 @@ Also, if we want an sdf file to use it directly in a QSAR modelling tool, like F
 datacur -i sample_file.xlsx -e myEndpoint -o output_file -f sdf -c curate -s smiles_colname -id id_colname -r
 ```
 
+Finally, there's an option to list all the output files in the endpoint directory using the following command:
+
+```sh
+datacur -c manage -e myEndpoint -a list
+```
+
 The tool is still under construction, but thus far it works with the specified options from above.
 
 ## Data curation commands
