@@ -10,6 +10,7 @@ import pandas as pd
 import pathlib
 import shutil
 import sys
+import tarfile
 import time
 
 from curate.util import utils
@@ -270,3 +271,40 @@ def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     sys.stderr.write("Model {} removed\n".format(curation_endpoint))
     
     return True, "Model {} removed\n".format(curation_endpoint)
+
+def action_export(curation_endpoint: str) -> Tuple[bool,str]:
+    """
+        Exports the whole curation endpoint tree indicated in the argument as a single
+        tarball file with the same name.
+
+        :param curation_endpoint: path to curation endpoint in the repo.
+    """
+
+    if not curation_endpoint:
+        return False,  'Empty endpoint name\n'
+
+    current_path = os.getcwd()
+    exportfile = os.path.join(current_path,curation_endpoint+'.tgz')
+
+    base_path = utils.curation_tree_path(curation_endpoint)
+
+    if not os.path.isdir(base_path):
+        return False, 'Unable to export, endpoint directory not found\n'
+
+    # change to curation repository to tar the file from there
+    os.chdir(base_path)
+
+    itemend = os.listdir()
+    itemend.sort()
+
+    with tarfile.open(exportfile, 'w:gz') as tar:
+        for iversion in itemend:
+            if not os.path.isdir(iversion):
+                continue
+            tar.add(iversion)
+
+    # return to current directory
+    os.chdir(current_path)
+    sys.stderr.write("Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint))
+
+    return True, "Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint)
