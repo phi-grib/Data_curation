@@ -14,7 +14,7 @@ import time
 
 from curate.util import utils
 
-from typing import Tuple
+from typing import Tuple, Union
 
 def get_metadata(data: pd.DataFrame, structure_colname: str) -> list:
     """
@@ -99,6 +99,8 @@ def get_total_of_smiles_per_type_of_substance(smiles_dataframe: pd.DataFrame) ->
     subs_count = smiles_dataframe.groupby('substance_type_name')['substance_type_name'].count()
 
     return subs_count
+
+#### API functions
 
 def action_new(curation_path: str) -> Tuple[bool, str]:
     """
@@ -199,7 +201,6 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
         argument
 
         :param curation_endpoint: curation endpoint to be removed
-
     """
 
     if not curation_endpoint:
@@ -213,3 +214,59 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
     sys.stderr.write("Curation endpoint dir {} has been removed\n".format(curation_endpoint))
 
     return True, "Curation endpoint dir {} has been removed\n".format(curation_endpoint)
+
+def action_dir() -> Tuple[bool,Union[str,list]]:
+    """
+        Returns a list of curation endpoints and files
+
+        :return bool:
+        :return str:
+        :return results:
+    """
+
+    # get curation repo path
+
+    cur_path = pathlib.Path(utils.curation_repository_path())
+    if cur_path.is_dir() is False:
+        return False,  'Curation repository path does not exist. Please run "flame -c config".\n'
+
+    # get directories in curation repo path
+
+    dirs = [x for x in cur_path.iterdir() if x.is_dir()]
+    results = []
+
+    for directory in dirs:
+        dir_dict = {}
+        # I convert directory, which is a PosixPath object into a string
+        directory_string = str(directory)
+        dir_dict[directory_string] = os.listdir(directory)
+        results.append(dir_dict)
+
+    return True, results
+
+def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
+    """
+        Removes the endpoint tree described by the argument.
+
+        :param curation_endpoint: path to curation endpoint in the repo.
+
+        :return bool:
+        :return str:
+    """
+
+    if not curation_endpoint:
+        return False, 'Empty endpoint name\n'
+
+    ndir = utils.curation_tree_path(curation_endpoint)
+
+    if not os.path.isdir(ndir):
+        return False, "Model {} not found\n".format(curation_endpoint)
+
+    try:
+        shutil.rmtree(ndir, ignore_errors=True)
+    except:
+        return False, "Failed to remove model {}\n".format(curation_endpoint)
+
+    sys.stderr.write("Model {} removed\n".format(curation_endpoint))
+    
+    return True, "Model {} removed\n".format(curation_endpoint)
