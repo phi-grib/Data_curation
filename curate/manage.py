@@ -153,8 +153,10 @@ def get_creation_date(endpoint_path: str) -> str:
 
 def action_list(curation_dir: str) -> Tuple[bool, str]:
     """
-        In no argument is provided lists all models present at the repository 
-        otherwyse lists all versions for the model provided as argument
+        In no argument is provided lists all endpoints present at the repository 
+        otherwyse lists all files for the endpoint provided as argument.
+
+        :param curation_dir: path to the endpoint in curation repo
     """
 
     # if no name is provided, just list the different curation dirs
@@ -175,7 +177,21 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
             sys.stderr.write("\n{} {}\n".format(x, creation_date))
             
         sys.stderr.write("\nRetrieved list of curation endpoints from {}\n".format(rdir))
+
         return True, "{} endpoints found\n".format(num_curs)
+
+    else:
+        # if a path name is provided, list files
+        base_path = utils.curation_tree_path(curation_dir)
+        num_files = 0
+        sys.stderr.write('Files found in curation endpoint {}:\n'.format(curation_dir))
+        for x in os.listdir(base_path):
+            num_files += 1
+            xpath = os.path.join(base_path,x)
+            creation_date = get_creation_date(xpath)
+            sys.stderr.write("\n{} {}\n".format(x, creation_date))
+
+        return True, "Endpoint {} has {} published versions\n".format(curation_dir, num_files)
 
 def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
     """
