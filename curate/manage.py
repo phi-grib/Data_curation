@@ -10,11 +10,12 @@ import pandas as pd
 import pathlib
 import shutil
 import sys
+import tarfile
 import time
 
 from curate.util import utils
 
-from typing import Tuple
+from typing import Tuple, Union
 
 def get_metadata(data: pd.DataFrame, structure_colname: str) -> list:
     """
@@ -58,7 +59,7 @@ def set_curation_repository(path: str = None):
 
     sys.stderr.write('Model repository updated to {}'.format(path))
 
-    return True, 'curation repository updated'
+    return True, 'curation repository updated\n'
 
 #### Functions to represent simple statistics after the curation
 
@@ -100,6 +101,8 @@ def get_total_of_smiles_per_type_of_substance(smiles_dataframe: pd.DataFrame) ->
 
     return subs_count
 
+#### API functions
+
 def action_new(curation_path: str) -> Tuple[bool, str]:
     """
         Create a new curation endpoint tree, using the given name.
@@ -136,10 +139,27 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     
     return True, "new endpoint {} created\n".format(curation_path)
 
+def get_creation_date(endpoint_path: str) -> str:
+    """
+        Returns the creation date of the selected endpoint dir in the curation repository.
+
+        :param endpoint_path: complete path to endpoint directory.
+
+        :return creation_date: string with the creation date of the endpoint dir.
+    """
+
+    import datetime
+
+    creation_date = datetime.datetime.fromtimestamp(os.stat(endpoint_path).st_mtime).strftime("%d-%b-%Y")
+    
+    return creation_date
+
 def action_list(curation_dir: str) -> Tuple[bool, str]:
     """
-        In no argument is provided lists all models present at the repository 
-        otherwyse lists all versions for the model provided as argument
+        In no argument is provided lists all endpoints present at the repository 
+        otherwyse lists all files for the endpoint provided as argument.
+
+        :param curation_dir: path to the endpoint in curation repo
     """
 
     # if no name is provided, just list the different curation dirs
@@ -151,14 +171,30 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
         num_curs = 0
         sys.stderr.write('Curation endpoints found in repository:\n')
         for x in os.listdir(rdir):
-            xpath = os.path.join(rdir,x) 
+            xpath = os.path.join(rdir,x)
             # discard if the item is not a directory
             if not os.path.isdir(xpath):
                 continue
             num_curs += 1
-            sys.stderr.write("\t"+x)
+            creation_date = get_creation_date(xpath)
+            sys.stderr.write("\n{} {}\n".format(x, creation_date))
+            
         sys.stderr.write("\nRetrieved list of curation endpoints from {}\n".format(rdir))
+
         return True, "{} endpoints found\n".format(num_curs)
+
+    else:
+        # if a path name is provided, list files
+        base_path = utils.curation_tree_path(curation_dir)
+        num_files = 0
+        sys.stderr.write('Files found in curation endpoint {}:\n'.format(curation_dir))
+        for x in os.listdir(base_path):
+            num_files += 1
+            xpath = os.path.join(base_path,x)
+            creation_date = get_creation_date(xpath)
+            sys.stderr.write("\n{} {}\n".format(x, creation_date))
+
+        return True, "Endpoint {} has {} published versions\n".format(curation_dir, num_files)
 
 def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
     """
@@ -166,7 +202,6 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
         argument
 
         :param curation_endpoint: curation endpoint to be removed
-
     """
 
     if not curation_endpoint:
@@ -180,3 +215,96 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
     sys.stderr.write("Curation endpoint dir {} has been removed\n".format(curation_endpoint))
 
     return True, "Curation endpoint dir {} has been removed\n".format(curation_endpoint)
+
+def action_dir() -> Tuple[bool,Union[str,list]]:
+    """
+        Returns a list of curation endpoints and files
+
+        :return bool:
+        :return str:
+        :return results:
+    """
+
+    # get curation repo path
+
+    cur_path = pathlib.Path(utils.curation_repository_path())
+    if cur_path.is_dir() is False:
+        return False,  'Curation repository path does not exist. Please run "flame -c config".\n'
+
+    # get directories in curation repo path
+
+    dirs = [x for x in cur_path.iterdir() if x.is_dir()]
+    results = []
+
+    for directory in dirs:
+        dir_dict = {}
+        # I convert directory, which is a PosixPath object into a string
+        directory_string = str(directory)
+        dir_dict[directory_string] = os.listdir(directory)
+        results.append(dir_dict)
+
+    return True, results
+
+def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
+    """
+        Removes the endpoint tree described by the argument.
+
+        :param curation_endpoint: path to curation endpoint in the repo.
+
+        :return bool:
+        :return str:
+    """
+
+    if not curation_endpoint:
+        return False, 'Empty endpoint name\n'
+
+    ndir = utils.curation_tree_path(curation_endpoint)
+
+    if not os.path.isdir(ndir):
+        return False, "Model {} not found\n".format(curation_endpoint)
+
+    try:
+        shutil.rmtree(ndir, ignore_errors=True)
+    except:
+        return False, "Failed to remove model {}\n".format(curation_endpoint)
+
+    sys.stderr.write("Model {} removed\n".format(curation_endpoint))
+    
+    return True, "Model {} removed\n".format(curation_endpoint)
+
+def action_export(curation_endpoint: str) -> Tuple[bool,str]:
+    """
+        Exports the whole curation endpoint tree indicated in the argument as a single
+        tarball file with the same name.
+
+        :param curation_endpoint: path to curation endpoint in the repo.
+    """
+
+    if not curation_endpoint:
+        return False,  'Empty endpoint name\n'
+
+    current_path = os.getcwd()
+    exportfile = os.path.join(current_path,curation_endpoint+'.tgz')
+
+    base_path = utils.curation_tree_path(curation_endpoint)
+
+    if not os.path.isdir(base_path):
+        return False, 'Unable to export, endpoint directory not found\n'
+
+    # change to curation repository to tar the file from there
+    os.chdir(base_path)
+
+    itemend = os.listdir()
+    itemend.sort()
+
+    with tarfile.open(exportfile, 'w:gz') as tar:
+        for iversion in itemend:
+            if not os.path.isdir(iversion):
+                continue
+            tar.add(iversion)
+
+    # return to current directory
+    os.chdir(current_path)
+    sys.stderr.write("Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint))
+
+    return True, "Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint)

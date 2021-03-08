@@ -4,16 +4,17 @@
     Created by: Eric March Vila (eric.march@upf.edu)
     On: 23/02/2021, 13:16 PM
 """
+
 import os
 import sys
 
 import curate.manage as manage
 
-from typing import Tuple
+from typing import Tuple, Optional
 
 from curate.util import utils
 
-def curation_cmd(**kwargs: dict):
+def curation_cmd(**kwargs: dict) -> Optional[bool]:
     """
         Instantiate curate objectt using kwargs from argument parser.
 
@@ -67,18 +68,3 @@ def manage_cmd(arguments: dict) -> Tuple[bool, str]:
         results = "Specified manage action is not defined"
 
     return success, results
-
-def output_file_to_proper_dir(outfile_name: str) -> str:
-    """
-        Join curation repo path to output file name so it can be saved 
-        in its proper directory.
-
-        :param outfile_name: output file name
-
-        :return outfile_path: output file name with the directory path
-    """
-    
-    curation_dir_path = utils.curation_repository_path()
-    outfile_path = '/'.join([curation_dir_path,outfile_name])
-
-    return outfile_path

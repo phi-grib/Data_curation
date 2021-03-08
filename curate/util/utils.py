@@ -71,7 +71,7 @@ def read_config() -> Union[Tuple[bool, str], Tuple[bool, dict]]:
         return False, e
 
     if conf is None:
-        return False, 'unable to obtain configuration file'
+        return False, 'unable to obtain configuration file\n'
 
     if conf['config_status']:
         items = ['curation_repository_path']
@@ -79,7 +79,7 @@ def read_config() -> Union[Tuple[bool, str], Tuple[bool, dict]]:
             try:
                 conf[i] = os.path.abspath(conf[i])
             except:
-                return False, "Configuration file incorrect. Unable to convert {} to a valid path.".format(conf[i])
+                return False, "Configuration file incorrect. Unable to convert {} to a valid path.\n".format(conf[i])
 
     return True, conf
 
