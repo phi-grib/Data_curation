@@ -229,7 +229,7 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
 
     cur_path = pathlib.Path(utils.curation_repository_path())
     if cur_path.is_dir() is False:
-        return False,  'Curation repository path does not exist. Please run "flame -c config".\n'
+        return False,  'Curation repository path does not exist. Please run "datacur -c config".\n'
 
     # get directories in curation repo path
 

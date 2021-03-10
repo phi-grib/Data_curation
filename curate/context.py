@@ -65,6 +65,6 @@ def manage_cmd(arguments: dict) -> Tuple[bool, str]:
         success, results = manage.action_remove(arguments.endpoint)
     else: 
         success = False
-        results = "Specified manage action is not defined"
+        results = "Specified manage action is not defined\n"
 
     return success, results
