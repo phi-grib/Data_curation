@@ -122,7 +122,7 @@ class Curator(object):
             :return final_smi: canonicalized SMILES
         """
 
-        final_smi, exclude = standardizer.standardize_mol(smi)
+        final_smi = standardizer.standardize_mol(smi)
         final_smi = Chem.MolToSmiles(final_smi)
 
         return final_smi
