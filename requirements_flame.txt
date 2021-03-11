@@ -1,0 +1,5 @@
+git+https://github.com/phi-grib/phitools.git
+git+https://github.com/EMVGaron/standardiser
+git+https://github.com/phi-grib/EPA_simplified.git
+xlrd == 1.2.0
+openpyxl
