@@ -20,7 +20,7 @@ from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
 
 from phitools import moleculeHelper as mh
-from standardiser import process_smiles as ps
+from standardiser2 import process_smiles as ps
 
 class Curator(object):
     """
