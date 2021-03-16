@@ -5,4 +5,5 @@ xlrd == 1.2.0
 openpyxl
 appdirs
 lxml
-jupyterlab >=6.1.2
+jupyter-client >=6.1.2
+jupyterlab
