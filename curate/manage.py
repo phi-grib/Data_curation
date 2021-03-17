@@ -240,7 +240,7 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         dir_dict = {}
         # I convert directory, which is a PosixPath object into a string
         directory_string = str(directory)
-        dir_dict[directory_string] = os.listdir(directory)
+        dir_dict[directory_string] = (os.listdir(directory), [get_creation_date(os.path.join(directory,x)) for x in os.listdir(directory)])
         results.append(dir_dict)
 
     return True, results
