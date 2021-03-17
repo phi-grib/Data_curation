@@ -199,6 +199,10 @@ class DataCuration(object):
 
     def calculate_data_stats(self, dataframe: pd.DataFrame):
         """
+            Counts how many substances have been processed, how many haven't and the different
+            types of substances calculated.
+
+            :param dataframe: curated data dataframe
         """
 
         data_stats = self.get_number_of_processed_vs_unprocessed(dataframe)

@@ -5,6 +5,7 @@
     On: 18/02/2021, 17:49 PM
 """
 
+import json
 import os
 import pandas as pd
 import pathlib
@@ -178,6 +179,22 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
 
     return True, "Curation endpoint dir {} has been removed\n".format(curation_endpoint)
 
+def read_json_statistics(json_file: pathlib.PosixPath) -> list:
+    """
+        Gets JSON files containint statistics of curation and returns it as a list
+
+        :param json_file: json file complete path
+
+        :return json_data: json data as list
+    """
+
+    json_data = []
+
+    with open(str(json_file)) as f:
+        json_data.append(json.load(f))
+    
+    return json_data
+
 def action_dir() -> Tuple[bool,Union[str,list]]:
     """
         Returns a list of curation endpoints and files
@@ -204,6 +221,7 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         directory_string = str(directory).split('/')[-1]
         # Not showing statistics files in the list of files within the directory
         dir_dict[directory_string] = [(x,get_creation_date(os.path.join(directory,x))) for x in os.listdir(directory) if x.endswith('.json') is False]
+        dir_dict['statistics'] = [read_json_statistics(os.path.join(directory,x)) for x in os.listdir(directory) if x.endswith('.json')]
 
         results.append(dir_dict)
 
