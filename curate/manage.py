@@ -201,10 +201,10 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
     for directory in dirs:
         dir_dict = {}
         # I convert directory, which is a PosixPath object into a string
-        directory_string = str(directory)
+        directory_string = str(directory).split('/')[-1]
         # Not showing statistics files in the list of files within the directory
-        dir_dict[directory_string] = ([x for x in os.listdir(directory) if x.endswith('.json') is False], 
-                                    [get_creation_date(os.path.join(directory,x)) for x in os.listdir(directory) if x.endswith('.json') is False])
+        dir_dict[directory_string] = [(x,get_creation_date(os.path.join(directory,x))) for x in os.listdir(directory) if x.endswith('.json') is False]
+
         results.append(dir_dict)
 
     return True, results
