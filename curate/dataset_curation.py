@@ -96,7 +96,10 @@ class DataCuration(object):
         elif 'tsv' in outfile_type.lower():
             output_name_format = '.'.join([outfile_full_path.split('.')[0],'tsv'])
             data.to_csv(output_name_format, sep='\t')
-
+        elif 'json' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_full_path.split('.')[0],'json'])
+            data.to_json(path_or_buf = output_name_format, orient = 'index')
+    
     def write_sdf(self, outfile_name: str):
         """
             Prepares curated data to be converted into sdf file using
@@ -162,7 +165,48 @@ class DataCuration(object):
         substance_types = pd.DataFrame(substance_types, columns=['id','type'])
         
         return substance_types
+
+    def get_number_of_processed_vs_unprocessed(self, smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
+        """
+            This function returns a dataframe with the number of total SMILES, the ones
+            that have been processed by the code and the ones that haven't.
+
+            :param smiles_dataframe:
+
+            :return smiles_stats_df:
+        """
+
+        smiles_stats_dict = {'SMILES':['Total SMILES','Processed SMILES', 'Unable to process'],
+                             'Count':[len(smiles_dataframe.index), len(self.curated_data.index), len(self.problematic_structures.index)]}
+        
+        smiles_stats_df = pd.DataFrame(data=smiles_stats_dict)
     
+        return smiles_stats_df
+
+    def get_total_of_smiles_per_type_of_substance(self, smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
+        """
+            This function returns the amount of substance types found of each kind
+            after curating the SMILES.
+
+            :param smiles_dataframe:
+
+            :return subs_count:
+        """
+
+        subs_count = smiles_dataframe.groupby('substance_type_name')['substance_type_name'].count()
+        
+        return subs_count
+
+    def calculate_data_stats(self, dataframe: pd.DataFrame):
+        """
+        """
+
+        data_stats = self.get_number_of_processed_vs_unprocessed(dataframe)
+        subs_types_stats = self.get_total_of_smiles_per_type_of_substance(dataframe)
+
+        self.get_output_file(outfile_name='curation_statistics', outfile_type='json', data=data_stats)
+        self.get_output_file(outfile_name='substance_type_statistics', outfile_type='json', data=subs_types_stats)
+
     def curate_data(self, remove_problematic: bool = None) -> pd.DataFrame:
         """
             Check SMILES column to get a curated SMILES and the type of substance.
@@ -186,6 +230,7 @@ class DataCuration(object):
 
         if remove_problematic:
             self.remove_problematic_structures(curated_data)
+            self.calculate_data_stats(curated_data)
             self.get_output_file(outfile_name='Problematic_structures_removed', outfile_type='xlsx', data=self.problematic_structures)
         else:
             self.curated_data = curated_data

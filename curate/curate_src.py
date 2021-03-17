@@ -33,7 +33,7 @@ def main():
     
     parser.add_argument('-f', '--format',
                         help='Format of the output file.',
-                        choices=['xlsx', 'csv', 'tsv', 'sdf'],
+                        choices=['xlsx', 'csv', 'tsv', 'sdf','json'],
                         required=False)
 
     parser.add_argument('-a', '--action',

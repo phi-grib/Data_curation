@@ -61,46 +61,6 @@ def set_curation_repository(path: str = None):
 
     return True, 'curation repository updated\n'
 
-#### Functions to represent simple statistics after the curation
-
-def get_number_of_processed_vs_unprocessed(smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
-    """
-        This function returns a dataframe with the number of total SMILES, the ones
-        that have been processed by the code and the ones that haven't.
-
-        Is it expected to receive an input from the API using the output of the previous
-        function get_list_of_filtered_SMILES_and_substance_type()
-
-        :param smiles_dataframe:
-
-        :return smiles_stats_df:
-    """
-
-    unprocessed_smiles = smiles_dataframe[smiles_dataframe['structure_curated'].isna()]
-    processed_smiles = smiles_dataframe[~smiles_dataframe['structure_curated'].isna()]
-
-    smiles_stats_dict = {'Total SMILES':len(smiles_dataframe.index), 
-                         'Processed SMILES':len(processed_smiles.index), 
-                         'Unable to process':len(unprocessed_smiles.index)}
-    
-    smiles_stats_df = pd.DataFrame(data=smiles_stats_dict)
-
-    return smiles_stats_df
-
-def get_total_of_smiles_per_type_of_substance(smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
-    """
-        This function returns the amount of substance types found of each kind
-        after curating the SMILES.
-
-        :param smiles_dataframe:
-
-        :return subs_count:
-    """
-
-    subs_count = smiles_dataframe.groupby('substance_type_name')['substance_type_name'].count()
-
-    return subs_count
-
 #### API functions
 
 def action_new(curation_path: str) -> Tuple[bool, str]:
@@ -189,6 +149,8 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
         num_files = 0
         sys.stderr.write('Files found in curation endpoint {}:\n'.format(curation_dir))
         for x in os.listdir(base_path):
+            if x.endswith('.json'):
+                continue
             num_files += 1
             xpath = os.path.join(base_path,x)
             creation_date = get_creation_date(xpath)
@@ -240,7 +202,9 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         dir_dict = {}
         # I convert directory, which is a PosixPath object into a string
         directory_string = str(directory)
-        dir_dict[directory_string] = (os.listdir(directory), [get_creation_date(os.path.join(directory,x)) for x in os.listdir(directory)])
+        # Not showing statistics files in the list of files within the directory
+        dir_dict[directory_string] = ([x for x in os.listdir(directory) if x.endswith('.json') is False], 
+                                    [get_creation_date(os.path.join(directory,x)) for x in os.listdir(directory) if x.endswith('.json') is False])
         results.append(dir_dict)
 
     return True, results
