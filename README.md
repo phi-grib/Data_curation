@@ -166,7 +166,7 @@ Data curation was designed to be used in different ways, using diverse interface
 
 Data curation was produced at the PharmacoInformatics lab (http://phi.upf.edu), in the framework of the eTRANSAFE project (http://etransafe.eu). eTRANSAFE has received support from IMI2 Joint Undertaking under Grant Agreement No. 777365. This Joint Undertaking receives support from the European Union’s Horizon 2020 research and innovation programme and the European Federation of Pharmaceutical Industries and Associations (EFPIA). 
 
-Copyright 2021 Eric March (eirc.march@upf.edu)
+Copyright 2021 Eric March (eric.march@upf.edu)
 
 Data curation is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License as published by the Free Software Foundation version 3**.
 
