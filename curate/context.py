@@ -43,7 +43,7 @@ def curation_cmd(**kwargs: dict) -> Optional[bool]:
 
     curating.curate_data(remove_problematic=kwargs['remove_problematic'])
 
-    curating.get_output_file(outfile_type=kwargs['outfile_type'])
+    curating.get_output_file(outfile_type=kwargs['outfile_type'], smiles_column='structure_curated')
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """
