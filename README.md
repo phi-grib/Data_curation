@@ -149,7 +149,7 @@ Management commands deserve further description:
 | Command | Example | Description |
 | --- | --- | ---|
 | new | *datacur -c manage -a new -e MyEndpoint* | Creates a new entry in the curation repository named MyEndpoint  |
-| remove | *datacur -c manage -a remove -e MyEndpoint | Removes the specified endpoint from the curation repository |
+| remove | *datacur -c manage -a remove -e MyEndpoint* | Removes the specified endpoint from the curation repository |
 | list | *datacur -c manage -a list* | Lists the endpoints present in the curation repository. If the name of an endpoint is provided, lists only the files within that endpoint directory  |
 
 ## Technical details
