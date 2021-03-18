@@ -95,26 +95,26 @@ Now the curation repository is totally configured and ready to store the outputs
 Let's curate a sample file:
 
 ```sh
-datacur -i sample_file.xlsx -e myEndpoint -o output_file -f xlsx -c curate -r
+datacur -i sample_file.xlsx -e myEndpoint -f xlsx -c curate -r
 ```
 
-This will take the input file sample_file.xlsx and return output_file.xlsx since we specified the format using -f option. With -r we asked the program to remove problematic structures and store them in a separate file for further revision. Since we haven't specified SMILES column nor ID column, the program uses a predifined name for each, being 'structure' for SMILES and 'name' for ID. If we want to specify those columns, which is recommended, we have to type:
+This will take the input file sample_file.xlsx and return curated_data.xlsx since we specified the format using -f option. With -r we asked the program to remove problematic structures and store them in a separate file for further revision. Since we haven't specified SMILES column nor ID column, the program uses a predifined name for each, being 'structure' for SMILES and 'name' for ID. If we want to specify those columns, which is recommended, we have to type:
 
 ```sh
-datacur -i sample_file.xlsx -e myEndpoint -o output_file -f xlsx -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.xlsx -e myEndpoint -f xlsx -c curate -s smiles_colname -id id_colname -r
 ```
 
 In that case, our input is an Excel file and the code handles this internally using Pandas option read_excel().
 If we want to use another accepted format, like csv or tsv and we know we have a specific separator that is not a comma nor a tab, we can also specify the separator using the -sep option:
 
 ```sh
-datacur -i sample_file.csv -e myEndpoint -o output_file -sep ':' -f xlsx -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.csv -e myEndpoint -sep ':' -f xlsx -c curate -s smiles_colname -id id_colname -r
 ```
 
 Also, if we want an sdf file to use it directly in a QSAR modelling tool, like Flame, we can put that in the -f option:
 
 ```sh
-datacur -i sample_file.xlsx -e myEndpoint -o output_file -f sdf -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.xlsx -e myEndpoint -f sdf -c curate -s smiles_colname -id id_colname -r
 ```
 
 Finally, there's an option to list all the output files in the endpoint directory using the following command:
@@ -131,9 +131,8 @@ The tool is still under construction, but thus far it works with the specified o
 | --- | --- |
 | -i/ --infile |  Name of the input file used by the command. |
 | -e/ --endpoint |  Name of the endpoint of our curation files. |
-| -o/ --outfile | Name of the output file. |
-| -f/ --format | Output file formats that can be provided. Acceptable values are *xlsx*, *csv*, *tsv* and *sdf*. |
-| -a/ --action | Management action to be carried out. Acceptable value is *silent*. |
+| -f/ --format | Output file formats that can be provided. Acceptable values are *xlsx*, *csv*, *tsv*, *sdf* and *json*. |
+| -a/ --action | Management action to be carried out. Acceptable value are *silent*, *new*, *list* and *remove*. The meaning of these actions and examples of use are provided below. |
 | -c/ --command | Specific action to be done. Acceptable values are *curate*, *split* and *config*. |
 | -d/ --directory | Defines the root directory for the curation repository. |
 | -id/ --id_column | Column name containing the molecule identifier. |
@@ -141,6 +140,17 @@ The tool is still under construction, but thus far it works with the specified o
 | -sep/ --separator | If added, uses this argument as the input file separator. |
 | -r/ --remove | If added, removes problematic structures after SMILES curation. |
 | -h/ --help | Shows a help message on the screen |
+
+Management commands deserve further description:
+
+
+### Management commands
+
+| Command | Example | Description |
+| --- | --- | ---|
+| new | *datacur -c manage -a new -e MyEndpoint* | Creates a new entry in the curation repository named MyEndpoint  |
+| remove | *datacur -c manage -a remove -e MyEndpoint | Removes the specified endpoint from the curation repository |
+| list | *datacur -c manage -a list* | Lists the endpoints present in the curation repository. If the name of an endpoint is provided, lists only the files within that endpoint directory  |
 
 ## Technical details
 
@@ -154,4 +164,13 @@ Data curation was designed to be used in different ways, using diverse interface
 
 ## Licensing
 
-TODO
+Data curation was produced at the PharmacoInformatics lab (http://phi.upf.edu), in the framework of the eTRANSAFE project (http://etransafe.eu). eTRANSAFE has received support from IMI2 Joint Undertaking under Grant Agreement No. 777365. This Joint Undertaking receives support from the European Union’s Horizon 2020 research and innovation programme and the European Federation of Pharmaceutical Industries and Associations (EFPIA). 
+
+Copyright 2021 Eric March (eirc.march@upf.edu)
+
+Data curation is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License as published by the Free Software Foundation version 3**.
+
+Data curation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Data curation. If not, see <http://www.gnu.org/licenses/>.
