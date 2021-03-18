@@ -26,10 +26,6 @@ def main():
     parser.add_argument('-e', '--endpoint',
                         help='Endpoint curation name.',
                         required=False)
-
-    parser.add_argument('-o', '--outfile',
-                        help='Output file name.',
-                        required=False)
     
     parser.add_argument('-f', '--format',
                         help='Format of the output file.',
@@ -81,8 +77,8 @@ def main():
         utils.config_test()
 
     if args.command == 'curate':
-        if (args.outfile is None) or (args.infile is None) or (args.format is None) or (args.endpoint is None):
-            sys.stderr.write("datacur curate : input, output, output format and endpoint arguments are compulsory\n")
+        if (args.infile is None) or (args.format is None) or (args.endpoint is None):
+            sys.stderr.write("datacur curate : input, output format and endpoint arguments are compulsory\n")
             return
         
         if args.id_column is None:
@@ -105,7 +101,6 @@ def main():
                              structure_column=smiles_,
                              separator=sep,
                              remove_problematic=args.remove,
-                             outfile_name=args.outfile,
                              outfile_type=args.format,
                              endpoint=args.endpoint)
     

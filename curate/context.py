@@ -24,8 +24,7 @@ def curation_cmd(**kwargs: dict) -> Optional[bool]:
                 - structure_column: column name containing the SMILES string
                 - separator: file separator ir input file is a csv or a tsv.
                 - remove_problematic: boolean indicating the option of removing problematic structures or not
-                - outfile_name: output file name
-                - outfile_type: output file type: xlsx, csv, tsv or sdf.
+                - outfile_type: output file type: xlsx, csv, tsv, sdf or json.
     """
     
     import curate.dataset_curation as datacur
@@ -44,8 +43,7 @@ def curation_cmd(**kwargs: dict) -> Optional[bool]:
 
     curating.curate_data(remove_problematic=kwargs['remove_problematic'])
 
-    curating.get_output_file(outfile_name=kwargs['outfile_name'],
-                             outfile_type=kwargs['outfile_type'])
+    curating.get_output_file(outfile_type=kwargs['outfile_type'])
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """

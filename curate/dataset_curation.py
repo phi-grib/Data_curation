@@ -69,7 +69,7 @@ class DataCuration(object):
                 
         return i_data
     
-    def get_output_file(self, outfile_name: str, outfile_type: str, data: pd.DataFrame = None):
+    def get_output_file(self, outfile_type: str, data: pd.DataFrame = None, outfile_name: str = None):
         """
             Saves the curated data into a specific file format.
             Requires output file name and type of file (Excel, CSV, TSV, sdf)
@@ -82,6 +82,9 @@ class DataCuration(object):
 
         if data is None:
             data = self.curated_data.copy()
+
+        if outfile_name is None:
+            outfile_name = 'curated_data'
 
         outfile_full_path = '/'.join([self.output_dir,outfile_name])
 
@@ -108,7 +111,7 @@ class DataCuration(object):
             :param outfile_name: output file name
         """
 
-        output_name_format = '.'.join([outfile_name.split('.')[0],'sdf'])
+        output_name_format = '.'.join([outfile_name,'sdf'])
         cur_data = self.prepare_data_for_sdf(copy=True)
         
         PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName=self.identifier)
@@ -148,7 +151,7 @@ class DataCuration(object):
         data.loc[:,'ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
         
         if no_mol.empty is False:
-            self.get_output_file(outfile_name='Non_processed_molecules', outfile_type='xlsx', data=no_mol)
+            self.get_output_file(outfile_type='xlsx', data=no_mol, outfile_name='Non_processed_molecules', )
 
         return data
 
@@ -208,8 +211,8 @@ class DataCuration(object):
         data_stats = self.get_number_of_processed_vs_unprocessed(dataframe)
         subs_types_stats = self.get_total_of_smiles_per_type_of_substance(dataframe)
 
-        self.get_output_file(outfile_name='curation_statistics', outfile_type='json', data=data_stats)
-        self.get_output_file(outfile_name='substance_type_statistics', outfile_type='json', data=subs_types_stats)
+        self.get_output_file(outfile_type='json', data=data_stats, outfile_name='curation_statistics')
+        self.get_output_file(outfile_type='json', data=subs_types_stats, outfile_name='substance_type_statistics')
 
     def curate_data(self, remove_problematic: bool = None) -> pd.DataFrame:
         """
@@ -235,7 +238,7 @@ class DataCuration(object):
         if remove_problematic:
             self.remove_problematic_structures(curated_data)
             self.calculate_data_stats(curated_data)
-            self.get_output_file(outfile_name='Problematic_structures_removed', outfile_type='xlsx', data=self.problematic_structures)
+            self.get_output_file(outfile_type='xlsx', data=self.problematic_structures, outfile_name='Problematic_structures_removed')
         else:
             self.curated_data = curated_data
     
