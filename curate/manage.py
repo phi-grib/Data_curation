@@ -58,9 +58,9 @@ def set_curation_repository(path: str = None):
 
     utils.set_curation_repository(path)
 
-    sys.stderr.write('Model repository updated to {}'.format(path))
+    sys.stderr.write('Model repository updated to {}\n'.format(path))
 
-    return True, 'curation repository updated\n'
+    return True, 'curation repository updatedn'
 
 #### API functions
 
@@ -81,24 +81,47 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     # try to use this name. This is a simple workaround to prevent creating paths 
     # with this name 
     if curation_path == 'test':
-        return False, 'the name "test" is disallowed, please use any other name\n'
+        return False, 'the name "test" is disallowed, please use any other name'
 
     # curation endpoint directory
     ndir = pathlib.Path(utils.curation_tree_path(curation_path))
 
     # check if there is already a tree for this endpoint
     if ndir.exists():
-        return False, "Endpoint {} already exists\n".format(curation_path)
+        return False, "Endpoint {} already exists".format(curation_path)
 
     try:
         ndir.mkdir(parents=True)
         sys.stderr.write("{} created\n".format(ndir))
     except:
-        return False, "Unable to create path for {} endpoint\n".format(curation_path)
+        return False, "Unable to create path for {} endpoint".format(curation_path)
+
+    # Copy classes skeletons to ndir
+    wkd = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
+    children_names = ['idata', 'odata']
+
+    for cname in children_names:
+        filename = cname + '_child.py'
+        src_path = wkd / 'children' / filename
+        dst_path = ndir / filename
+        try:
+            shutil.copy(src_path, dst_path)
+        except:
+            return False, 'Unable to copy {} file'.format(cname)
+
+    sys.stderr.write('copied class skeletons from {} to {}\n'.format(src_path, dst_path))
+        
+    # copy parameter yml file
+    params_path = wkd / 'children/parameters.yaml'
+    shutil.copy(params_path, ndir)
+
+    # copy documentation yml file
+    documentation_path = wkd / 'children/documentation.yaml'
+    shutil.copy(documentation_path, ndir)
 
     sys.stderr.write("New endpoint {} created\n".format(curation_path))
     
-    return True, "new endpoint {} created\n".format(curation_path)
+    return True, "new endpoint {} created".format(curation_path)
 
 def get_creation_date(endpoint_path: str) -> str:
     """
@@ -142,7 +165,7 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
             
         sys.stderr.write("\nRetrieved list of curation endpoints from {}\n".format(rdir))
 
-        return True, "{} endpoints found\n".format(num_curs)
+        return True, "{} endpoints found".format(num_curs)
 
     else:
         # if a path name is provided, list files
@@ -157,7 +180,7 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
             creation_date = get_creation_date(xpath)
             sys.stderr.write("\n{} {}\n".format(x, creation_date))
 
-        return True, "Endpoint {} has {} published versions\n".format(curation_dir, num_files)
+        return True, "Endpoint {} has {} published versions".format(curation_dir, num_files)
 
 def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
     """
@@ -168,16 +191,16 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
     """
 
     if not curation_endpoint:
-        return False, 'Empty curation endpoint\n'
+        return False, 'Empty curation endpoint'
 
     rdir = utils.curation_tree_path(curation_endpoint)
     if not os.path.isdir(rdir):
-        return False, '{curation_endpoint} not found\n'.format(curation_endpoint)
+        return False, '{} not found'.format(curation_endpoint)
 
     shutil.rmtree(rdir, ignore_errors=True)
     sys.stderr.write("Curation endpoint dir {} has been removed\n".format(curation_endpoint))
 
-    return True, "Curation endpoint dir {} has been removed\n".format(curation_endpoint)
+    return True, "Curation endpoint dir {} has been removed".format(curation_endpoint)
 
 def read_json_statistics(json_file: pathlib.PosixPath) -> list:
     """
@@ -239,21 +262,21 @@ def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     """
 
     if not curation_endpoint:
-        return False, 'Empty endpoint name\n'
+        return False, 'Empty endpoint name'
 
     ndir = utils.curation_tree_path(curation_endpoint)
 
     if not os.path.isdir(ndir):
-        return False, "Model {} not found\n".format(curation_endpoint)
+        return False, "Model {} not found".format(curation_endpoint)
 
     try:
         shutil.rmtree(ndir, ignore_errors=True)
     except:
-        return False, "Failed to remove model {}\n".format(curation_endpoint)
+        return False, "Failed to remove model {}".format(curation_endpoint)
 
     sys.stderr.write("Model {} removed\n".format(curation_endpoint))
     
-    return True, "Model {} removed\n".format(curation_endpoint)
+    return True, "Model {} removed".format(curation_endpoint)
 
 def action_export(curation_endpoint: str) -> Tuple[bool,str]:
     """
@@ -264,7 +287,7 @@ def action_export(curation_endpoint: str) -> Tuple[bool,str]:
     """
 
     if not curation_endpoint:
-        return False,  'Empty endpoint name\n'
+        return False,  'Empty endpoint name'
 
     current_path = os.getcwd()
     exportfile = os.path.join(current_path,curation_endpoint+'.tgz')
@@ -272,7 +295,7 @@ def action_export(curation_endpoint: str) -> Tuple[bool,str]:
     base_path = utils.curation_tree_path(curation_endpoint)
 
     if not os.path.isdir(base_path):
-        return False, 'Unable to export, endpoint directory not found\n'
+        return False, 'Unable to export, endpoint directory not found'
 
     # change to curation repository to tar the file from there
     os.chdir(base_path)
@@ -290,4 +313,4 @@ def action_export(curation_endpoint: str) -> Tuple[bool,str]:
     os.chdir(current_path)
     sys.stderr.write("Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint))
 
-    return True, "Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint)
+    return True, "Endpoint {} exported as {}.tgz".format(curation_endpoint,curation_endpoint)
