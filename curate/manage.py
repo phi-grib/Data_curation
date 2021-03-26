@@ -99,7 +99,7 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     # Copy classes skeletons to ndir
     wkd = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
     children_names = ['idata', 'odata']
-
+    
     for cname in children_names:
         filename = cname + '_child.py'
         src_path = wkd / 'children' / filename
@@ -180,7 +180,7 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
             creation_date = get_creation_date(xpath)
             sys.stderr.write("\n{} {}\n".format(x, creation_date))
 
-        return True, "Endpoint {} has {} published versions".format(curation_dir, num_files)
+        return True, "Endpoint {} has {} files".format(curation_dir, num_files)
 
 def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
     """
