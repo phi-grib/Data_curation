@@ -165,3 +165,64 @@ def set_curation_repository(path: str = None):
         configuration['curation_repository_path'] = str(new_path.resolve())
 
     write_config(configuration)
+
+def md5sum(filename: str, blocksize: int = 65536) -> dict:
+    """
+        Returns the MD5 sum of the file given as argument.
+
+        :param filename:
+        :param blocksize:
+
+        :return hash_hex:
+    """
+    hash_ = hashlib.md5()
+
+    with open(filename, "rb") as f:
+        for block in iter(lambda: f.read(blocksize), b""):
+            hash_.update(block)
+
+    hash_hex = hash_.hexdigest()
+
+    return hash_hex
+
+def id_generator(size=10, chars=string.ascii_uppercase + string.digits) -> str:
+    """
+        Return a random ID (used for temp files) with uppercase letters and numbers
+
+        :param size:
+        :param chars:
+
+        :return random_id:
+    """
+
+    random_id = ''.join(random.choice(chars) for _ in range(size))
+
+    return random_id
+
+def is_empty(mylist: list) -> bool:
+    """
+        Returns True if every element in the list is None
+
+        :param mylist:
+
+        :return bool:
+    """
+
+    for i in mylist:
+        if i is not None:
+            return False
+    return True
+
+def is_string_empty(mylist: list) -> bool:
+    """
+        Returns True if every element in the list is None
+
+        :param mylist:
+
+        :return bool:
+    """
+
+    for i in mylist:
+        if i != '':
+            return False
+    return True

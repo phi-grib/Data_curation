@@ -1,31 +1,15 @@
-#! -*- coding: utf-8 -*-
+"""
+    Copied from idata.py from Flame
 
-# Description    Flame Idata class
-#
-# Authors:       Manuel Pastor (manuel.pastor@upf.edu)
-#
-# Copyright 2018 Manuel Pastor
-#
-# This file is part of Flame
-#
-# Flame is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation version 3.
-#
-# Flame is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Flame. If not, see <http://www.gnu.org/licenses/>.
+    Created by: Eric March Vila (eric.march@upf.edu)
+    On: 26/03/2021, 11:05 PM
+"""
 
 import os
 import sys
 import pickle
 import shutil
 import tempfile
-# import multiprocessing as mp
 from joblib import Parallel, delayed
 import pathlib
 
@@ -34,31 +18,28 @@ from rdkit import Chem
 
 from standardiser import standardise
 
-import flame.chem.sdfileutils as sdfutils
-import flame.chem.compute_md as computeMD
-import flame.chem.convert_3d as convert3D
+# import flame.chem.sdfileutils as sdfutils
+# import flame.chem.compute_md as computeMD
+# import flame.chem.convert_3d as convert3D
 
-from flame.util import utils, get_logger, supress_log
-
-LOG = get_logger(__name__)
-
+from curate.util import utils
 
 class Idata:
 
     def __init__(self, parameters, conveyor, input_source: str):
         """
-        Input data class to standarize mol inputs
+            Input data class to standarize mol inputs
 
-        Parameters
-        ----------
-        parameters: dict
-            dict with model parameters
+            Parameters
+            ----------
+            parameters: dict
+                dict with model parameters
 
-        conveyor: class
-            main class to store the workflow results
+            conveyor: class
+                main class to store the workflow results
 
-        input_source: str
-            SDF file with the molecules to use as training or predict        
+            input_source: str
+                SDF file with the molecules to use as training or predict        
 
         """
 

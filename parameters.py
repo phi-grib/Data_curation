@@ -1,24 +1,9 @@
-#! -*- coding: utf-8 -*-
+"""
+    Copied from parameters.py from Flame
 
-# Description    Flame Build class
-#
-# Authors:       Manuel Pastor (manuel.pastor@upf.edu)
-#
-# Copyright 2018 Manuel Pastor
-#
-# This file is part of Flame
-#
-# Flame is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation version 3.
-#
-# Flame is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Flame. If not, see <http://www.gnu.org/licenses/>.
+    Created by: Eric March Vila (eric.march@upf.edu)
+    On: 26/03/2021, 11:05 PM
+"""
 
 import os
 import yaml
@@ -26,8 +11,7 @@ import json
 import hashlib
 import pickle
 
-from flame.util import utils
-
+from curate.util import utils
 
 class Parameters:
     ''' Class storing a large set of parameters defining how a model is built
@@ -50,11 +34,6 @@ class Parameters:
         self.extended = False
         self.param_format = 1
         return
-
-    # def loadDict (self, d):
-    #     ''' load the content from a dictionary '''
-    #     self.p = d    
-    #     return
 
     def loadYaml(self, model, version, isSpace=False):       
         ''' load a set of parameters from the configuration file present 
@@ -168,32 +147,7 @@ class Parameters:
                 return False, e
         
         self.applyDelta(newp)
-
-        # # update interna dict with keys in the input file (delta)
-        # black_list = ['param_format','version','model_path','endpoint','md5']
-        # for key in newp:
-        #     if key not in black_list:
-
-        #         val = newp[key]
-
-        #         # YAML define null values as 'None, which are interpreted 
-        #         # as strings
-        #         if val == 'None':
-        #             val = None
-
-        #         if isinstance(val ,dict):
-        #             for inner_key in val:
-        #                 inner_val = val[inner_key]
-
-        #                 if inner_val == 'None':
-        #                     inner_val = None
-
-        #                 self.setInnerVal(key, inner_key, inner_val)
-        #                 #print ('@delta: adding',key, inner_key, inner_val)
-        #         else:
-        #             self.setVal(key,val)
-        #             #print ('@delta: adding',key,val,type(val))
-
+        
         # dump internal dict to the parameters file
         if isSpace:
             parameters_file_path = utils.space_path(model, version)

@@ -98,7 +98,7 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
 
     # Copy classes skeletons to ndir
     wkd = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
-    children_names = ['idata', 'odata']
+    children_names = ['idata', 'learn', 'odata']
     
     for cname in children_names:
         filename = cname + '_child.py'
@@ -118,6 +118,13 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     # copy documentation yml file
     documentation_path = wkd / 'children/documentation.yaml'
     shutil.copy(documentation_path, ndir)
+
+    # create default labels
+    p = { 'type' : 'unk', 'subtype' : 'unk', 
+        'endpoint' : 'unk' }
+          
+    with open(os.path.join(ndir, 'curation-labels.pkl'), 'wb') as fo:
+        pickle.dump(p, fo)
 
     sys.stderr.write("New endpoint {} created\n".format(curation_path))
     
