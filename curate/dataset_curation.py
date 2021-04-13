@@ -152,7 +152,7 @@ class DataCuration(object):
             cur_data = self.add_mol_column_to_df(data, smiles_column)
             return cur_data
         else:
-            self.add_mol_column_to_df(data)
+            self.add_mol_column_to_df(data, smiles_column)
 
     def add_mol_column_to_df(self, data: pd.DataFrame, smiles_column: str) -> pd.DataFrame:
         """

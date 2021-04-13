@@ -362,68 +362,28 @@ def action_export(curation_endpoint: str) -> Tuple[bool,str]:
 
     return True, "Endpoint {} exported as {}.tgz".format(curation_endpoint,curation_endpoint)
 
-def action_info(model, version, output='text'):
-    '''
-    Returns a text or an object with results info for a given model and version
-    TODO: add Q/C + conf/no-conf + ensem/no-ensem + list of ensemble (when applicable)
-    '''
+def action_info_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
+    """
+        Returns a list of curation statistics
 
-    if model is None:
-        if output != 'text':
-            return False, {'code':1, 'message': 'Empty model label'}
-        return False, 'Empty model label'
+        :param endpoint: curation endpoint to collect statistics from
+        
+        :return bool:
+        :return str:
+        :return stats_dict:
+    """
 
-    meta_path = utils.model_path(model, version)
-    meta_file = os.path.join(meta_path, 'model-meta.pkl')
-    if not os.path.isfile(meta_file):
-        if output != 'text':
-            return False, {'code':0, 'message': 'Info file not found'}
-        return False, 'Info file not found'
+    # get curation endpoint path
 
-    with open(meta_file,'rb') as handle:
-        modelID = pickle.load(handle)
-        errorMessage = pickle.load(handle)
-        warningMessage = pickle.load(handle)
-        build_info = pickle.load(handle)
-        valid_info  = pickle.load(handle)
-        type_info = pickle.load(handle)
+    endpoint_curation = pathlib.Path(utils.curation_tree_path(endpoint))
+    if endpoint_curation.is_dir() is False:
+        return False,  'Curation endpoint path does not exist.\n'
 
-    if errorMessage is not None:
-        if output != 'text':
-            return False, {'code':1, 'message': errorMessage}
-        return False, errorMessage        
+    # get statisics files in curation endpint
+    
+    stats_dict = {}
+    stats_dict['curation_results'] = read_json_statistics(os.path.join(endpoint_curation,'curation_statistics.json'))
+    stats_dict['substance_results'] = read_json_statistics(os.path.join(endpoint_curation,'substance_type_statistics.json'))
+    # stats = [read_json_statistics(os.path.join(endpoint_curation,x)) for x in os.listdir(endpoint_curation) if x.endswith('.json')]
 
-    warning_info = None
-    if warningMessage is not None:
-        warning_info = [('warning', 'runtime warning', warningMessage)]
-
-
-    # merge everything 
-    info = None
-
-    for iinfo in (build_info, valid_info, type_info, warning_info, [('modelID','unique model ID', modelID)]):
-        if info == None:
-            info = iinfo
-        else:
-            if iinfo != None:
-                info+=iinfo
-
-    if info == None:
-        if output != 'text':
-            return False, {'code':1, 'message': 'No relevant information found'}
-        return False, 'No relevant information found'
-
-    # when this function is called from the console, output is 'text'
-    # write and exit
-    if output == 'text':
-
-        LOG.info (f'informing model {model} version {version}')
-
-        for val in info:
-            if len(val) < 3:
-                LOG.info(val)
-            else:
-                LOG.info(f'{val[0]} ({val[1]}) : {val[2]}')
-        return True, 'model informed OK'
-
-    return True, info
+    return True, stats_dict
