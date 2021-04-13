@@ -234,7 +234,6 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         # Not showing statistics files in the list of files within the directory
         dir_dict['curation_endpoint'] = directory_string
         dir_dict['creation_date'] = get_creation_date(directory)
-        # dir_dict['statistics'] = [read_json_statistics(os.path.join(directory,x)) for x in os.listdir(directory) if x.endswith('.json')]
 
         results.append(dir_dict)
 
@@ -246,7 +245,7 @@ def action_info_dir() -> Tuple[bool,Union[str,list]]:
 
         :return bool:
         :return str:
-        :return results:
+        :return endpoint_list:
     """
 
     curation_list_file = utils.curation_tree_path('curation_list.pkl')
