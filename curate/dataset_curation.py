@@ -17,6 +17,8 @@ from curate.parameters import Parameters
 from curate.conveyor import Conveyor
 from curate.idata import Idata
 from curate.odata import Odata
+from curate.util import utils
+
 class DataCuration(object):
 
     """
