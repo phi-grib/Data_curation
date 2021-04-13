@@ -9,6 +9,7 @@ import json
 import os
 import pandas as pd
 import pathlib
+import pickle
 import shutil
 import sys
 import tarfile
@@ -88,7 +89,7 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
 
     # check if there is already a tree for this endpoint
     if ndir.exists():
-        return False, "Endpoint {} already exists".format(curation_path)
+        return False, "Endpoint {} already exists\n".format(curation_path)
 
     try:
         ndir.mkdir(parents=True)
@@ -96,35 +97,16 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     except:
         return False, "Unable to create path for {} endpoint".format(curation_path)
 
-    # Copy classes skeletons to ndir
-    wkd = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
-    children_names = ['idata', 'learn', 'odata']
-    
-    for cname in children_names:
-        filename = cname + '_child.py'
-        src_path = wkd / 'children' / filename
-        dst_path = ndir / filename
-        try:
-            shutil.copy(src_path, dst_path)
-        except:
-            return False, 'Unable to copy {} file'.format(cname)
-
-    sys.stderr.write('copied class skeletons from {} to {}\n'.format(src_path, dst_path))
-        
-    # copy parameter yml file
-    params_path = wkd / 'children/parameters.yaml'
-    shutil.copy(params_path, ndir)
-
-    # copy documentation yml file
-    documentation_path = wkd / 'children/documentation.yaml'
-    shutil.copy(documentation_path, ndir)
-
     # create default labels
-    p = { 'type' : 'unk', 'subtype' : 'unk', 
-        'endpoint' : 'unk' }
-          
-    with open(os.path.join(ndir, 'curation-labels.pkl'), 'wb') as fo:
-        pickle.dump(p, fo)
+    curation_info = {'endpoint' : curation_path, 'creation_date': get_creation_date(ndir), 'input_file': 'unk'}
+    curation_list_file = utils.curation_tree_path('curation_list.pkl')
+
+    if os.path.isfile(curation_list_file):
+        with open(curation_list_file, 'ab') as fo:
+            pickle.dump(curation_info, fo)
+    else:
+        with open(curation_list_file, 'wb') as fo:
+            pickle.dump(curation_info, fo)
 
     sys.stderr.write("New endpoint {} created\n".format(curation_path))
     
@@ -258,6 +240,64 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
 
     return True, results
 
+def action_info_dir() -> Tuple[bool,Union[str,list]]:
+    """
+        Returns a list of curation endpoints and files
+
+        :return bool:
+        :return str:
+        :return results:
+    """
+
+    curation_list_file = utils.curation_tree_path('curation_list.pkl')
+
+    if not os.path.isfile(curation_list_file):
+        return False,  'Curation list file does not exist.\n'
+
+    endpoint_list = []
+    with (open(curation_list_file, "rb")) as openfile:
+        while True:
+            try:
+                endpoint_list.append(pickle.load(openfile))
+            except EOFError:
+                break
+    
+    return True, endpoint_list
+
+def manage_pickle_info_dir(input_file: str, endpoint: str) -> Tuple[bool, str]:
+    """
+        Writes the input file name into the curation list pickle
+        so it can be retrieved by the left table in the API
+
+        :param input_file: input file name
+        :para endpoint: endpoint name of the curation
+
+        :return bool: False if curation pickle doesn't exist. Action_new must be called first
+        :return str: same reason as above
+    """
+
+    curation_list_file = utils.curation_tree_path('curation_list.pkl')
+
+    if not os.path.isfile(curation_list_file):
+        return False,  'Curation list file does not exist.\n'
+    
+    temporary_pickle = utils.curation_tree_path('temp.pkl')
+
+    with (open(curation_list_file, "rb")) as openfile:
+        with (open(temporary_pickle, 'wb')) as out:
+            while True:
+                try:
+                    curation_list = pickle.load(openfile)
+                    if curation_list['endpoint'] == endpoint:
+                        curation_list['input_file'] = input_file
+                        pickle.dump(curation_list, out)
+                    else:
+                        pickle.dump(curation_list, out)
+                except EOFError:
+                    break
+
+    os.rename(temporary_pickle, curation_list_file)
+
 def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     """
         Removes the endpoint tree described by the argument.
@@ -321,3 +361,69 @@ def action_export(curation_endpoint: str) -> Tuple[bool,str]:
     sys.stderr.write("Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint))
 
     return True, "Endpoint {} exported as {}.tgz".format(curation_endpoint,curation_endpoint)
+
+def action_info(model, version, output='text'):
+    '''
+    Returns a text or an object with results info for a given model and version
+    TODO: add Q/C + conf/no-conf + ensem/no-ensem + list of ensemble (when applicable)
+    '''
+
+    if model is None:
+        if output != 'text':
+            return False, {'code':1, 'message': 'Empty model label'}
+        return False, 'Empty model label'
+
+    meta_path = utils.model_path(model, version)
+    meta_file = os.path.join(meta_path, 'model-meta.pkl')
+    if not os.path.isfile(meta_file):
+        if output != 'text':
+            return False, {'code':0, 'message': 'Info file not found'}
+        return False, 'Info file not found'
+
+    with open(meta_file,'rb') as handle:
+        modelID = pickle.load(handle)
+        errorMessage = pickle.load(handle)
+        warningMessage = pickle.load(handle)
+        build_info = pickle.load(handle)
+        valid_info  = pickle.load(handle)
+        type_info = pickle.load(handle)
+
+    if errorMessage is not None:
+        if output != 'text':
+            return False, {'code':1, 'message': errorMessage}
+        return False, errorMessage        
+
+    warning_info = None
+    if warningMessage is not None:
+        warning_info = [('warning', 'runtime warning', warningMessage)]
+
+
+    # merge everything 
+    info = None
+
+    for iinfo in (build_info, valid_info, type_info, warning_info, [('modelID','unique model ID', modelID)]):
+        if info == None:
+            info = iinfo
+        else:
+            if iinfo != None:
+                info+=iinfo
+
+    if info == None:
+        if output != 'text':
+            return False, {'code':1, 'message': 'No relevant information found'}
+        return False, 'No relevant information found'
+
+    # when this function is called from the console, output is 'text'
+    # write and exit
+    if output == 'text':
+
+        LOG.info (f'informing model {model} version {version}')
+
+        for val in info:
+            if len(val) < 3:
+                LOG.info(val)
+            else:
+                LOG.info(f'{val[0]} ({val[1]}) : {val[2]}')
+        return True, 'model informed OK'
+
+    return True, info

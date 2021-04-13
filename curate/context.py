@@ -35,6 +35,12 @@ def curation_cmd(**kwargs: dict) -> Optional[bool]:
         sys.stderr.write("Endpoint name not found in model repository.\n")
         return
 
+    # saves input file as metadata after checking
+
+    manage.manage_pickle_info_dir(input_file=kwargs['data_input'], endpoint=kwargs['endpoint'])
+    
+    # call of curation functions
+
     curating = datacur.DataCuration(data_input=kwargs['data_input'], 
                                     molecule_identifier=kwargs['molecule_identifier'],
                                     structure_column=kwargs['structure_column'],
