@@ -379,10 +379,10 @@ def action_info_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
         return False,  'Curation endpoint path does not exist.\n'
 
     # get statisics files in curation endpint
+    stats_file = os.path.join(endpoint_curation,'statistics.pkl')
     
-    stats_dict = {}
-    stats_dict['curation_results'] = read_json_statistics(os.path.join(endpoint_curation,'curation_statistics.json'))
-    stats_dict['substance_results'] = read_json_statistics(os.path.join(endpoint_curation,'substance_type_statistics.json'))
-    # stats = [read_json_statistics(os.path.join(endpoint_curation,x)) for x in os.listdir(endpoint_curation) if x.endswith('.json')]
+    stats = []
+    with (open(stats_file, "rb")) as openfile:
+        stats = pickle.load(openfile)
 
-    return True, stats_dict
+    return True, stats

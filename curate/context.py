@@ -45,6 +45,7 @@ def curation_cmd(**kwargs: dict) -> Optional[bool]:
                                     molecule_identifier=kwargs['molecule_identifier'],
                                     structure_column=kwargs['structure_column'],
                                     output_dir=output_dir,
+                                    endpoint=kwargs['endpoint'],
                                     separator=kwargs['separator'])
 
     curating.curate_data(remove_problematic=kwargs['remove_problematic'])

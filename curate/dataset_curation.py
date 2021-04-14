@@ -7,14 +7,13 @@
 
 import numpy as np
 import pandas as pd
+import pickle
 import sys
 
 from rdkit import Chem
 from rdkit.Chem import PandasTools
 from typing import Optional, Union, Tuple
 
-from curate.idata import Idata
-from curate.odata import Odata
 from curate.util import utils
 
 class DataCuration(object):
@@ -30,7 +29,8 @@ class DataCuration(object):
         TODO:More features will be implemented
     """
     
-    def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, separator: str = None):
+    def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
+                        endpoint: str, separator: str = None):
         """
             Initialize class getting substance types for structure curation.
         """
@@ -41,7 +41,8 @@ class DataCuration(object):
         self.identifier = molecule_identifier
         self.structure_column = structure_column
         self.output_dir = output_dir
-        
+        self.endpoint = endpoint
+
         ## Stores a copy of the input data in the curation endpoint directory
         self.write_input_data()
         
@@ -199,12 +200,11 @@ class DataCuration(object):
             :return smiles_stats_df:
         """
 
-        smiles_stats_dict = {'SMILES':['Total SMILES','Processed SMILES', 'Unable to process'],
-                             'Count':[len(smiles_dataframe.index), len(self.curated_data.index), len(self.problematic_structures.index)]}
-        
-        smiles_stats_df = pd.DataFrame(data=smiles_stats_dict)
-    
-        return smiles_stats_df
+        smiles_stats_dict = {'Total SMILES':len(smiles_dataframe.index),
+                            'Processed SMILES':len(self.curated_data.index), 
+                            'Unable to process':len(self.problematic_structures.index)}
+
+        return smiles_stats_dict
 
     def get_total_of_smiles_per_type_of_substance(self, smiles_dataframe: pd.DataFrame) -> pd.DataFrame:
         """
@@ -216,8 +216,8 @@ class DataCuration(object):
             :return subs_count:
         """
 
-        subs_count = smiles_dataframe.groupby('substance_type_name')['substance_type_name'].count()
-        
+        subs_count = smiles_dataframe.groupby('substance_type_name')['substance_type_name'].count().to_dict()
+
         return subs_count
 
     def calculate_data_stats(self, dataframe: pd.DataFrame):
@@ -231,8 +231,14 @@ class DataCuration(object):
         data_stats = self.get_number_of_processed_vs_unprocessed(dataframe)
         subs_types_stats = self.get_total_of_smiles_per_type_of_substance(dataframe)
 
-        self.get_output_file(outfile_type='json', data=data_stats, outfile_name='curation_statistics')
-        self.get_output_file(outfile_type='json', data=subs_types_stats, outfile_name='substance_type_statistics')
+        general_stats = {}
+        general_stats['curation_stats'] = data_stats
+        general_stats['substance_types'] = subs_types_stats
+        
+        stats_file = utils.curation_tree_path('/'.join([self.endpoint,'statistics.pkl']))
+        
+        with open(stats_file, 'wb') as fo:
+            pickle.dump(general_stats, fo)
 
     def curate_data(self, remove_problematic: bool = None) -> pd.DataFrame:
         """
