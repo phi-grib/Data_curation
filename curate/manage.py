@@ -15,9 +15,9 @@ import sys
 import tarfile
 import time
 
-from curate.util import utils
-
 from typing import Tuple, Union
+
+from curate.util import utils
 
 def get_metadata(data: pd.DataFrame, structure_colname: str) -> list:
     """
