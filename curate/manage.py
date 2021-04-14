@@ -19,37 +19,6 @@ from typing import Tuple, Union
 
 from curate.util import utils
 
-def get_metadata(data: pd.DataFrame, structure_colname: str) -> list:
-    """
-        Checks the columns of the input data and returns all that are 
-        not the SMILES. Everything but the structure is considered metadata.
-        
-        :param data: dataframe to be used
-        :param structure_colname: name of the column containing the SMILES
-
-        :return metadata: returns a list with the metadata, which are the 
-        column names of the input data without the SMILES
-    """
-
-    metadata = data.loc[:, data.columns != structure_colname].columns
-
-    return metadata
-
-def convert_to_json(data: pd.DataFrame, filename: str = None) -> str:
-    """
-        Converts into JSON the input dataframe.
-        If filename is provided, json is written as a file.
-
-        :param data: dataframe to be converted.
-        :param filename: filename where to dump the JSON.
-
-        :return json_data: JSON string from pandas dataframe
-    """
-
-    json_data = data.to_json(path_or_buf = filename, orient = 'index')
-
-    return json_data
-
 def set_curation_repository(path: str = None):
     """
         Set the path to the curation repository
@@ -191,22 +160,6 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
 
     return True, "Curation endpoint dir {} has been removed".format(curation_endpoint)
 
-def read_json_statistics(json_file: pathlib.PosixPath) -> list:
-    """
-        Gets JSON files containint statistics of curation and returns it as a list
-
-        :param json_file: json file complete path
-
-        :return json_data: json data as list
-    """
-
-    json_data = []
-
-    with open(str(json_file)) as f:
-        json_data.append(json.load(f))
-    
-    return json_data
-
 def action_dir() -> Tuple[bool,Union[str,list]]:
     """
         Returns a list of curation endpoints and files
@@ -236,66 +189,66 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         dir_dict['creation_date'] = get_creation_date(directory)
 
         results.append(dir_dict)
-
+    
     return True, results
 
-def action_info_dir() -> Tuple[bool,Union[str,list]]:
-    """
-        Returns a list of curation endpoints and files
+# def action_info_dir() -> Tuple[bool,Union[str,list]]:
+#     """
+#         Returns a list of curation endpoints and files
 
-        :return bool:
-        :return str:
-        :return endpoint_list:
-    """
+#         :return bool:
+#         :return str:
+#         :return endpoint_list:
+#     """
 
-    curation_list_file = utils.curation_tree_path('curation_list.pkl')
+#     curation_list_file = utils.curation_tree_path('curation_list.pkl')
 
-    if not os.path.isfile(curation_list_file):
-        return False,  'Curation list file does not exist.\n'
+#     if not os.path.isfile(curation_list_file):
+#         return False,  'Curation list file does not exist.\n'
 
-    endpoint_list = []
-    with (open(curation_list_file, "rb")) as openfile:
-        while True:
-            try:
-                endpoint_list.append(pickle.load(openfile))
-            except EOFError:
-                break
+#     endpoint_list = []
+#     with (open(curation_list_file, "rb")) as openfile:
+#         while True:
+#             try:
+#                 endpoint_list.append(pickle.load(openfile))
+#             except EOFError:
+#                 break
     
-    return True, endpoint_list
+#     return True, endpoint_list
 
-def manage_pickle_info_dir(input_file: str, endpoint: str) -> Tuple[bool, str]:
-    """
-        Writes the input file name into the curation list pickle
-        so it can be retrieved by the left table in the API
+# def manage_pickle_info_dir(input_file: str, endpoint: str) -> Tuple[bool, str]:
+#     """
+#         Writes the input file name into the curation list pickle
+#         so it can be retrieved by the left table in the API
 
-        :param input_file: input file name
-        :para endpoint: endpoint name of the curation
+#         :param input_file: input file name
+#         :para endpoint: endpoint name of the curation
 
-        :return bool: False if curation pickle doesn't exist. Action_new must be called first
-        :return str: same reason as above
-    """
+#         :return bool: False if curation pickle doesn't exist. Action_new must be called first
+#         :return str: same reason as above
+#     """
 
-    curation_list_file = utils.curation_tree_path('curation_list.pkl')
+#     curation_list_file = utils.curation_tree_path('curation_list.pkl')
 
-    if not os.path.isfile(curation_list_file):
-        return False,  'Curation list file does not exist.\n'
+#     if not os.path.isfile(curation_list_file):
+#         return False,  'Curation list file does not exist.\n'
     
-    temporary_pickle = utils.curation_tree_path('temp.pkl')
+#     temporary_pickle = utils.curation_tree_path('temp.pkl')
 
-    with (open(curation_list_file, "rb")) as openfile:
-        with (open(temporary_pickle, 'wb')) as out:
-            while True:
-                try:
-                    curation_list = pickle.load(openfile)
-                    if curation_list['endpoint'] == endpoint:
-                        curation_list['input_file'] = input_file
-                        pickle.dump(curation_list, out)
-                    else:
-                        pickle.dump(curation_list, out)
-                except EOFError:
-                    break
+#     with (open(curation_list_file, "rb")) as openfile:
+#         with (open(temporary_pickle, 'wb')) as out:
+#             while True:
+#                 try:
+#                     curation_list = pickle.load(openfile)
+#                     if curation_list['endpoint'] == endpoint:
+#                         curation_list['input_file'] = input_file
+#                         pickle.dump(curation_list, out)
+#                     else:
+#                         pickle.dump(curation_list, out)
+#                 except EOFError:
+#                     break
 
-    os.rename(temporary_pickle, curation_list_file)
+#     os.rename(temporary_pickle, curation_list_file)
 
 def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     """

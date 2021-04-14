@@ -34,10 +34,6 @@ def curation_cmd(**kwargs: dict) -> Optional[bool]:
     if not os.path.isdir(output_dir):
         sys.stderr.write("Endpoint name not found in model repository.\n")
         return
-
-    # saves input file as metadata after checking
-
-    manage.manage_pickle_info_dir(input_file=kwargs['data_input'], endpoint=kwargs['endpoint'])
     
     # call of curation functions
 
