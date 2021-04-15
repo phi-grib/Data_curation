@@ -187,7 +187,12 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         # Not showing statistics files in the list of files within the directory
         dir_dict['curation_endpoint'] = directory_string
         dir_dict['creation_date'] = get_creation_date(directory)
+        dir_dict['curation_output'] = 'unk'
 
+        for file_ in os.listdir(directory):
+            if file_.startswith('curated_data'):
+                dir_dict['curation_output'] = file_
+        
         results.append(dir_dict)
     
     return True, results
