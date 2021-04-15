@@ -334,6 +334,9 @@ def action_info_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     # get statisics files in curation endpint
     stats_file = os.path.join(endpoint_curation,'statistics.pkl')
     
+    if not os.path.isfile(stats_file):
+        return False,  'Statistics file does not exist.\n'
+
     stats = []
     with (open(stats_file, "rb")) as openfile:
         stats = pickle.load(openfile)
