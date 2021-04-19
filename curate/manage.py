@@ -182,7 +182,7 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
 
     for directory in dirs:
         dir_dict = {}
-        # I convert directory, which is a PosixPath object into a string
+        # I convert directory, which is a PosixPath object, into a string
         directory_string = str(directory).split('/')[-1]
         # Not showing statistics files in the list of files within the directory
         dir_dict['curation_endpoint'] = directory_string
