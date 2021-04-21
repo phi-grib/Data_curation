@@ -11,6 +11,7 @@ import sys
 
 import curate.context as context
 
+from curate.chem import chembl_extraction
 from curate.util import utils, config
 
 def main():
@@ -35,7 +36,7 @@ def main():
     parser.add_argument('-a', '--action',
                         action='store',
                         help='Manage action.',
-                        choices=['silent','new','list','remove'],
+                        choices=['silent','new','list','remove','chembl'],
                         required=False)
     
     parser.add_argument('-c', '--command',
@@ -69,7 +70,9 @@ def main():
     args = parser.parse_args()
     
     if args.infile is not None:
-        if not os.path.isfile(args.infile):
+        if args.action == 'chembl':
+            pass
+        elif not os.path.isfile(args.infile):
             sys.stderr.write('Input file {} not found\n'.format(args.infile))
             return
     
@@ -77,7 +80,15 @@ def main():
         utils.config_test()
 
     if args.command == 'curate':
-        if (args.infile is None) or (args.format is None) or (args.endpoint is None):
+
+        if args.action == 'chembl':
+            input_file = chembl_extraction.get_dataframe_from_target(args.infile)
+            args.id_column = 'molecule_chembl_id'
+            args.smiles_col = 'canonical_smiles'
+        else:
+            input_file = args.infile
+
+        if (input_file is None) or (args.format is None) or (args.endpoint is None):
             sys.stderr.write("datacur curate : input, output format and endpoint arguments are compulsory\n")
             return
         
@@ -95,8 +106,8 @@ def main():
             sep = args.separator
         else:
             sep = None
-
-        context.curation_cmd(data_input=args.infile,
+        
+        context.curation_cmd(data_input=input_file,
                              molecule_identifier=id_,
                              structure_column=smiles_,
                              separator=sep,
