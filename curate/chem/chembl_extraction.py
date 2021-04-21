@@ -2,7 +2,7 @@
     Code for extracting ChEMBL datasets using
     a target.
 
-    Target can be a string (cox2) or a ChEMBL ID (CHEMBL230).
+    Target has to be a ChEMBL ID (e.g: CHEMBL230).
 
     TODO:Might incoporate other arguments like species (e.g: Homo sapiens)
 
@@ -13,8 +13,6 @@
 import pandas as pd
 
 from chembl_webresource_client.new_client import new_client
-from rdkit import Chem
-from rdkit.Chem import PandasTools
 
 def get_dataframe_from_target(chembl_id: str) -> pd.DataFrame:
     """
