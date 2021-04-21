@@ -14,11 +14,11 @@ from typing import Tuple, Optional
 
 from curate.util import utils
 
-def curation_cmd(**kwargs: dict) -> Optional[bool]:
+def curation_cmd(commnad_dict: dict) -> Optional[bool]:
     """
-        Instantiate curate objectt using kwargs from argument parser.
+        Instantiate curate objectt using commnad_dict from argument parser.
 
-        :param **kwargs:
+        :param commnad_dict:
                 - data_input: input file name to be processed
                 - molecule_identifier: column name containing the molecule ID. Usually CAS is used.
                 - structure_column: column name containing the SMILES string
@@ -30,23 +30,23 @@ def curation_cmd(**kwargs: dict) -> Optional[bool]:
     import curate.dataset_curation as datacur
     
     # safety check if curation endpoint exists
-    output_dir = utils.curation_tree_path(kwargs['endpoint'])
+    output_dir = utils.curation_tree_path(commnad_dict['endpoint'])
     if not os.path.isdir(output_dir):
         sys.stderr.write("Endpoint name not found in model repository.\n")
         return
     
     # call of curation functions
 
-    curating = datacur.DataCuration(data_input=kwargs['data_input'], 
-                                    molecule_identifier=kwargs['molecule_identifier'],
-                                    structure_column=kwargs['structure_column'],
+    curating = datacur.DataCuration(data_input=commnad_dict['data_input'], 
+                                    molecule_identifier=commnad_dict['molecule_identifier'],
+                                    structure_column=commnad_dict['structure_column'],
                                     output_dir=output_dir,
-                                    endpoint=kwargs['endpoint'],
-                                    separator=kwargs['separator'])
+                                    endpoint=commnad_dict['endpoint'],
+                                    separator=commnad_dict['separator'])
 
-    curating.curate_data(remove_problematic=kwargs['remove_problematic'])
+    curating.curate_data(remove_problematic=commnad_dict['remove_problematic'])
 
-    curating.get_output_file(outfile_type=kwargs['outfile_type'], smiles_column='structure_curated')
+    curating.get_output_file(outfile_type=commnad_dict['outfile_type'], smiles_column='structure_curated')
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """
