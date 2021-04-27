@@ -111,5 +111,3 @@ def configure(path: str = None, silent: bool = False) -> Union[Tuple[bool, str],
     else:
         sys.stderr.write("Aborting...\n")
         return False, "Configuration aborted"
-
-

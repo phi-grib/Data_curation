@@ -1,0 +1,7 @@
+data_input: input file name
+molecule_identifier: molecule ID column
+structure_column: SMILES column
+endpoint: curation endpoint
+separator: column separator
+remove_problematic: true/false
+outfile_type: xlsx, csv, tsv, sdf, json.

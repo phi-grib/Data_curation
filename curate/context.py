@@ -21,8 +21,9 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
         :param commnad_dict:
                 - data_input: input file name to be processed
                 - molecule_identifier: column name containing the molecule ID. Usually CAS is used.
+                - endpoint: curation endpoint name
                 - structure_column: column name containing the SMILES string
-                - separator: file separator ir input file is a csv or a tsv.
+                - separator: file separator if input file is a csv or a tsv.
                 - remove_problematic: boolean indicating the option of removing problematic structures or not
                 - outfile_type: output file type: xlsx, csv, tsv, sdf or json.
     """

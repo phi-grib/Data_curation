@@ -66,16 +66,9 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     except:
         return False, "Unable to create path for {} endpoint".format(curation_path)
 
-    # create default labels
-    curation_info = {'endpoint' : curation_path, 'creation_date': get_creation_date(ndir), 'input_file': 'unk'}
-    curation_list_file = utils.curation_tree_path('curation_list.pkl')
-
-    if os.path.isfile(curation_list_file):
-        with open(curation_list_file, 'ab') as fo:
-            pickle.dump(curation_info, fo)
-    else:
-        with open(curation_list_file, 'wb') as fo:
-            pickle.dump(curation_info, fo)
+    # copy parameter yml file
+    params_path = wkd / 'children/curation_parameters.yaml'
+    shutil.copy(params_path, ndir)
 
     sys.stderr.write("New endpoint {} created\n".format(curation_path))
     
@@ -289,3 +282,34 @@ def action_info_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
         stats = pickle.load(openfile)
 
     return True, stats
+
+def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
+    """
+        Returns an object with whole results info for a given model and version
+
+        :param curation_path:
+        :param oformat:
+
+    """
+
+    if curation_path is None:
+        return False, 'Empty curation label'
+
+    from curate.parameters import Parameters
+
+    param = Parameters()
+    success, results = param.loadYaml(curation_path)
+
+    if not success:
+        sys.stderr.write("Error obtaining parametes for curation endpoint {} : {}\n".format(curation_path, results))
+        return False, results
+
+    if oformat != 'text':
+        return True, param
+
+    else:
+        yaml = param.dumpYAML()
+        for line in yaml:
+            print(line)
+
+        return True, 'Parameters listed'
