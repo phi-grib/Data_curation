@@ -292,7 +292,6 @@ def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[b
 
         :param curation_path:
         :param oformat:
-
     """
 
     if curation_path is None:
@@ -301,7 +300,7 @@ def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[b
     from curate.parameters import Parameters
 
     param = Parameters()
-    success, results = param.loadYaml(curation_path)
+    success, results = param.loadYaml_curation(curation_path)
 
     if not success:
         sys.stderr.write("Error obtaining parametes for curation endpoint {} : {}\n".format(curation_path, results))
@@ -311,7 +310,7 @@ def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[b
         return True, param
 
     else:
-        yaml = param.dumpYAML()
+        yaml = param.dumpYAML_curation()()
         for line in yaml:
             print(line)
 
