@@ -77,27 +77,10 @@ class Parameters:
         except Exception as e:
             return False, e
 
-        # check version of the parameter file
-        # no 'version' key mans version < 2.0
-        if 'param_format' in self.p:
-            self.extended = True
-        else:
-            self.extended = False
-            self.param_format = 1.0
-
-        # # correct CV to kfold for conformal models
-        # if self.getVal('conformal') is True:
-        #     self.setVal('ModelValidationCV','kfold')
-        if self.getVal('model') == 'majority':
-            self.setVal('conformal',False)
-
-        # add keys for the model and a MD5 hash
-        self.setVal('endpoint',model)
-        self.setVal('version',version)
-        self.setVal('model_path',parameters_file_path)
-        # self.setVal('md5',utils.md5sum(parameters_file_name))
-        self.setVal('md5',self.idataHash())
-
+        # add keys for the model
+        self.setVal('endpoint',curation_path)
+        self.setVal('curation_path',parameters_file_path)
+        
         return True, 'OK'
 
     def applyDelta (self, newp):
@@ -366,3 +349,18 @@ class Parameters:
 
     def dumpJSON (self):
         return json.dumps(self.p)
+    
+    def dumpYAML (self):
+        yaml_out = []
+
+        order = ['data_input','molecule_identifier','structure_column','endpoint',
+                 'separator','remove_problematic','outfile_type','curation_path']
+
+        for ik in order:
+            if ik in self.p:
+                k = ik
+                v = self.p[k]
+
+                yaml_out.append ("{} : {}".format(k,str(v)))
+
+        return yaml_out

@@ -66,6 +66,9 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     except:
         return False, "Unable to create path for {} endpoint".format(curation_path)
 
+    # Copy classes skeletons to ndir
+    wkd = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
+    
     # copy parameter yml file
     params_path = wkd / 'children/curation_parameters.yaml'
     shutil.copy(params_path, ndir)
