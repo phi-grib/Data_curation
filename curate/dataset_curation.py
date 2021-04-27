@@ -74,7 +74,7 @@ class DataCuration(object):
             else:
                 sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf)\n')
                 sys.exit()
-                
+
         return i_data
     
     def write_input_data(self):

@@ -197,64 +197,6 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
     
     return True, results
 
-# def action_info_dir() -> Tuple[bool,Union[str,list]]:
-#     """
-#         Returns a list of curation endpoints and files
-
-#         :return bool:
-#         :return str:
-#         :return endpoint_list:
-#     """
-
-#     curation_list_file = utils.curation_tree_path('curation_list.pkl')
-
-#     if not os.path.isfile(curation_list_file):
-#         return False,  'Curation list file does not exist.\n'
-
-#     endpoint_list = []
-#     with (open(curation_list_file, "rb")) as openfile:
-#         while True:
-#             try:
-#                 endpoint_list.append(pickle.load(openfile))
-#             except EOFError:
-#                 break
-    
-#     return True, endpoint_list
-
-# def manage_pickle_info_dir(input_file: str, endpoint: str) -> Tuple[bool, str]:
-#     """
-#         Writes the input file name into the curation list pickle
-#         so it can be retrieved by the left table in the API
-
-#         :param input_file: input file name
-#         :para endpoint: endpoint name of the curation
-
-#         :return bool: False if curation pickle doesn't exist. Action_new must be called first
-#         :return str: same reason as above
-#     """
-
-#     curation_list_file = utils.curation_tree_path('curation_list.pkl')
-
-#     if not os.path.isfile(curation_list_file):
-#         return False,  'Curation list file does not exist.\n'
-    
-#     temporary_pickle = utils.curation_tree_path('temp.pkl')
-
-#     with (open(curation_list_file, "rb")) as openfile:
-#         with (open(temporary_pickle, 'wb')) as out:
-#             while True:
-#                 try:
-#                     curation_list = pickle.load(openfile)
-#                     if curation_list['endpoint'] == endpoint:
-#                         curation_list['input_file'] = input_file
-#                         pickle.dump(curation_list, out)
-#                     else:
-#                         pickle.dump(curation_list, out)
-#                 except EOFError:
-#                     break
-
-#     os.rename(temporary_pickle, curation_list_file)
-
 def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     """
         Removes the endpoint tree described by the argument.

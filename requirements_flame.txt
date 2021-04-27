@@ -7,3 +7,4 @@ appdirs
 lxml
 jupyter-client >=6.1.2
 jupyterlab
+chembl_webresource_client
