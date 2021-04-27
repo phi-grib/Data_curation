@@ -106,14 +106,16 @@ def main():
             sep = args.separator
         else:
             sep = None
-        
-        context.curation_cmd(data_input=input_file,
-                             molecule_identifier=id_,
-                             structure_column=smiles_,
-                             separator=sep,
-                             remove_problematic=args.remove,
-                             outfile_type=args.format,
-                             endpoint=args.endpoint)
+
+        command = {'data_input':args.infile,
+                    'molecule_identifier':id_,
+                    'structure_column':smiles_,
+                    'separator':sep,
+                    'remove_problematic':args.remove,
+                    'outfile_type':args.format,
+                    'endpoint':args.endpoint}
+
+        context.curation_cmd(command)
     
     elif args.command == 'config':
         success, results = config.configure(args.directory, (args.action == 'silent'))
