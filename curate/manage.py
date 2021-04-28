@@ -310,7 +310,7 @@ def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[b
         return True, param
 
     else:
-        yaml = param.dumpYAML_curation()()
+        yaml = param.dumpYAML_curation()
         for line in yaml:
             print(line)
 
