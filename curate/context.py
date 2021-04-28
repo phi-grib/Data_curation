@@ -43,11 +43,13 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                                     structure_column=commnad_dict['structure_column'],
                                     output_dir=output_dir,
                                     endpoint=commnad_dict['endpoint'],
-                                    separator=commnad_dict['separator'])
+                                    separator=commnad_dict['separator'],
+                                    remove_problematic=commnad_dict['remove_problematic'],
+                                    outfile_type=commnad_dict['outfile_type'])
 
-    curating.curate_data(remove_problematic=commnad_dict['remove_problematic'])
+    curating.curate_data()
 
-    curating.get_output_file(outfile_type=commnad_dict['outfile_type'], smiles_column='structure_curated')
+    curating.get_output_file(smiles_column='structure_curated')
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """

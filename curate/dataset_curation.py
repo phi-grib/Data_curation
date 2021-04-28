@@ -5,6 +5,7 @@
     On: 02/02/2021, 17:32 PM
 """
 
+import json
 import numpy as np
 import pandas as pd
 import pickle
@@ -14,6 +15,7 @@ from rdkit import Chem
 from rdkit.Chem import PandasTools
 from typing import Optional, Union, Tuple
 
+from curate.parameters import Parameters
 from curate.util import utils
 
 class DataCuration(object):
@@ -30,7 +32,7 @@ class DataCuration(object):
     """
     
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
-                        endpoint: str, separator: str = None):
+                        endpoint: str, separator: str = None, remove_problematic: bool = None, outfile_type: str = None):
         """
             Initialize class getting substance types for structure curation.
         """
@@ -42,10 +44,29 @@ class DataCuration(object):
         self.structure_column = structure_column
         self.output_dir = output_dir
         self.endpoint = endpoint
+        self.remove_problematic = remove_problematic
+        self.outfile_type = outfile_type
 
         ## Stores a copy of the input data in the curation endpoint directory
         self.write_input_data()
         
+        ## Stores parameters in curation_parameters.yaml file
+        self.param = Parameters()
+        param_string = {'data_input': data_input, 
+                        'molecule_identifier': self.identifier,
+                        'structure_column': self.structure_column,
+                        'endpoint':self.endpoint,
+                        'separator':self.separator,
+                        'remove_problematic':self.remove_problematic,
+                        'outfile_type':self.outfile_type}
+        param_string = json.dumps(param_string)
+        
+        success, message = self.param.delta_curation(endpoint, param_string, iformat='JSONS')
+        
+        if not success:
+            sys.stderr.write('Unable to load curation parameters. {}. Aborting...\n'.format(message))
+            sys.exit(1)
+
     def process_input(self, data_input: Union[pd.DataFrame,str]) -> pd.DataFrame:
         """
             Checks if input is an Excel file and converts it into pandas dataframe.
@@ -84,7 +105,7 @@ class DataCuration(object):
 
         self.get_output_file(outfile_type='sdf', smiles_column=self.structure_column, data=self.input_data, outfile_name='input_data')
 
-    def get_output_file(self, outfile_type: str, smiles_column: str = None, data: pd.DataFrame = None, outfile_name: str = None):
+    def get_output_file(self, outfile_type: str = None, smiles_column: str = None, data: pd.DataFrame = None, outfile_name: str = None):
         """
             Saves the curated data into a specific file format.
             Requires output file name and type of file (Excel, CSV, TSV, sdf)
@@ -97,6 +118,9 @@ class DataCuration(object):
             :return output_file:
         """
 
+        if self.outfile_type:
+            outfile_type = self.outfile_type
+        
         if data is None:
             data = self.curated_data.copy()
 
@@ -240,11 +264,9 @@ class DataCuration(object):
         with open(stats_file, 'wb') as fo:
             pickle.dump(general_stats, fo)
 
-    def curate_data(self, remove_problematic: bool = None) -> pd.DataFrame:
+    def curate_data(self) -> pd.DataFrame:
         """
             Check SMILES column to get a curated SMILES and the type of substance.
-
-            :param remove_problematic: it allows the user to get rid of problematic structures for QSAR modelling. 
 
             :return curated_data: dataframe containing the curated information
         """
@@ -261,7 +283,7 @@ class DataCuration(object):
             curated_data.loc[curated_data.index == i,'structure_curated'] = san_smi
             curated_data.loc[curated_data.index == i,'substance_type_name'] = sub_type
 
-        if remove_problematic:
+        if self.remove_problematic:
             self.remove_problematic_structures(curated_data)
             self.calculate_data_stats(curated_data)
             self.get_output_file(outfile_type='xlsx', data=self.problematic_structures, outfile_name='Problematic_structures_removed')

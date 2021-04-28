@@ -11,6 +11,8 @@ import json
 import hashlib
 import pickle
 
+from typing import Union, Tuple
+
 from curate.util import utils
 
 class Parameters:
@@ -51,12 +53,12 @@ class Parameters:
             return False, e
 
         # add keys for the model
-        self.setVal('endpoint',curation_path)
-        self.setVal('curation_path',parameters_file_path)
-        
+        self.p['endpoint'] = curation_path
+        self.p['curation_path'] = parameters_file_path
+
         return True, 'OK'
 
-    def applyDelta_curation (self, newp: dict):
+    def applyDelta_curation(self, newp: dict):
         """
             Update internal dict with keys in the input file (delta)
 
@@ -76,8 +78,7 @@ class Parameters:
 
                 self.p[key] = val
 
-
-    def delta_curation(self, curation: str, parameters: Union[list,str], iformat: str ='YAML') -> Tuple[str, bool]:
+    def delta_curation(self, curation: str, parameters: str, iformat: str ='YAML') -> Tuple[str, bool]:
         """
             load a set of parameters from the configuration file present 
             at the curation directory
@@ -92,7 +93,7 @@ class Parameters:
             :param parameters:
         """
 
-        if not self.loadYaml(curation):
+        if not self.loadYaml_curation(curation):
             return False, 'file not found'
         
         # parse parameter file assuning it will be in
@@ -115,7 +116,7 @@ class Parameters:
         self.applyDelta_curation(newp)
 
         # dump internal dict to the parameters file
-        parameters_file_path = utils.curation_tree_path(curation_path)
+        parameters_file_path = utils.curation_tree_path(curation)
         parameters_file_name = os.path.join(parameters_file_path, 'curation_parameters.yaml')
 
         try:
@@ -125,7 +126,7 @@ class Parameters:
             return False, 'unable to write parameters'
 
         return True, 'OK'
-
+    
     @staticmethod
     def saveJSON(self, model, version, input_JSON):
         p = json.load(input_JSON)
