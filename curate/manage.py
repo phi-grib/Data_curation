@@ -288,7 +288,7 @@ def action_info_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
 
 def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """
-        Returns an object with whole results info for a given model and version
+        Returns an object with the curation parameters for a given endpoint
 
         :param curation_path:
         :param oformat:
