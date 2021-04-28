@@ -118,7 +118,7 @@ class DataCuration(object):
             :return output_file:
         """
 
-        if self.outfile_type:
+        if outfile_type is None and self.outfile_type:
             outfile_type = self.outfile_type
         
         if data is None:
