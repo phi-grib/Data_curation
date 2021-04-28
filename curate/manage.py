@@ -314,4 +314,4 @@ def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[b
         for line in yaml:
             print(line)
 
-        return True, 'Parameters listed'
+        return True, 'Parameters listed', yaml
