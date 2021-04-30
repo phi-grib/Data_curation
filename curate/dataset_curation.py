@@ -122,7 +122,9 @@ class DataCuration(object):
             outfile_type = self.outfile_type
         
         if data is None:
-            data = self.curated_data.copy()
+            data_copy = self.curated_data.copy()
+        else:
+            data_copy = data.copy()
 
         if outfile_name is None:
             outfile_name = 'curated_data'
@@ -130,19 +132,19 @@ class DataCuration(object):
         outfile_full_path = '/'.join([self.output_dir,outfile_name])
 
         if 'sdf' in outfile_type.lower():
-            self.write_sdf(data, outfile_full_path, smiles_column)
+            self.write_sdf(data_copy, outfile_full_path, smiles_column)
         elif 'xlsx' in outfile_type.lower() or 'excel' in outfile_type.lower():
             output_name_format = '.'.join([outfile_full_path,'xlsx'])
-            data.to_excel(output_name_format)
+            data_copy.to_excel(output_name_format)
         elif 'csv' in outfile_type.lower():
             output_name_format = '.'.join([outfile_full_path,'csv'])
-            data.to_csv(output_name_format, sep=',')
+            data_copy.to_csv(output_name_format, sep=',')
         elif 'tsv' in outfile_type.lower():
             output_name_format = '.'.join([outfile_full_path,'tsv'])
-            data.to_csv(output_name_format, sep='\t')
+            data_copy.to_csv(output_name_format, sep='\t')
         elif 'json' in outfile_type.lower():
             output_name_format = '.'.join([outfile_full_path,'json'])
-            data.to_json(path_or_buf = output_name_format, orient = 'index')
+            data_copy.to_json(path_or_buf = output_name_format, orient = 'index')
 
     def save_output_header(self):
         """
