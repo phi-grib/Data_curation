@@ -286,6 +286,35 @@ def action_info_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
 
     return True, stats
 
+def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
+    """
+        Returns a dataframe of curation output header
+
+        :param endpoint: curation endpoint
+        
+        :return bool:
+        :return str:
+        :return head_:
+    """
+
+    # get curation endpoint path
+
+    endpoint_curation = pathlib.Path(utils.curation_tree_path(endpoint))
+    if endpoint_curation.is_dir() is False:
+        return False,  'Curation endpoint path does not exist.\n'
+
+    # get header file in curation endpint
+    header_file = os.path.join(endpoint_curation,'curated_data_head.pkl')
+    
+    if not os.path.isfile(header_file):
+        return False,  'Curation header file does not exist.\n'
+
+    head_ = []
+    with (open(header_file, "rb")) as openfile:
+        head_ = pickle.load(openfile)
+
+    return True, head_
+
 def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """
         Returns an object with the curation parameters for a given endpoint

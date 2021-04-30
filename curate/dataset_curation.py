@@ -143,6 +143,16 @@ class DataCuration(object):
         elif 'json' in outfile_type.lower():
             output_name_format = '.'.join([outfile_full_path,'json'])
             data.to_json(path_or_buf = output_name_format, orient = 'index')
+
+    def save_output_header(self):
+        """
+            Stores in a pickle a header from the curated data so it can be retrieved
+            in the GUI
+        """
+
+        head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
+        output_header = self.curated_data.head(10)
+        output_header.to_pickle(head_pickle_full_path)
     
     def write_sdf(self, data: pd.DataFrame, outfile_name: str, smiles_column: str):
         """
@@ -289,7 +299,9 @@ class DataCuration(object):
             self.get_output_file(outfile_type='xlsx', data=self.problematic_structures, outfile_name='Problematic_structures_removed')
         else:
             self.curated_data = curated_data
-    
+
+        self.save_output_header()
+        
     def remove_problematic_structures(self, data: pd.DataFrame = None) -> pd.DataFrame:
         """
             Remove problematic structures from main dataset.
