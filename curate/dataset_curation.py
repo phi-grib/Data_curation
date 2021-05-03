@@ -236,9 +236,13 @@ class DataCuration(object):
             :return smiles_stats_df:
         """
 
-        smiles_stats_dict = {'Total SMILES':len(smiles_dataframe.index),
-                            'Processed SMILES':len(self.curated_data.index), 
-                            'Unable to process':len(self.problematic_structures.index)}
+        if self.remove_problematic:
+            smiles_stats_dict = {'Total SMILES':len(smiles_dataframe.index),
+                                'Processed SMILES':len(self.curated_data.index), 
+                                'Unable to process':len(self.problematic_structures.index)}
+        else:
+            smiles_stats_dict = {'Total SMILES':len(smiles_dataframe.index),
+                                'Processed SMILES':len(self.curated_data.index)}
 
         return smiles_stats_dict
 
@@ -297,11 +301,11 @@ class DataCuration(object):
 
         if self.remove_problematic:
             self.remove_problematic_structures(curated_data)
-            self.calculate_data_stats(curated_data)
             self.get_output_file(outfile_type='xlsx', data=self.problematic_structures, outfile_name='Problematic_structures_removed')
         else:
             self.curated_data = curated_data
 
+        self.calculate_data_stats(self.curated_data)
         self.save_output_header()
         
     def remove_problematic_structures(self, data: pd.DataFrame = None) -> pd.DataFrame:
