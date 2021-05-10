@@ -15,6 +15,7 @@ import sys
 import tarfile
 import time
 
+from rdkit.Chem import PandasTools
 from typing import Tuple, Union
 
 from curate.util import utils
@@ -314,6 +315,47 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
         head_ = pickle.load(openfile)
 
     return True, head_
+
+def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
+    """
+        Returns the output file
+
+        :param endpoint: curation endpoint
+        
+        :return bool:
+        :return str:
+        :return head_:
+    """
+    
+    # get curation endpoint path
+
+    endpoint_curation = pathlib.Path(utils.curation_tree_path(endpoint))
+    if endpoint_curation.is_dir() is False:
+        return False,  'Curation endpoint path does not exist.\n'
+    
+    # get curation file in curation endpint
+    curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
+    curation_file_path = os.path.join(endpoint_curation, curation_file)
+    
+    if not os.path.isfile(curation_file_path):
+        return False,  'Curation output file does not exist.\n'
+
+    curation_ = []
+    if curation_file_path.endswith('.csv'):
+        with (open(curation_file_path, "rb")) as openfile:
+            curation_ = csv.reader(curation_file_path, quotechar='"')
+    elif curation_file_path.endswith('.tsv'):
+        with (open(curation_file_path, "rb")) as openfile:
+            curation_ = csv.reader(curation_file_path, delimiter='\t', quotechar='"')
+    elif curation_file_path.endswith('.xlsx'):
+        curation_ = pd.read_excel(curation_file_path)
+    elif curation_file_path.endswith('.json'):
+        with (open(curation_file_path)) as openfile:
+            curation_.append(json.load(openfile))
+    elif curation_file_path.endswith('.sdf'):
+        curation_ = PandasTools.LoadSDF(curation_file_path, smilesName='structure_curated',molColName='name', removeHs=False, strictParsing=True)
+
+    return True, curation_
 
 def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """
