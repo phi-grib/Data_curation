@@ -5,6 +5,7 @@
     On: 18/02/2021, 17:49 PM
 """
 
+import csv
 import json
 import os
 import pandas as pd
@@ -335,7 +336,7 @@ def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     
     # get curation file in curation endpint
     curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
-    curation_file_path = os.path.join(endpoint_curation, curation_file)
+    curation_file_path = os.path.join(endpoint_curation, curation_file[0])
     
     if not os.path.isfile(curation_file_path):
         return False,  'Curation output file does not exist.\n'
