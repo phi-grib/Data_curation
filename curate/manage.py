@@ -314,7 +314,7 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     head_ = []
     with (open(header_file, "rb")) as openfile:
         head_ = pickle.load(openfile)
-
+    
     return True, head_
 
 def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
