@@ -141,7 +141,7 @@ class Parameters:
 
         return True
 
-    def update_file_curation(self, curation: str) -> Tuple[bool, str]:
+    def update_file_curation(self, curation: str) -> Union[Tuple[bool,str], bool]:
         """
             Function to save current parameter values modified
             at the object level (i.e: From a interactive python shell)
@@ -153,8 +153,8 @@ class Parameters:
         if not p:
             return False, 'No loaded parameters'
 
-        parameters_file_path = utils.model_path(model, version)
-        parameters_file_name = os.path.join (parameters_file_path,
+        parameters_file_path = utils.curation_tree_path(curation)
+        parameters_file_name = os.path.join(parameters_file_path,
                                             'curation_parameters.yaml')
 
         try:
