@@ -345,10 +345,10 @@ def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     curation_ = []
     if curation_file_path.endswith('.csv'):
         with (open(curation_file_path, "rb")) as openfile:
-            curation_ = csv.reader(curation_file_path, quotechar='"')
+            curation_ = pd.read_csv(curation_file_path, delimiter=',')
     elif curation_file_path.endswith('.tsv'):
         with (open(curation_file_path, "rb")) as openfile:
-            curation_ = csv.reader(curation_file_path, delimiter='\t', quotechar='"')
+            curation_ = pd.read_csv(curation_file_path, delimiter='\t')
     elif curation_file_path.endswith('.xlsx'):
         curation_ = pd.read_excel(curation_file_path)
     elif curation_file_path.endswith('.json'):
