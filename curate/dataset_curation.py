@@ -153,7 +153,7 @@ class DataCuration(object):
         """
 
         head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
-        output_header = self.curated_data.head(10)
+        output_header = self.curated_data[[self.identifier,self.structure_column,'structure_curated','substance_type_name']].head(10)
         output_header.to_pickle(head_pickle_full_path)
     
     def write_sdf(self, data: pd.DataFrame, outfile_name: str, smiles_column: str):
