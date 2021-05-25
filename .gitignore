@@ -134,4 +134,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-curate/curation/curation_list.pkl
+curate/curation/*
