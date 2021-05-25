@@ -5,7 +5,6 @@
     On: 18/02/2021, 17:49 PM
 """
 
-import csv
 import json
 import os
 import pandas as pd
@@ -14,7 +13,6 @@ import pickle
 import shutil
 import sys
 import tarfile
-import time
 
 from rdkit.Chem import PandasTools
 from typing import Tuple, Union

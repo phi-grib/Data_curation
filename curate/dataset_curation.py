@@ -13,7 +13,7 @@ import sys
 
 from rdkit import Chem
 from rdkit.Chem import PandasTools
-from typing import Optional, Union, Tuple
+from typing import Optional, Union
 
 from curate.parameters import Parameters
 from curate.util import utils

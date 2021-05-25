@@ -9,7 +9,6 @@ import appdirs
 import os
 import sys
 
-from pathlib import Path
 from typing import Union, Tuple
 
 from curate.util import utils
