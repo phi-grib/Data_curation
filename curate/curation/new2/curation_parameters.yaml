@@ -1,8 +1,0 @@
-curation_path: /home/eric/phi_lab/Inditex/Data_curation/curate/curation/new2
-data_input: sample_smiles.xlsx
-endpoint: new2
-molecule_identifier: name
-outfile_type: xlsx
-remove_problematic: true
-separator: null
-structure_column: structure
