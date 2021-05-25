@@ -19,8 +19,8 @@ from rdkit import Chem
 from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
 
+from curate.chem import process_smiles as ps
 from phitools import moleculeHelper as mh
-from standardiser2 import process_smiles as ps
 
 class Curator(object):
     """
