@@ -1,6 +1,0 @@
-git+https://github.com/phi-grib/phitools.git
-git+https://github.com/phi-grib/standardiser
-git+https://github.com/EMVGaron/standardiser2
-git+https://github.com/phi-grib/EPA_simplified.git
-jupyter-client >=6.1.2
-jupyterlab
