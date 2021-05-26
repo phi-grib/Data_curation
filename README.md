@@ -23,7 +23,7 @@ cd Data_curation/
 
 Create the **conda environment**:
 ```bash
-conda env create -f environment.yml
+conda env create -f envfl.yml
 ```
 
 Then activate the environment:
@@ -35,13 +35,7 @@ conda activate datacuration
 Install Data curation:
 
 ```bash
-python setup.py install
-```
-
-And install the pip dependencies:
-
-``` bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ## Configuration
