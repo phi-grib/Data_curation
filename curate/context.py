@@ -43,6 +43,7 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                                     structure_column=commnad_dict['structure_column'],
                                     output_dir=output_dir,
                                     endpoint=commnad_dict['endpoint'],
+                                    metadata=commnad_dict['metadata'],
                                     separator=commnad_dict['separator'],
                                     remove_problematic=commnad_dict['remove_problematic'],
                                     outfile_type=commnad_dict['outfile_type'])

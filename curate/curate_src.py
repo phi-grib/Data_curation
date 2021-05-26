@@ -58,6 +58,10 @@ def main():
                         help='Column name where the SMILES string is found.',
                         required=False)
     
+    parser.add_argument('-m', '--metadata',
+                        help='Collect the column names for metadata if the user wants to.',
+                        required=False)
+    
     parser.add_argument('-sep', '--separator',
                         help='If added, takes this argument as the file separator.',
                         required=False)
@@ -102,6 +106,14 @@ def main():
         else:
             smiles_ = args.smiles_col
 
+        if args.metadata:
+            metadata_ = args.metadata.split(',')
+            if (id_ in metadata_) or (smiles_ in metadata_):
+                sys.stderr.write("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
+                return
+        else:
+            metadata_ = None
+         
         if args.separator:
             sep = args.separator
         else:
@@ -111,6 +123,7 @@ def main():
                     'molecule_identifier':id_,
                     'structure_column':smiles_,
                     'separator':sep,
+                    'metadata':metadata_,
                     'remove_problematic':args.remove,
                     'outfile_type':args.format,
                     'endpoint':args.endpoint}

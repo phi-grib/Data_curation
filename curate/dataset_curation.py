@@ -27,12 +27,10 @@ class DataCuration(object):
             - Substance type identification from structure
             - Dataset selection (optional)
             - Dataset resampling (optional)
-        
-        TODO:More features will be implemented
     """
     
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
-                        endpoint: str, separator: str = None, remove_problematic: bool = None, outfile_type: str = None):
+                        endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None, outfile_type: str = None):
         """
             Initialize class getting substance types for structure curation.
         """
@@ -44,6 +42,7 @@ class DataCuration(object):
         self.structure_column = structure_column
         self.output_dir = output_dir
         self.endpoint = endpoint
+        self.metadata = metadata
         self.remove_problematic = remove_problematic
         self.outfile_type = outfile_type
 
@@ -52,13 +51,16 @@ class DataCuration(object):
         
         ## Stores parameters in curation_parameters.yaml file
         self.param = Parameters()
+
         param_string = {'data_input': data_input, 
                         'molecule_identifier': self.identifier,
                         'structure_column': self.structure_column,
                         'endpoint':self.endpoint,
+                        'metadata':self.metadata,
                         'separator':self.separator,
                         'remove_problematic':self.remove_problematic,
                         'outfile_type':self.outfile_type}
+
         param_string = json.dumps(param_string)
         
         success, message = self.param.delta_curation(endpoint, param_string, iformat='JSONS')
@@ -153,7 +155,13 @@ class DataCuration(object):
         """
 
         head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
-        output_header = self.curated_data[[self.identifier,self.structure_column,'structure_curated','substance_type_name']].head(10)
+        if self.metadata:
+            cols = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
+            cols.extend(self.metadata)
+        else:
+            cols = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
+
+        output_header = self.curated_data[cols].head(10)
         output_header.to_pickle(head_pickle_full_path)
     
     def write_sdf(self, data: pd.DataFrame, outfile_name: str, smiles_column: str):
