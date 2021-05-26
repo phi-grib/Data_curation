@@ -36,6 +36,16 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
         sys.stderr.write("Endpoint name not found in model repository.\n")
         return
     
+    # check of metadata
+
+    if commnad_dict['metadata']:
+        metadata_ = commnad_dict['metadata'].split(',')
+        if (commnad_dict['molecule_identifier'] in metadata_) or (commnad_dict['structure_column'] in metadata_):
+            sys.stderr.write("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
+            return
+    else:
+        metadata_ = commnad_dict['metadata']
+
     # call of curation functions
 
     curating = datacur.DataCuration(data_input=commnad_dict['data_input'], 
@@ -43,7 +53,7 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                                     structure_column=commnad_dict['structure_column'],
                                     output_dir=output_dir,
                                     endpoint=commnad_dict['endpoint'],
-                                    metadata=commnad_dict['metadata'],
+                                    metadata=metadata_,
                                     separator=commnad_dict['separator'],
                                     remove_problematic=commnad_dict['remove_problematic'],
                                     outfile_type=commnad_dict['outfile_type'])

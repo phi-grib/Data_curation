@@ -107,10 +107,7 @@ def main():
             smiles_ = args.smiles_col
 
         if args.metadata:
-            metadata_ = args.metadata.split(',')
-            if (id_ in metadata_) or (smiles_ in metadata_):
-                sys.stderr.write("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
-                return
+            metadata_ = args.metadata
         else:
             metadata_ = None
          
