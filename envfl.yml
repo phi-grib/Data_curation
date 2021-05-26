@@ -21,8 +21,6 @@ dependencies:
   - openpyxl
   - appdirs
   - lxml
-  - jupyter_client=6.1.2
-  - jupyterlab
   - pip:
      - xgboost
      - django==2.2.8
