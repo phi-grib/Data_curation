@@ -46,40 +46,6 @@ def disconnect(mol):
     
     return mol, metals
 
-def protonate(mol, pH=7.4):
-    Chem.MolToMolFile(mol, 'in.sdf')
-
-    stderrf = open (os.devnull, 'w')
-    stdoutf = open (os.devnull, 'w')
-
-    outfile = 'out.sdf'
-
-    call = [self.mokaPath+'blabber_sd', 'in.mol',
-            '-p',  str(pH),
-            '-o',  outfile]
-
-    try:
-        retcode = subprocess.call(call,stdout=stdoutf, stderr=stderrf)
-    except:
-        return (False, 'Blabber execution error')
-
-    stdoutf.close()
-    stderrf.close()
-
-    if 'blabber110' in self.mokaPath: # in old blabber versions, error is reported as '0'
-        if retcode == 0:
-            return (False, 'Blabber 1.0 execution error')
-    else:
-        if retcode != 0:
-            return (False, 'Blabber execution error')
-
-    if not os.path.exists(outfile):
-        return (False, 'Blabber output not found')
-    if os.stat(outfile).st_size==0:
-        return (False, 'Blabber output is empty')
-
-    return (True, Chem.MolFromMolFile(outfile))
-
 def normalize(inF, outF, singleF, failedF, remove_salts= True, keep_nonorganic= False, verbose=False, pH=7.4) :
       
     count = 0        ## count for the whole dataset

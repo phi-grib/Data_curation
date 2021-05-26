@@ -17,7 +17,7 @@ dependencies:
   - psycopg2
   - chembl_structure_pipeline
   - chembl_webresource_client
-  - xlrd=1.2.0
+  - xlrd
   - openpyxl
   - appdirs
   - lxml

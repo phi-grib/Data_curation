@@ -348,7 +348,7 @@ def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
         with (open(curation_file_path, "rb")) as openfile:
             curation_ = pd.read_csv(curation_file_path, delimiter='\t')
     elif curation_file_path.endswith('.xlsx'):
-        curation_ = pd.read_excel(curation_file_path)
+        curation_ = pd.read_excel(curation_file_path, engine='openpyxl')
     elif curation_file_path.endswith('.json'):
         with (open(curation_file_path)) as openfile:
             curation_.append(json.load(openfile))

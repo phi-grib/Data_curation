@@ -81,7 +81,7 @@ class DataCuration(object):
             i_data = data_input
         elif isinstance(data_input,str):
             if data_input.endswith('.xlsx'):
-                i_data = pd.read_excel(data_input)
+                i_data = pd.read_excel(data_input, engine='openpyxl')
             elif data_input.endswith('.csv'):
                 if not self.separator:
                     self.separator = ','
