@@ -114,7 +114,7 @@ class Curator(object):
 
     def check_errors(self, smi: str) -> str:
         """
-            This function processes the SMILES in order no canonicalize it and detect any errors.
+            This function processes the SMILES in order to canonicalize it and detect any errors.
             If errors are detected, the returned SMILES is not sanitized.
 
             :param smi: SMILES string of the compound
