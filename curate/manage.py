@@ -186,7 +186,7 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         dir_dict['curation_output'] = 'unk'
 
         for file_ in os.listdir(directory):
-            if file_.startswith('curated_data'):
+            if file_.startswith('curated_data') and 'head' not in file_:
                 dir_dict['curation_output'] = file_
         
         results.append(dir_dict)
