@@ -343,16 +343,20 @@ def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     if curation_file_path.endswith('.csv'):
         with (open(curation_file_path, "rb")) as openfile:
             curation_ = pd.read_csv(curation_file_path, delimiter=',')
+            curation_ = curation_.to_dict('list')
     elif curation_file_path.endswith('.tsv'):
         with (open(curation_file_path, "rb")) as openfile:
             curation_ = pd.read_csv(curation_file_path, delimiter='\t')
+            curation_ = curation_.to_dict('list')
     elif curation_file_path.endswith('.xlsx'):
         curation_ = pd.read_excel(curation_file_path, engine='openpyxl')
+        curation_ = curation_.to_dict('list')
     elif curation_file_path.endswith('.json'):
         with (open(curation_file_path)) as openfile:
             curation_.append(json.load(openfile))
     elif curation_file_path.endswith('.sdf'):
         curation_ = PandasTools.LoadSDF(curation_file_path, smilesName='structure_curated',molColName='name', removeHs=False, strictParsing=True)
+        curation_ = curation_.to_dict('list')
 
     return True, curation_
 
