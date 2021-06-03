@@ -327,7 +327,6 @@ def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     """
     
     # get curation endpoint path
-
     endpoint_curation = pathlib.Path(utils.curation_tree_path(endpoint))
     if endpoint_curation.is_dir() is False:
         return False,  'Curation endpoint path does not exist.\n'
