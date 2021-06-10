@@ -16,6 +16,7 @@ import rdkit
 
 from chembl_structure_pipeline import standardizer
 from rdkit import Chem
+from rdkit.Chem.MolStandardize import rdMolStandardize
 from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
 
@@ -288,3 +289,16 @@ class Curator(object):
             salt = '_'.join([subType,'salt'])
 
         return salt
+    
+    def salt_remover(self, smiles: str) -> list:
+        """
+        """
+
+        rmv = rdMolStandardize.LargestFragmentChooser()
+        cleaned_smiles = []
+        for smi in smiles:
+            if "." in smi:
+                cleaned_smiles.append(Chem.MolToSmiles(rmv.choose(Chem.MolFromSmiles(smi))))
+            else:
+                cleaned_smiles.append(smi)
+        return cleaned_smiles
