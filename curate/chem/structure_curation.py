@@ -16,6 +16,7 @@ import rdkit
 
 from chembl_structure_pipeline import standardizer
 from rdkit import Chem
+from rdkit.Chem.MolStandardize import rdMolStandardize
 from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
 
@@ -90,6 +91,7 @@ class Curator(object):
                 sub_type = '_'.join([sub_type,sub_type_ns])
         else:
             sub_type = self.check_organic_inorganic(self.smiles, self.smiles_mol)
+        
         checker = None
 
         if sub_type == 'organic':
@@ -124,6 +126,7 @@ class Curator(object):
 
         final_smi = standardizer.standardize_mol(smi)
         final_smi = Chem.MolToSmiles(final_smi)
+        final_smi = self.salt_remover(final_smi)
 
         return final_smi
 
@@ -283,8 +286,26 @@ class Curator(object):
         salt = None
         
         res, deleted = remover.StripMolWithDeleted(self.smiles_mol)
-
+        
         if len(deleted) >= 1:
             salt = '_'.join([subType,'salt'])
 
         return salt
+    
+    def salt_remover(self, smiles: str) -> str:
+        """
+            Removes salts and counterions. Non sanitizable molecules can't be processed
+
+            :param smiles: smiles string
+
+            :return cleaned_smiles: 
+        """
+        
+        rmv = rdMolStandardize.LargestFragmentChooser()
+        
+        if "." in smiles and Chem.MolFromSmiles(smiles):
+            cleaned_smiles = Chem.MolToSmiles(rmv.choose(self.smiles_mol))
+        else:
+            cleaned_smiles = smiles
+
+        return cleaned_smiles
