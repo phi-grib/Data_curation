@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import re
 import rdkit
+import sys
 
 from chembl_structure_pipeline import standardizer
 from rdkit import Chem
@@ -54,7 +55,12 @@ class Curator(object):
         """
 
         self.no_san = False
-        mol = Chem.MolFromSmiles(smiles)
+        try:
+            mol = Chem.MolFromSmiles(smiles)
+        except TypeError:
+            sys.stderr.write('Please check your structures and remove the NaNs\n')
+            raise
+        
         #  Sanitization check (detects invalid valence)
         if mol is None:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
@@ -124,7 +130,10 @@ class Curator(object):
             :return final_smi: canonicalized SMILES
         """
 
-        final_smi = standardizer.standardize_mol(smi)
+        try:
+            final_smi = standardizer.standardize_mol(smi)
+        except:
+            final_smi = smi
         final_smi = Chem.MolToSmiles(final_smi)
         final_smi = self.salt_remover(final_smi)
 
