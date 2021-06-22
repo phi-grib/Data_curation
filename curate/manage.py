@@ -336,29 +336,29 @@ def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
 
     if not curation_file:
         return False,  'Curation output file does not exist.\n'
-
-    curation_file_path = os.path.join(endpoint_curation, curation_file[0])
+    else:
+        curation_file_path = os.path.join(endpoint_curation, curation_file[0])
     
-    curation_ = []
-    if curation_file_path.endswith('.csv'):
-        with (open(curation_file_path, "rb")) as openfile:
-            curation_ = pd.read_csv(curation_file_path, delimiter=',')
-            curation_ = curation_.to_dict('list')
-    elif curation_file_path.endswith('.tsv'):
-        with (open(curation_file_path, "rb")) as openfile:
-            curation_ = pd.read_csv(curation_file_path, delimiter='\t')
-            curation_ = curation_.to_dict('list')
-    elif curation_file_path.endswith('.xlsx'):
-        curation_ = pd.read_excel(curation_file_path, engine='openpyxl')
-        curation_ = curation_.to_dict('list')
-    elif curation_file_path.endswith('.json'):
-        with (open(curation_file_path)) as openfile:
-            curation_.append(json.load(openfile))
-    elif curation_file_path.endswith('.sdf'):
-        curation_ = PandasTools.LoadSDF(curation_file_path, smilesName='structure_curated',molColName='name', removeHs=False, strictParsing=True)
-        curation_ = curation_.to_dict('list')
+    # curation_ = []
+    # if curation_file_path.endswith('.csv'):
+    #     with (open(curation_file_path, "rb")) as openfile:
+    #         curation_ = pd.read_csv(curation_file_path, delimiter=',')
+    #         curation_ = curation_.to_dict('list')
+    # elif curation_file_path.endswith('.tsv'):
+    #     with (open(curation_file_path, "rb")) as openfile:
+    #         curation_ = pd.read_csv(curation_file_path, delimiter='\t')
+    #         curation_ = curation_.to_dict('list')
+    # elif curation_file_path.endswith('.xlsx'):
+    #     curation_ = pd.read_excel(curation_file_path, engine='openpyxl')
+    #     curation_ = curation_.to_dict('list')
+    # elif curation_file_path.endswith('.json'):
+    #     with (open(curation_file_path)) as openfile:
+    #         curation_.append(json.load(openfile))
+    # elif curation_file_path.endswith('.sdf'):
+    #     curation_ = PandasTools.LoadSDF(curation_file_path, smilesName='structure_curated',molColName='name', removeHs=False, strictParsing=True)
+    #     curation_ = curation_.to_dict('list')
 
-    return True, curation_
+        return True, curation_file_path
 
 def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """
