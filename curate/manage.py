@@ -315,7 +315,7 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     
     return True, head_
 
-def action_curation_results(endpoint: str) -> Tuple[bool, Union[str,dict]]:
+def action_curation_results(endpoint: str) -> Tuple[bool, str]:
     """
         Returns the output file
 
