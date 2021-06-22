@@ -335,7 +335,7 @@ def action_curation_results(endpoint: str) -> Tuple[bool, str]:
     curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
 
     if not curation_file:
-        return False,  'Curation output file does not exist.\n'
+        return False, {'code':0, 'message': 'curations not found for {} directory'.format(endpoint)}
     else:
         curation_file_path = os.path.join(endpoint_curation, curation_file[0])
     
