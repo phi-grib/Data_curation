@@ -10,8 +10,10 @@ import os
 import sys
 
 import curate.context as context
+# from curate.chem import chembl_extraction
 
-from curate.chem import chembl_extraction
+
+
 from curate.util import utils, config
 
 def main():
@@ -82,6 +84,7 @@ def main():
     if args.command == 'curate':
 
         if args.action == 'chembl':
+            from curate.chem import chembl_extraction
             input_file = chembl_extraction.get_dataframe_from_target(args.infile)
             args.id_column = 'molecule_chembl_id'
             args.smiles_col = 'canonical_smiles'

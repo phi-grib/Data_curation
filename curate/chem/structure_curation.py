@@ -22,7 +22,7 @@ from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union, Tuple
 
 from curate.chem import process_smiles as ps
-from phitools import moleculeHelper as mh
+# from phitools import moleculeHelper as mh
 
 class Curator(object):
     """
