@@ -70,7 +70,7 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     wkd = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
     
     # copy parameter yml file
-    params_path = wkd / 'children/curation_parameters.yaml'
+    params_path = wkd / 'children' / 'curation_parameters.yaml'
     shutil.copy(params_path, ndir)
 
     sys.stderr.write("New endpoint {} created\n".format(curation_path))
@@ -179,7 +179,10 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
     for directory in dirs:
         dir_dict = {}
         # I convert directory, which is a PosixPath object, into a string
-        directory_string = str(directory).split('/')[-1]
+        # this will not work in Windows (MP)
+        # directory_string = str(directory).split('/')[-1]
+        directory_string = directory.parts[-1]
+
         # Not showing statistics files in the list of files within the directory
         dir_dict['curation_endpoint'] = directory_string
         dir_dict['creation_date'] = get_creation_date(directory)
@@ -192,6 +195,10 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         results.append(dir_dict)
     
     return True, results
+
+
+
+
 
 def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     """
