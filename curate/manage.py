@@ -337,8 +337,9 @@ def action_curation_results(endpoint: str) -> Tuple[bool, str]:
         return False,  'Curation endpoint path does not exist.\n'
     
     # get curation file in curation endpint
-    curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
-
+    # curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
+    curation_file = [f for f in os.listdir(endpoint_curation) if f == 'curated_data.pkl']
+    
     if not curation_file:
         return False, {'code':0, 'message': 'curations not found for {} directory'.format(endpoint)}
     else:

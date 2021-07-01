@@ -105,7 +105,10 @@ class DataCuration(object):
             Uses the get_output_file function to write a copy of the input data in sdf
         """
 
-        self.get_output_file(outfile_type='sdf', smiles_column=self.structure_column, data=self.input_data, outfile_name='input_data')
+        input_path = '/'.join([self.output_dir,'input_data'])
+        data_copy = self.input_data.copy()
+
+        self.format_output(data = data_copy, outfile_type = 'sdf', outfile_path = input_path, smiles_column = self.structure_column)
 
     def write_output_curation_data(self):
         """
@@ -117,67 +120,42 @@ class DataCuration(object):
 
     def get_formated_curation_output(self, smiles_column: str = None):
         """
+            Retrieves the curated data pickle and creates a readable output in the specified format
+
+            :param smiles_column: SMILES column to use in SDF creation (optional)
         """
 
         curated_data_pickle_path = '/'.join([self.output_dir,'curated_data.pkl'])
         curated_data = pd.read_pickle(curated_data_pickle_path)
         outfile_path = 'curated_data'
 
-        if 'sdf' in self.outfile_type.lower():
-            self.write_sdf(curated_data, outfile_path, smiles_column)
-        elif 'xlsx' in self.outfile_type.lower() or 'excel' in self.outfile_type.lower():
-            output_name_format = '.'.join([outfile_path,'xlsx'])
-            curated_data.to_excel(output_name_format)
-        elif 'csv' in self.outfile_type.lower():
-            output_name_format = '.'.join([outfile_path,'csv'])
-            curated_data.to_csv(output_name_format, sep=',')
-        elif 'tsv' in self.outfile_type.lower():
-            output_name_format = '.'.join([outfile_path,'tsv'])
-            curated_data.to_csv(output_name_format, sep='\t')
-        elif 'json' in self.outfile_type.lower():
-            output_name_format = '.'.join([outfile_path,'json'])
-            curated_data.to_json(path_or_buf = output_name_format, orient = 'index')
+        self.format_output(data = curated_data, outfile_type = self.outfile_type, outfile_path = outfile_path, smiles_column = smiles_column)
 
-    def get_output_file(self, outfile_type: str = None, smiles_column: str = None, data: pd.DataFrame = None, outfile_name: str = None):
+    def format_output(self, data: pd.DataFrame, outfile_type: str, outfile_path: str, smiles_column: str = None):
         """
-            Saves the curated data into a specific file format.
-            Requires output file name and type of file (Excel, CSV, TSV, sdf)
+            Gives the desired format to the input data.
+            Requires output file path and type of file (Excel, CSV, TSV, sdf, json)
 
-            :param outfile_type: format for the output file {.xlsx, .csv, .tsv, .sdf}
-            :param smiles_column: SMILES column in the dataframe to be processed
-            :param data: Dataframe to be written
-            :param outfile_name: name of the output file
-
-            :return output_file:
+            :param data: dataframe containing the data to be processed
+            :param outfile_type: type of file to create
+            :param outfile_path: output file path
+            :param smiles_column: SMILES column in the dataframe to be processed (optional)
         """
-
-        if outfile_type is None and self.outfile_type:
-            outfile_type = self.outfile_type
-        
-        if data is None:
-            data_copy = self.curated_data.copy()
-        else:
-            data_copy = data.copy()
-
-        if outfile_name is None:
-            outfile_name = 'curated_data'
-
-        outfile_full_path = '/'.join([self.output_dir,outfile_name])
 
         if 'sdf' in outfile_type.lower():
-            self.write_sdf(data_copy, outfile_full_path, smiles_column)
+            self.write_sdf(data, outfile_path, smiles_column)
         elif 'xlsx' in outfile_type.lower() or 'excel' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'xlsx'])
-            data_copy.to_excel(output_name_format)
+            output_name_format = '.'.join([outfile_path,'xlsx'])
+            data.to_excel(output_name_format)
         elif 'csv' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'csv'])
-            data_copy.to_csv(output_name_format, sep=',')
+            output_name_format = '.'.join([outfile_path,'csv'])
+            data.to_csv(output_name_format, sep=',')
         elif 'tsv' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'tsv'])
-            data_copy.to_csv(output_name_format, sep='\t')
+            output_name_format = '.'.join([outfile_path,'tsv'])
+            data.to_csv(output_name_format, sep='\t')
         elif 'json' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'json'])
-            data_copy.to_json(path_or_buf = output_name_format, orient = 'index')
+            output_name_format = '.'.join([outfile_path,'json'])
+            data.to_json(path_or_buf = output_name_format, orient = 'index')
 
     def save_output_header(self):
         """
@@ -247,7 +225,8 @@ class DataCuration(object):
         data.loc[:,'ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
         
         if no_mol.empty is False:
-            self.get_output_file(outfile_type='xlsx', data=no_mol, outfile_name='Non_processed_molecules')
+            non_processed_path = '/'.join([self.output_dir,'Non_processed_molecules'])
+            self.format_output(data = no_mol, outfile_type = 'xlsx', outfile_path = non_processed_path)
 
         return data
 
@@ -340,7 +319,9 @@ class DataCuration(object):
 
         if self.remove_problematic:
             self.remove_problematic_structures(curated_data)
-            self.get_output_file(outfile_type='xlsx', data=self.problematic_structures, outfile_name='Problematic_structures_removed')
+            problematic_path = '/'.join([self.output_dir,'Problematic_structures_removed'])
+            self.format_output(data = self.problematic_structures, outfile_type= 'xlsx', outfile_path = problematic_path)
+            
         else:
             self.curated_data = curated_data
 
