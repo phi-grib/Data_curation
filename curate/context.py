@@ -60,8 +60,10 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                                     outfile_type=commnad_dict['outfile_type'])
 
     curating.curate_data()
+    curating.write_output_curation_data()
 
-    curating.get_output_file(smiles_column='structure_curated')
+    #curating.get_output_file(smiles_column='structure_curated')
+    curating.get_formated_curation_output(smiles_column='structure_curated')
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """

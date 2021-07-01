@@ -107,6 +107,37 @@ class DataCuration(object):
 
         self.get_output_file(outfile_type='sdf', smiles_column=self.structure_column, data=self.input_data, outfile_name='input_data')
 
+    def write_output_curation_data(self):
+        """
+            Writes curated data as a pickle that can be loaded and transformed later into another format.
+        """
+
+        outfile_path = '/'.join([self.output_dir,'curated_data.pkl'])
+        self.curated_data.to_pickle(outfile_path)
+
+    def get_formated_curation_output(self, smiles_column: str = None):
+        """
+        """
+
+        curated_data_pickle_path = '/'.join([self.output_dir,'curated_data.pkl'])
+        curated_data = pd.read_pickle(curated_data_pickle_path)
+        outfile_path = 'curated_data'
+
+        if 'sdf' in self.outfile_type.lower():
+            self.write_sdf(curated_data, outfile_path, smiles_column)
+        elif 'xlsx' in self.outfile_type.lower() or 'excel' in self.outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'xlsx'])
+            curated_data.to_excel(output_name_format)
+        elif 'csv' in self.outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'csv'])
+            curated_data.to_csv(output_name_format, sep=',')
+        elif 'tsv' in self.outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'tsv'])
+            curated_data.to_csv(output_name_format, sep='\t')
+        elif 'json' in self.outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'json'])
+            curated_data.to_json(path_or_buf = output_name_format, orient = 'index')
+
     def get_output_file(self, outfile_type: str = None, smiles_column: str = None, data: pd.DataFrame = None, outfile_name: str = None):
         """
             Saves the curated data into a specific file format.

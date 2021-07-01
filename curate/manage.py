@@ -127,8 +127,6 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
         num_files = 0
         sys.stderr.write('Files found in curation endpoint {}:\n'.format(curation_dir))
         for x in os.listdir(base_path):
-            if x.endswith('.json'):
-                continue
             num_files += 1
             xpath = os.path.join(base_path,x)
             creation_date = get_creation_date(xpath)
