@@ -10,9 +10,6 @@ import os
 import sys
 
 import curate.context as context
-# from curate.chem import chembl_extraction
-
-
 
 from curate.util import utils, config
 

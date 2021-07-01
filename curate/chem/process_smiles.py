@@ -1,4 +1,4 @@
-import sys, os
+import os
 
 from rdkit import Chem
 from standardiser import standardise

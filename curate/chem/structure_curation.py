@@ -9,8 +9,6 @@
     On: 27/05/2020, 12:16 PM
 """
 
-# import numpy as np
-# import pandas as pd
 import re
 import rdkit
 import sys
@@ -19,10 +17,9 @@ from chembl_structure_pipeline import standardizer
 from rdkit import Chem
 from rdkit.Chem.MolStandardize import rdMolStandardize
 from rdkit.Chem.SaltRemover import SaltRemover
-from typing import Optional, Union, Tuple
+from typing import Optional, Union
 
 from curate.chem import process_smiles as ps
-# from phitools import moleculeHelper as mh
 
 class Curator(object):
     """

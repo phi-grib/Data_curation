@@ -5,7 +5,6 @@
     On: 18/02/2021, 17:49 PM
 """
 
-import json
 import os
 import pandas as pd
 import pathlib
@@ -194,10 +193,6 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
     
     return True, results
 
-
-
-
-
 def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     """
         Removes the endpoint tree described by the argument.
@@ -339,12 +334,15 @@ def action_curation_results(endpoint: str) -> Tuple[bool, str]:
     # get curation file in curation endpint
     # curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
     curation_file = [f for f in os.listdir(endpoint_curation) if f == 'curated_data.pkl']
-    
+
     if not curation_file:
         return False, {'code':0, 'message': 'curations not found for {} directory'.format(endpoint)}
     else:
         curation_file_path = os.path.join(endpoint_curation, curation_file[0])
     
+    #### TODO: improve this function so it gets the output file properly formatted from the pickle.
+    #### Maybe I can capture the outfile type and use the function in dataset_curation.py
+
     # curation_ = []
     # if curation_file_path.endswith('.csv'):
     #     with (open(curation_file_path, "rb")) as openfile:

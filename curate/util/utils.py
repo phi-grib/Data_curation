@@ -7,7 +7,6 @@
 
 __modules__ = None
 
-import numpy as np
 import os
 import pathlib
 import sys

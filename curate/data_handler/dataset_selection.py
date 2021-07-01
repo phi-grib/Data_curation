@@ -3,12 +3,10 @@
     On: 21/09/2020, 13:45 PM
 """
 
-import numpy as np
 import pandas as pd
 import sys
 
 from sklearn.model_selection import train_test_split
-from typing import Union, Optional, Tuple
 
 class Selection(object):
     
