@@ -18,7 +18,7 @@ setup(
     packages=find_packages(),
     # If any package contains *.txt or *.rst files, include them:
     # package_data={'': ['*.yaml', '*.yml']},
-    package_data={'data-curation': ['curate/config.yaml','curate/children/*.yaml']},
+    package_data={'data-curation': ['config.yaml','children/*.yaml']},
     entry_points={
        'console_scripts': ['datacur=curate.curate_src:main'],
     }
