@@ -35,7 +35,7 @@ def main():
     parser.add_argument('-a', '--action',
                         action='store',
                         help='Manage action.',
-                        choices=['silent','new','list','remove','chembl'],
+                        choices=['silent','new','list','remove','chembl','export', 'download'],
                         required=False)
     
     parser.add_argument('-c', '--command',
@@ -88,8 +88,8 @@ def main():
         else:
             input_file = args.infile
 
-        if (input_file is None) or (args.format is None) or (args.endpoint is None):
-            sys.stderr.write("datacur curate : input, output format and endpoint arguments are compulsory\n")
+        if (input_file is None) or (args.endpoint is None):
+            sys.stderr.write("datacur curate : input and endpoint arguments are compulsory\n")
             return
         
         if args.id_column is None:
@@ -112,7 +112,6 @@ def main():
                     'structure_column':smiles_,
                     'separator':sep,
                     'remove_problematic':args.remove,
-                    'outfile_type':args.format,
                     'endpoint':args.endpoint}
 
         context.curation_cmd(command)

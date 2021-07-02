@@ -56,13 +56,10 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                                     endpoint=commnad_dict['endpoint'],
                                     metadata=metadata_,
                                     separator=commnad_dict['separator'],
-                                    remove_problematic=commnad_dict['remove_problematic'],
-                                    outfile_type=commnad_dict['outfile_type'])
+                                    remove_problematic=commnad_dict['remove_problematic'])
 
     curating.curate_data()
     curating.write_output_curation_data()
-
-    curating.get_formated_curation_output(smiles_column='structure_curated')
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """
@@ -80,6 +77,10 @@ def manage_cmd(arguments: dict) -> Tuple[bool, str]:
         success, results = manage.action_list(arguments.endpoint)
     elif arguments.action == 'remove':
         success, results = manage.action_remove(arguments.endpoint)
+    elif arguments.action == 'export':
+        success, results = manage.action_export(arguments.endpoint)
+    elif arguments.action == 'download':
+        success, results = manage.action_curation_results(arguments.endpoint, arguments.format)
     else: 
         success = False
         results = "Specified manage action is not defined\n"

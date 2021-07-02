@@ -315,16 +315,26 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     
     return True, head_
 
-def action_curation_results(endpoint: str) -> Tuple[bool, str]:
+def action_curation_results(endpoint: str, output_format: str, smiles_column: str = None, identifier: str = None) -> Tuple[bool, Union[dict,str]]:
     """
         Returns the output file
 
         :param endpoint: curation endpoint
+        :param output_format: format to download the output curated_data
+        :param identifier: identifier for creating the sdf (optional)
         
         :return bool:
         :return str:
         :return head_:
     """
+    
+    # process identifier and SMILES column for sdf
+    if output_format == 'sdf':
+        if identifier is None:
+            identifier = 'name'
+    
+        if smiles_column is None:
+            smiles_column = 'structure_curated'
     
     # get curation endpoint path
     endpoint_curation = pathlib.Path(utils.curation_tree_path(endpoint))
@@ -332,37 +342,21 @@ def action_curation_results(endpoint: str) -> Tuple[bool, str]:
         return False,  'Curation endpoint path does not exist.\n'
     
     # get curation file in curation endpint
-    # curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
-    curation_file = [f for f in os.listdir(endpoint_curation) if f == 'curated_data.pkl']
-
-    if not curation_file:
-        return False, {'code':0, 'message': 'curations not found for {} directory'.format(endpoint)}
-    else:
-        curation_file_path = os.path.join(endpoint_curation, curation_file[0])
+    curation_file_pickle = [f for f in os.listdir(endpoint_curation) if f == 'curated_data.pkl']
     
-    #### TODO: improve this function so it gets the output file properly formatted from the pickle.
-    #### Maybe I can capture the outfile type and use the function in dataset_curation.py
+    if not curation_file_pickle:
+        return False, {'code':0, 'message': 'curations not found for {} directory'.format(endpoint)}
+    
+    curation_pickle_path = os.path.join(endpoint_curation,curation_file_pickle[0])
+    curated_data = pd.read_pickle(curation_pickle_path)
+    
+    utils.format_output(data = curated_data, 
+                        outfile_type = output_format, 
+                        outfile_path = 'curated_data', 
+                        smiles_column = smiles_column, 
+                        identifier = identifier)
 
-    # curation_ = []
-    # if curation_file_path.endswith('.csv'):
-    #     with (open(curation_file_path, "rb")) as openfile:
-    #         curation_ = pd.read_csv(curation_file_path, delimiter=',')
-    #         curation_ = curation_.to_dict('list')
-    # elif curation_file_path.endswith('.tsv'):
-    #     with (open(curation_file_path, "rb")) as openfile:
-    #         curation_ = pd.read_csv(curation_file_path, delimiter='\t')
-    #         curation_ = curation_.to_dict('list')
-    # elif curation_file_path.endswith('.xlsx'):
-    #     curation_ = pd.read_excel(curation_file_path, engine='openpyxl')
-    #     curation_ = curation_.to_dict('list')
-    # elif curation_file_path.endswith('.json'):
-    #     with (open(curation_file_path)) as openfile:
-    #         curation_.append(json.load(openfile))
-    # elif curation_file_path.endswith('.sdf'):
-    #     curation_ = PandasTools.LoadSDF(curation_file_path, smilesName='structure_curated',molColName='name', removeHs=False, strictParsing=True)
-    #     curation_ = curation_.to_dict('list')
-
-        return True, curation_file_path
+    return True, "Curated data downloaded successfully as {}".format(output_format)
 
 def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """

@@ -8,11 +8,14 @@
 __modules__ = None
 
 import os
+import pandas as pd
 import pathlib
 import sys
 import yaml
 
-from typing import Union, Tuple
+from rdkit import Chem
+from rdkit.Chem import PandasTools
+from typing import Union, Tuple, Optional
 
 def isSingleThread() -> Union[str, bool]:
     """
@@ -159,3 +162,86 @@ def set_curation_repository(path: str = None):
         configuration['curation_repository_path'] = str(new_path.resolve())
 
     write_config(configuration)
+
+def format_output(data: pd.DataFrame, outfile_type: str, outfile_path: str, smiles_column: str = None, identifier: str = None):
+        """
+            Gives the desired format to the input data.
+            Requires output file path and type of file (Excel, CSV, TSV, sdf, json)
+
+            :param data: dataframe containing the data to be processed
+            :param outfile_type: type of file to create
+            :param outfile_path: output file path
+            :param smiles_column: SMILES column in the dataframe to be processed (optional)
+        """
+
+        if 'sdf' in outfile_type.lower():
+            write_sdf(data, outfile_path, smiles_column, identifier)
+        elif 'xlsx' in outfile_type.lower() or 'excel' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'xlsx'])
+            data.to_excel(output_name_format)
+        elif 'csv' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'csv'])
+            data.to_csv(output_name_format, sep=',')
+        elif 'tsv' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'tsv'])
+            data.to_csv(output_name_format, sep='\t')
+        elif 'json' in outfile_type.lower():
+            output_name_format = '.'.join([outfile_path,'json'])
+            data.to_json(path_or_buf = output_name_format, orient = 'index')
+
+def write_sdf(data: pd.DataFrame, outfile_name: str, smiles_column: str, identifier: str):
+        """
+            Prepares curated data to be converted into sdf file using
+            PandasTools. Returns non processed molecules in excel format.
+
+            :param data: Dataframe to be written
+            :param smiles_column: SMILES column in the dataframe to be processed
+            :param outfile_name: output file name
+        """
+
+        output_name_format = '.'.join([outfile_name,'sdf'])
+        cur_data = prepare_data_for_sdf(data, smiles_column, copy=True)
+        
+        PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName=identifier)
+
+def prepare_data_for_sdf(data: pd.DataFrame, smiles_column: str, copy: bool = False) -> Optional[pd.DataFrame]:
+    """
+        Prepares the data to be converted to sdf.
+        If copy, it copies the dataframe so it's not overwritten with new columns before being processed as sdf.
+        Else, it directly uses self.curated_data. This option is used mostly in jupyter or CLI mode to keep the new columns
+        in the python object so it can be manipulated directly in the backend.
+
+        :param data: Dataframe to be treated
+        :param smiles_column: SMILES column in the dataframe to be processed
+        :param copy: boolean accepting True or False
+
+        :return cur_data: dataframe with new columns added before being converted into sdf.
+    """
+
+    if copy:
+        cur_data = add_mol_column_to_df(data, smiles_column)
+        return cur_data
+    else:
+        add_mol_column_to_df(data, smiles_column)
+
+def add_mol_column_to_df(data: pd.DataFrame, smiles_column: str) -> pd.DataFrame:
+    """
+        Applies PandasTools functionalities to process the structure into a valid format for the sdf transformation.
+
+        :param data: dataframe to be modified
+        :param smiles_column: SMILES column in the dataframe to be processed
+
+        :return data: modified data
+        :return no_mol: data that hasn't been modified
+    """
+
+    PandasTools.AddMoleculeColumnToFrame(data, smiles_column)
+    no_mol = data[data['ROMol'].isna()]
+    data.drop(no_mol.index, axis=0, inplace=True)
+    data.loc[:,'ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
+    
+    # if no_mol.empty is False:
+    #     non_processed_path = '/'.join([output_dir,'Non_processed_molecules'])
+    #     format_output(data = no_mol, outfile_type = 'xlsx', outfile_path = non_processed_path)
+
+    return data
