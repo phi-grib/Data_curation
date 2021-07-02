@@ -6,7 +6,7 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 setup(
-    name='data_curation',
+    name='data-curation',
     version='2.0',
     description='Data curation package. Optimized for pandas Dataframes',
     license='GNU',
