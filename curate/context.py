@@ -80,7 +80,7 @@ def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     elif arguments.action == 'export':
         success, results = manage.action_export(arguments.endpoint)
     elif arguments.action == 'download':
-        success, results = manage.action_curation_results(arguments.endpoint, arguments.format)
+        success, results = manage.action_curation_results(arguments)
     else: 
         success = False
         results = "Specified manage action is not defined\n"

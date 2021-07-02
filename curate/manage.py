@@ -315,7 +315,7 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     
     return True, head_
 
-def action_curation_results(endpoint: str, output_format: str, smiles_column: str = None, identifier: str = None) -> Tuple[bool, Union[dict,str]]:
+def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
     """
         Returns the output file
 
@@ -329,15 +329,19 @@ def action_curation_results(endpoint: str, output_format: str, smiles_column: st
     """
     
     # process identifier and SMILES column for sdf
-    if output_format == 'sdf':
-        if identifier is None:
+    if args.format == 'sdf':
+        if args.id_column is None:
             identifier = 'name'
+        else:
+            identifier = args.id_column
     
-        if smiles_column is None:
+        if args.smiles_col is None:
             smiles_column = 'structure_curated'
+        else:
+            smiles_column = args.smiles_column
     
     # get curation endpoint path
-    endpoint_curation = pathlib.Path(utils.curation_tree_path(endpoint))
+    endpoint_curation = pathlib.Path(utils.curation_tree_path(args.endpoint))
     if endpoint_curation.is_dir() is False:
         return False,  'Curation endpoint path does not exist.\n'
     
@@ -345,18 +349,31 @@ def action_curation_results(endpoint: str, output_format: str, smiles_column: st
     curation_file_pickle = [f for f in os.listdir(endpoint_curation) if f == 'curated_data.pkl']
     
     if not curation_file_pickle:
-        return False, {'code':0, 'message': 'curations not found for {} directory'.format(endpoint)}
+        return False, {'code':0, 'message': 'curations not found for {} directory'.format(args.endpoint)}
     
     curation_pickle_path = os.path.join(endpoint_curation,curation_file_pickle[0])
     curated_data = pd.read_pickle(curation_pickle_path)
     
     utils.format_output(data = curated_data, 
-                        outfile_type = output_format, 
+                        outfile_type = args.format, 
                         outfile_path = 'curated_data', 
                         smiles_column = smiles_column, 
                         identifier = identifier)
+    
+    if args.remove is None:
 
-    return True, "Curated data downloaded successfully as {}".format(output_format)
+        return True, "Curated data downloaded successfully as {}".format(args.format)
+    else:
+        problematic_pickle = os.path.join(endpoint_curation,'Problematic_structures_removed.pkl')
+        problematic_data = pd.read_pickle(problematic_pickle)
+        utils.format_output(data = problematic_data, 
+                        outfile_type = 'xlsx', 
+                        outfile_path = 'Problematic_structures_removed.xlsx', 
+                        smiles_column = smiles_column, 
+                        identifier = identifier)
+        
+        return True, "Curated data and problematic structures downloaded successfully as curated_data.{} and Problematic_structures_removed.xlsx".format(format)
+
 
 def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """
