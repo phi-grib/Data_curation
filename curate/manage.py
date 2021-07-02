@@ -365,6 +365,10 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
         return True, "Curated data downloaded successfully as {}".format(args.format)
     else:
         problematic_pickle = os.path.join(endpoint_curation,'Problematic_structures_removed.pkl')
+
+        if not os.path.isfile(problematic_pickle):
+            return False, 'Problematic structures pickle does not exist. Please use -r option for curating a dataset.\n'
+        
         problematic_data = pd.read_pickle(problematic_pickle)
         utils.format_output(data = problematic_data, 
                         outfile_type = 'xlsx', 
