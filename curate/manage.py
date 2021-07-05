@@ -328,17 +328,15 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
         :return head_:
     """
     
-    # process identifier and SMILES column for sdf
-    if args.format == 'sdf':
-        if args.id_column is None:
-            identifier = 'name'
-        else:
-            identifier = args.id_column
-    
-        if args.smiles_col is None:
-            smiles_column = 'structure_curated'
-        else:
-            smiles_column = args.smiles_column
+    if args.id_column is None:
+        identifier = 'name'
+    else:
+        identifier = args.id_column
+
+    if args.smiles_col is None:
+        smiles_column = 'structure_curated'
+    else:
+        smiles_column = args.smiles_column
     
     # get curation endpoint path
     endpoint_curation = pathlib.Path(utils.curation_tree_path(args.endpoint))
@@ -375,7 +373,7 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
         problematic_data = pd.read_pickle(problematic_pickle)
         utils.format_output(data = problematic_data, 
                         outfile_type = 'xlsx', 
-                        outfile_path = 'Problematic_structures_removed.xlsx', 
+                        outfile_path = 'Problematic_structures_removed', 
                         smiles_column = smiles_column, 
                         identifier = identifier)
         
