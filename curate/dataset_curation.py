@@ -110,22 +110,16 @@ class DataCuration(object):
     def write_output_curation_data(self):
         """
             Writes curated data as a pickle that can be loaded and transformed later into another format.
+            It also stores the header for visualization in the API.
         """
 
         outfile_path = '/'.join([self.output_dir,'curated_data.pkl'])
+        head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
+
         cols = self.select_cols()
-        
+
         selected_data = self.curated_data[cols]
         selected_data.to_pickle(outfile_path)
-
-    def save_output_header(self):
-        """
-            Stores in a pickle a header from the curated data so it can be retrieved
-            in the GUI
-        """
-
-        head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
-        cols = self.select_cols()
 
         output_header = self.curated_data[cols].head(10)
         output_header.to_pickle(head_pickle_full_path)
@@ -241,7 +235,6 @@ class DataCuration(object):
             self.curated_data = curated_data
 
         self.calculate_data_stats(self.curated_data)
-        self.save_output_header()
         
     def remove_problematic_structures(self, data: pd.DataFrame = None) -> pd.DataFrame:
         """
