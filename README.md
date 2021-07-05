@@ -106,6 +106,14 @@ If we want to use another accepted format, like csv or tsv and we know we have a
 datacur -i sample_file.csv -e myEndpoint -sep ':' -c curate -s smiles_colname -id id_colname -r
 ```
 
+If we have a large file containing lots of columns but we only want to keep some of them, then the --metadata or -m option is available. It will generate
+an output only containing the most important columns for the curation plus the ones selected as metadata. Imagine that our file contains the columns meta1 and meta 2:
+```sh
+datacur -i sample_file.csv -e myEndpoint -c curate -s smiles_colname -id id_colname -r -m 'meta1,meta2'
+```
+
+Our output will be stored containig the columns id_colname, smiles_colname, structure_curated, substance_type_name, meta1 and meta2. If this option is not selected, all the columns are stored by default.
+
 Also, there's an option to list all the output files in the endpoint directory using the following command:
 
 ```sh

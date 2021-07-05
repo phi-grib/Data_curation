@@ -124,9 +124,11 @@ class DataCuration(object):
         output_header = self.curated_data[cols].head(10)
         output_header.to_pickle(head_pickle_full_path)
 
-    def select_cols(self):
+    def select_cols(self) -> list:
         """
             Select the output columns taking into account the metadata if available.
+
+            :return selected_columns: selection of columns from curated data to be used in the final output if metadata is selected.
         """
         
         if self.metadata:
@@ -137,7 +139,6 @@ class DataCuration(object):
             selected_columns = self.curated_data.columns
 
         return selected_columns
-
 
     def get_substance_types(self) -> pd.DataFrame:
         """
