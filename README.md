@@ -144,6 +144,7 @@ The output file will be stored in the local directory where the command has been
 | -d/ --directory | Defines the root directory for the curation repository. |
 | -id/ --id_column | Column name containing the molecule identifier. |
 | -s/ --smiles_col | Column name containing the SMILES string. |
+| -m/ --metadata | Column names containing metadata of interest. |
 | -sep/ --separator | If added, uses this argument as the input file separator. |
 | -r/ --remove | If added, removes problematic structures after SMILES curation. |
 | -h/ --help | Shows a help message on the screen |
