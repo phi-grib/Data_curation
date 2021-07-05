@@ -3,10 +3,11 @@
 This Data curation tool provides a user-friendly CLI for treating raw data. It classifies the substances passed as input by filtering the SMILES and also applies a pre-processing of those structures to make them available for QSAR modelling.
 It can be used in Jupyter Notebook as well, including data selection funcionalities that still need to be implemented in the CLI.
 
+It has also been implemented as a part of Flame modelling software (https://github.com/phi-grib/flame).
 
 ## Installation:
 
-This tool has been designed for Linux. It hasn't been tested neither for macOS configurations nor for Windows. 
+This tool has been designed as a standalone application for Linux and also works for MacOS and Windows.
 It needs a suitable conda working environment where to be installed. 
 
 Download the repository:
@@ -23,7 +24,7 @@ cd Data_curation/
 
 Create the **conda environment**:
 ```bash
-conda env create -f envfl.yml
+conda env create -f environment.yml
 ```
 
 Then activate the environment:
@@ -70,7 +71,7 @@ This option sets up the curation repository within the Data curation installatio
 
 ## Quickstarting
 
-Data curation provides a command-line interface (CLI), curate.py, which allows for a fast and easy to implement curation of a file containing, an least, molecules with SMILES and an identifier (CAS, EC, name of the molecule, internal id etc...).
+Data curation provides a command-line interface (CLI), dataset_curation.py, which allows for a fast and easy to implement curation of a file containing, at least, molecules with SMILES and an identifier (CAS, EC, name of the molecule, internal id etc...).
 
 You can run the following commands from any terminal, in a computer where Data curation has been installed and the environment (datacuration) was activated (`source activate datacuration` in Linux).
 
@@ -89,35 +90,39 @@ Now the curation repository is totally configured and ready to store the outputs
 Let's curate a sample file:
 
 ```sh
-datacur -i sample_file.xlsx -e myEndpoint -f xlsx -c curate -r
+datacur -i sample_file.xlsx -e myEndpoint -c curate -r
 ```
 
-This will take the input file sample_file.xlsx and return curated_data.xlsx since we specified the format using -f option. With -r we asked the program to remove problematic structures and store them in a separate file for further revision. Since we haven't specified SMILES column nor ID column, the program uses a predifined name for each, being 'structure' for SMILES and 'name' for ID. If we want to specify those columns, which is recommended, we have to type:
+This will take the input file sample_file.xlsx and store the curated data as a pickle file in the curation repository (curated_data.pkl). With -r we asked the program to remove problematic structures and store them in a separate file for further revision. Since we haven't specified SMILES column nor ID column, the program uses a predifined name for each, being 'structure' for SMILES and 'name' for ID. If we want to specify those columns, which is recommended, we have to type:
 
 ```sh
-datacur -i sample_file.xlsx -e myEndpoint -f xlsx -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.xlsx -e myEndpoint -c curate -s smiles_colname -id id_colname -r
 ```
 
 In that case, our input is an Excel file and the code handles this internally using Pandas option read_excel().
 If we want to use another accepted format, like csv or tsv and we know we have a specific separator that is not a comma nor a tab, we can also specify the separator using the -sep option:
 
 ```sh
-datacur -i sample_file.csv -e myEndpoint -sep ':' -f xlsx -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.csv -e myEndpoint -sep ':' -c curate -s smiles_colname -id id_colname -r
 ```
 
-Also, if we want an sdf file to use it directly in a QSAR modelling tool, like Flame, we can put that in the -f option:
-
-```sh
-datacur -i sample_file.xlsx -e myEndpoint -f sdf -c curate -s smiles_colname -id id_colname -r
-```
-
-Finally, there's an option to list all the output files in the endpoint directory using the following command:
+Also, there's an option to list all the output files in the endpoint directory using the following command:
 
 ```sh
 datacur -c manage -e myEndpoint -a list
 ```
 
-The tool is still under construction, but thus far it works with the specified options from above.
+Finally, if we want to retrieve the curated data, we have the option download, where we can specify one of the accepted formats: tsv, csv, xlsx, sdf or json:
+
+```sh
+datacur -a download -c manage -e myEndpoint -f sdf
+```
+
+The output file will be stored in the local directory where the command has been executed.
+
+## ChEMBL download
+
+@TODO
 
 ## Data curation commands
 
@@ -145,6 +150,8 @@ Management commands deserve further description:
 | new | *datacur -c manage -a new -e MyEndpoint* | Creates a new entry in the curation repository named MyEndpoint  |
 | remove | *datacur -c manage -a remove -e MyEndpoint* | Removes the specified endpoint from the curation repository |
 | list | *datacur -c manage -a list* | Lists the endpoints present in the curation repository. If the name of an endpoint is provided, lists only the files within that endpoint directory  |
+| export | *datacur -c manage -a export* | Exports the full curation directory as a tarball to the current working directory  |
+| download | *datacur -c manage -a download -e myEndpoint -f myFormat* | Gets curated data in the specified format and stores it in the current working directory  |
 
 ## Technical details
 
