@@ -117,7 +117,7 @@ class DataCuration(object):
         head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
 
         cols = self.select_cols()
-
+        
         selected_data = self.curated_data[cols]
         selected_data.to_pickle(outfile_path)
 
@@ -128,7 +128,7 @@ class DataCuration(object):
         """
             Select the output columns taking into account the metadata if available.
         """
-
+        
         if self.metadata:
             format_meta = self.metadata.split(',')
             selected_columns = [self.identifier,self.structure_column,'structure_curated','substance_type_name']

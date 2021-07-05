@@ -39,14 +39,14 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
     
     # check of metadata
 
-    if 'metadata' in commnad_dict.keys() is True:
+    if commnad_dict['metadata']:
         metadata_ = commnad_dict['metadata']
         if (commnad_dict['molecule_identifier'] in metadata_) or (commnad_dict['structure_column'] in metadata_):
             sys.stderr.write("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
             return
     else:
         metadata_ = None
-
+    
     # call of curation functions
 
     curating = datacur.DataCuration(data_input=commnad_dict['data_input'], 

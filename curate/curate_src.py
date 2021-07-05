@@ -115,7 +115,7 @@ def main():
             meta_ = args.metadata
         else:
             meta_ = None
-
+        
         command = {'data_input':args.infile,
                     'molecule_identifier':id_,
                     'structure_column':smiles_,
