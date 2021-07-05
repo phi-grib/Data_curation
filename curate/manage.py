@@ -326,16 +326,6 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
         :return dict:
     """
     
-    if args.id_column is None:
-        identifier = 'name'
-    else:
-        identifier = args.id_column
-
-    if args.smiles_col is None:
-        smiles_column = 'structure_curated'
-    else:
-        smiles_column = args.smiles_column
-    
     # get curation endpoint path
     endpoint_curation = pathlib.Path(utils.curation_tree_path(args.endpoint))
     if endpoint_curation.is_dir() is False:
@@ -347,6 +337,13 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
     if not curation_file_pickle:
         return False, {'code':0, 'message': 'curations not found for {} directory'.format(args.endpoint)}
     
+    # get curation parameters
+    params = Parameters()
+    curation_parameters = params.get_parameters(endpoint_curation)
+    
+    identifier = curation_parameters['molecule_identifier']
+    smiles_column = curation_parameters['structure_column']
+
     curation_pickle_path = os.path.join(endpoint_curation,curation_file_pickle[0])
     curated_data = pd.read_pickle(curation_pickle_path)
     
@@ -356,12 +353,8 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
                         smiles_column = smiles_column, 
                         identifier = identifier)
     
-    # gets curation parameters to check if remove problematic is true or false.
+    # check if remove problematic is true or false.
     # if True, it downloads problematic structures file.
-
-    params = Parameters()
-    curation_parameters = params.get_parameters(endpoint_curation)
-
     if curation_parameters['remove_problematic'] == 'true':
         problematic_pickle = os.path.join(endpoint_curation,'Problematic_structures_removed.pkl')
 
