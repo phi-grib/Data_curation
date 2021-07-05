@@ -57,6 +57,10 @@ def main():
                         help='Column name where the SMILES string is found.',
                         required=False)
     
+    parser.add_argument('-m', '--metadata',
+                        help='Selects the metadata columns to be processed. Optional.',
+                        required=False)
+
     parser.add_argument('-sep', '--separator',
                         help='If added, takes this argument as the file separator.',
                         required=False)
@@ -107,9 +111,15 @@ def main():
         else:
             sep = None
 
+        if args.metadata:
+            meta_ = args.metadata
+        else:
+            meta_ = None
+
         command = {'data_input':args.infile,
                     'molecule_identifier':id_,
                     'structure_column':smiles_,
+                    'metadata':meta_,
                     'separator':sep,
                     'remove_problematic':args.remove,
                     'endpoint':args.endpoint}

@@ -39,8 +39,8 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
     
     # check of metadata
 
-    if 'metadata' in commnad_dict.keys():
-        metadata_ = commnad_dict['metadata'].split(',')
+    if 'metadata' in commnad_dict.keys() is True:
+        metadata_ = commnad_dict['metadata']
         if (commnad_dict['molecule_identifier'] in metadata_) or (commnad_dict['structure_column'] in metadata_):
             sys.stderr.write("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
             return

@@ -66,16 +66,14 @@ class Parameters:
         black_list = ['curation_path','endpoint']
         for key in newp:
             if key not in black_list:
-
                 val = newp[key]
-
                 # YAML define null values as None, which are interpreted 
                 # as strings
                 if val == 'None':
                     val = None
 
                 self.p[key] = val
-
+        
     def delta_curation(self, curation: str, parameters: str, iformat: str ='YAML') -> Tuple[str, bool]:
         """
             load a set of parameters from the configuration file present 
@@ -119,7 +117,7 @@ class Parameters:
 
         try:
             with open(parameters_file_name, 'w') as pfile:
-                yaml.dump (self.p, pfile)
+                yaml.dump(self.p, pfile)
         except Exception as e:
             return False, 'unable to write parameters'
 

@@ -113,7 +113,10 @@ class DataCuration(object):
         """
 
         outfile_path = '/'.join([self.output_dir,'curated_data.pkl'])
-        self.curated_data.to_pickle(outfile_path)
+        cols = self.select_cols()
+        
+        selected_data = self.curated_data[cols]
+        selected_data.to_pickle(outfile_path)
 
     def save_output_header(self):
         """
@@ -122,14 +125,25 @@ class DataCuration(object):
         """
 
         head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
-        if self.metadata:
-            cols = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
-            cols.extend(self.metadata)
-        else:
-            cols = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
+        cols = self.select_cols()
 
         output_header = self.curated_data[cols].head(10)
         output_header.to_pickle(head_pickle_full_path)
+
+    def select_cols(self):
+        """
+            Select the output columns taking into account the metadata if available.
+        """
+
+        if self.metadata:
+            format_meta = self.metadata.split(',')
+            selected_columns = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
+            selected_columns.extend(format_meta)
+        else:
+            selected_columns = self.curated_data.columns
+
+        return selected_columns
+
 
     def get_substance_types(self) -> pd.DataFrame:
         """
