@@ -339,8 +339,11 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
     
     # get curation parameters
     params = Parameters()
-    curation_parameters = params.get_parameters(endpoint_curation)
+    success, curation_parameters = params.get_parameters(endpoint_curation)
     
+    if not success:
+        return success, curation_parameters
+
     identifier = curation_parameters['molecule_identifier']
     smiles_column = curation_parameters['structure_column']
 
@@ -359,7 +362,7 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
         problematic_pickle = os.path.join(endpoint_curation,'Problematic_structures_removed.pkl')
 
         if not os.path.isfile(problematic_pickle):
-            return False, 'Problematic structures pickle does not exist. Please use -r option for curating a dataset.\n'
+            return False, 'Problematic structures pickle does not exist. Please use -r option when curating a dataset.\n'
         
         problematic_data = pd.read_pickle(problematic_pickle)
         utils.format_output(data = problematic_data, 

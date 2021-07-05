@@ -172,7 +172,7 @@ class Parameters:
 
         return yaml_out
     
-    def get_parameters(self, curation_path: str) -> dict:
+    def get_parameters(self, curation_path: str) -> Union[Tuple[bool,str],Tuple[bool,dict]]:
         """
             Returns curation_parameters.yaml as a dict
 
@@ -182,13 +182,17 @@ class Parameters:
         parameters_file_path = utils.curation_tree_path(curation_path)
         parameters_file_name = os.path.join(parameters_file_path,
                                             'curation_parameters.yaml')
-        curation_parameters = {}
+        
+        if os.path.isfile(parameters_file_name) is None:
+            return False, 'curation_parameters.yaml not found'
+        else:
+            curation_parameters = {}
 
-        with open(parameters_file_name, 'r') as pfile:
-            lines = pfile.readlines()
+            with open(parameters_file_name, 'r') as pfile:
+                lines = pfile.readlines()
 
-            for line in lines:
-                key, value = line.strip().split(':')
-                curation_parameters.update({key:value.strip()})
+                for line in lines:
+                    key, value = line.strip().split(':')
+                    curation_parameters.update({key:value.strip()})
 
-        return curation_parameters
+            return True, curation_parameters
