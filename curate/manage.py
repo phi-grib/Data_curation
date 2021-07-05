@@ -315,7 +315,7 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     
     return True, head_
 
-def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
+def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
     """
         Returns the output file in the specified format and problematic structures file if the option was selected
 
