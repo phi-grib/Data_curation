@@ -24,15 +24,15 @@ class Parameters:
     def loadYaml_curation(self, curation_path: str) -> Tuple[bool, str]:       
         """ 
             load a set of parameters from the configuration file present 
-            at the model directory
+            at the curation directory
 
-            adds some parameters identifying the model and the 
+            adds some parameters identifying the curation and the 
             hash of the configuration file
 
             :param curation_path:
         """
 
-        # obtain the path and the default name of the model parameters
+        # obtain the path and the default name of the curation parameters
         parameters_file_path = utils.curation_tree_path(curation_path)
         
         if not os.path.isdir(parameters_file_path):
@@ -50,7 +50,7 @@ class Parameters:
         except Exception as e:
             return False, e
 
-        # add keys for the model
+        # add keys for the curation params
         self.p['endpoint'] = curation_path
         self.p['curation_path'] = parameters_file_path
 
@@ -124,20 +124,6 @@ class Parameters:
             return False, 'unable to write parameters'
 
         return True, 'OK'
-    
-    @staticmethod
-    def saveJSON(self, model, version, input_JSON):
-        p = json.load(input_JSON)
-        parameters_file_path = utils.model_path(model, version)
-        parameters_file_name = os.path.join (parameters_file_path,
-                                            'curation_parameters.yaml')
-        try:
-            with open(parameters_file_name, 'w') as pfile:
-                yaml.dump (p, pfile)
-        except Exception as e:
-            return False
-
-        return True
 
     def update_file_curation(self, curation: str) -> Union[Tuple[bool,str], bool]:
         """
@@ -169,7 +155,7 @@ class Parameters:
         """
             Returns a list from the self.p object containing the parameters
 
-            :return yaml_out
+            :return yaml_out:
         """
 
         yaml_out = []
@@ -185,3 +171,24 @@ class Parameters:
                 yaml_out.append ("{} : {}".format(k,str(v)))
 
         return yaml_out
+    
+    def get_parameters(self, curation_path: str) -> dict:
+        """
+            Returns curation_parameters.yaml as a dict
+
+            :return curation_parameters: curation parameters as dict
+        """
+
+        parameters_file_path = utils.curation_tree_path(curation_path)
+        parameters_file_name = os.path.join(parameters_file_path,
+                                            'curation_parameters.yaml')
+        curation_parameters = {}
+
+        with open(parameters_file_name, 'r') as pfile:
+            lines = pfile.readlines()
+
+            for line in lines:
+                key, value = line.strip().split(':')
+                curation_parameters.update({key:value.strip()})
+
+        return curation_parameters

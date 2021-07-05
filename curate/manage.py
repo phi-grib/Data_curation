@@ -13,9 +13,9 @@ import shutil
 import sys
 import tarfile
 
-from rdkit.Chem import PandasTools
 from typing import Tuple, Union
 
+from curate.parameters import Parameters
 from curate.util import utils
 
 def set_curation_repository(path: str = None):
@@ -360,10 +360,13 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
                         smiles_column = smiles_column, 
                         identifier = identifier)
     
-    if args.remove is None:
+    # gets curation parameters to check if remove problematic is true or false.
+    # if True, it downloads problematic structures file.
 
-        return True, "Curated data downloaded successfully as {}".format(args.format)
-    else:
+    params = Parameters()
+    curation_parameters = params.get_parameters(endpoint_curation)
+
+    if curation_parameters['remove_problematic'] == 'true':
         problematic_pickle = os.path.join(endpoint_curation,'Problematic_structures_removed.pkl')
 
         if not os.path.isfile(problematic_pickle):
@@ -377,9 +380,10 @@ def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
                         identifier = identifier)
         
         return True, "Curated data and problematic structures downloaded successfully as curated_data.{} and Problematic_structures_removed.xlsx".format(format)
+    else:
+        return True, "Curated data downloaded successfully as {}".format(args.format)
 
-
-def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
+def action_parameters(curation_path: str, oformat: str = 'text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """
         Returns an object with the curation parameters for a given endpoint
 
