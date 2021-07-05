@@ -317,15 +317,13 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
 
 def action_curation_results(args) -> Tuple[bool, Union[dict,str]]:
     """
-        Returns the output file
+        Returns the output file in the specified format and problematic structures file if the option was selected
 
-        :param endpoint: curation endpoint
-        :param output_format: format to download the output curated_data
-        :param identifier: identifier for creating the sdf (optional)
+        :param args:
         
         :return bool:
         :return str:
-        :return head_:
+        :return dict:
     """
     
     if args.id_column is None:
