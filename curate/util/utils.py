@@ -200,39 +200,18 @@ def write_sdf(data: pd.DataFrame, outfile_name: str, smiles_column: str, identif
         """
 
         output_name_format = '.'.join([outfile_name,'sdf'])
-        cur_data = prepare_data_for_sdf(data, smiles_column, copy=True)
+        cur_data = prepare_data_for_sdf(data, smiles_column)
         
         PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName=identifier)
 
-def prepare_data_for_sdf(data: pd.DataFrame, smiles_column: str, copy: bool = False) -> Optional[pd.DataFrame]:
+def prepare_data_for_sdf(data: pd.DataFrame, smiles_column: str) -> Optional[pd.DataFrame]:
     """
         Prepares the data to be converted to sdf.
-        If copy, it copies the dataframe so it's not overwritten with new columns before being processed as sdf.
-        Else, it directly uses self.curated_data. This option is used mostly in jupyter or CLI mode to keep the new columns
-        in the python object so it can be manipulated directly in the backend.
 
         :param data: Dataframe to be treated
         :param smiles_column: SMILES column in the dataframe to be processed
-        :param copy: boolean accepting True or False
 
-        :return cur_data: dataframe with new columns added before being converted into sdf.
-    """
-
-    if copy:
-        cur_data = add_mol_column_to_df(data, smiles_column)
-        return cur_data
-    else:
-        add_mol_column_to_df(data, smiles_column)
-
-def add_mol_column_to_df(data: pd.DataFrame, smiles_column: str) -> pd.DataFrame:
-    """
-        Applies PandasTools functionalities to process the structure into a valid format for the sdf transformation.
-
-        :param data: dataframe to be modified
-        :param smiles_column: SMILES column in the dataframe to be processed
-
-        :return data: modified data
-        :return no_mol: data that hasn't been modified
+        :return data: dataframe with new columns added before being converted into sdf.
     """
 
     PandasTools.AddMoleculeColumnToFrame(data, smiles_column)
