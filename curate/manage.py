@@ -325,7 +325,7 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
         :return str:
         :return dict:
     """
-    
+
     # get curation endpoint path
     endpoint_curation = pathlib.Path(utils.curation_tree_path(args.endpoint))
     if endpoint_curation.is_dir() is False:
@@ -355,7 +355,7 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
                         outfile_path = 'curated_data', 
                         smiles_column = smiles_column, 
                         identifier = identifier)
-    
+
     # check if remove problematic is true or false.
     # if True, it downloads problematic structures file.
     if curation_parameters['remove_problematic'] == 'true':
