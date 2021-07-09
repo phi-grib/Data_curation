@@ -227,8 +227,8 @@ class DataCuration(object):
             curated_data.loc[curated_data.index == i,'substance_type_name'] = sub_type
 
         if self.remove_problematic:
-            self.remove_problematic_structures(curated_data)
-            problematic_path = '/'.join([self.output_dir,'Problematic_structures_removed.pkl'])
+            self.curated_data, self.problematic_structures = self.remove_problematic_structures(curated_data)
+            problematic_path = '/'.join([self.output_dir,'problematic_structures_removed.pkl'])
             self.problematic_structures.to_pickle(problematic_path)
             
         else:
@@ -243,7 +243,7 @@ class DataCuration(object):
 
             :param data: input data to be cleaned
 
-            :return data_cleaned: data without problematic structures
+            :return curated_data: data without problematic structures
             :return problematic_structures: data with the problematic structures
 
             TODO: add option to select specific substance types to be removed.
@@ -256,8 +256,10 @@ class DataCuration(object):
                               'inorganic', 'inorganic_metal', 'no_sanitizable_organic',
                               'no_sanitizable_inorganic', 'no_sanitizable_organometallic']
 
-        self.curated_data = data.loc[~data['substance_type_name'].isin(problem_struc_list)]
-        self.problematic_structures = data.loc[data['substance_type_name'].isin(problem_struc_list)]
+        curated_data = data.loc[~data['substance_type_name'].isin(problem_struc_list)]
+        problematic_structures = data.loc[data['substance_type_name'].isin(problem_struc_list)]
+
+        return curated_data, problematic_structures
 
     def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str):
         """
