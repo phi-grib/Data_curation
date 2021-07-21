@@ -6,12 +6,10 @@
 """
 
 import json
-import numpy as np
 import pandas as pd
 import pickle
 import sys
 
-from rdkit import Chem
 from rdkit.Chem import PandasTools
 from typing import Optional, Union
 
@@ -30,7 +28,7 @@ class DataCuration(object):
     """
     
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
-                        endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None, outfile_type: str = None):
+                        endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None):
         """
             Initialize class getting substance types for structure curation.
         """
@@ -44,7 +42,6 @@ class DataCuration(object):
         self.endpoint = endpoint
         self.metadata = metadata
         self.remove_problematic = remove_problematic
-        self.outfile_type = outfile_type
 
         ## Stores a copy of the input data in the curation endpoint directory
         self.write_input_data()
@@ -58,8 +55,7 @@ class DataCuration(object):
                         'endpoint':self.endpoint,
                         'metadata':self.metadata,
                         'separator':self.separator,
-                        'remove_problematic':self.remove_problematic,
-                        'outfile_type':self.outfile_type}
+                        'remove_problematic':self.remove_problematic}
 
         param_string = json.dumps(param_string)
         
@@ -105,120 +101,43 @@ class DataCuration(object):
             Uses the get_output_file function to write a copy of the input data in sdf
         """
 
-        self.get_output_file(outfile_type='sdf', smiles_column=self.structure_column, data=self.input_data, outfile_name='input_data')
+        input_path = '/'.join([self.output_dir,'input_data'])
+        data_copy = self.input_data.copy()
 
-    def get_output_file(self, outfile_type: str = None, smiles_column: str = None, data: pd.DataFrame = None, outfile_name: str = None):
+        utils.format_output(data = data_copy, outfile_type = 'sdf', outfile_path = input_path, smiles_column = self.structure_column)
+
+    def write_output_curation_data(self):
         """
-            Saves the curated data into a specific file format.
-            Requires output file name and type of file (Excel, CSV, TSV, sdf)
-
-            :param outfile_type: format for the output file {.xlsx, .csv, .tsv, .sdf}
-            :param smiles_column: SMILES column in the dataframe to be processed
-            :param data: Dataframe to be written
-            :param outfile_name: name of the output file
-
-            :return output_file:
+            Writes curated data as a pickle that can be loaded and transformed later into another format.
+            It also stores the header for visualization in the API.
         """
 
-        if outfile_type is None and self.outfile_type:
-            outfile_type = self.outfile_type
-        
-        if data is None:
-            data_copy = self.curated_data.copy()
-        else:
-            data_copy = data.copy()
-
-        if outfile_name is None:
-            outfile_name = 'curated_data'
-
-        outfile_full_path = '/'.join([self.output_dir,outfile_name])
-
-        if 'sdf' in outfile_type.lower():
-            self.write_sdf(data_copy, outfile_full_path, smiles_column)
-        elif 'xlsx' in outfile_type.lower() or 'excel' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'xlsx'])
-            data_copy.to_excel(output_name_format)
-        elif 'csv' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'csv'])
-            data_copy.to_csv(output_name_format, sep=',')
-        elif 'tsv' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'tsv'])
-            data_copy.to_csv(output_name_format, sep='\t')
-        elif 'json' in outfile_type.lower():
-            output_name_format = '.'.join([outfile_full_path,'json'])
-            data_copy.to_json(path_or_buf = output_name_format, orient = 'index')
-
-    def save_output_header(self):
-        """
-            Stores in a pickle a header from the curated data so it can be retrieved
-            in the GUI
-        """
-
+        outfile_path = '/'.join([self.output_dir,'curated_data.pkl'])
         head_pickle_full_path = '/'.join([self.output_dir,'curated_data_head.pkl'])
-        if self.metadata:
-            cols = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
-            cols.extend(self.metadata)
-        else:
-            cols = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
+
+        cols = self.select_cols()
+        
+        selected_data = self.curated_data[cols]
+        selected_data.to_pickle(outfile_path)
 
         output_header = self.curated_data[cols].head(10)
         output_header.to_pickle(head_pickle_full_path)
-    
-    def write_sdf(self, data: pd.DataFrame, outfile_name: str, smiles_column: str):
-        """
-            Prepares curated data to be converted into sdf file using
-            PandasTools. Returns non processed molecules in excel format.
 
-            :param data: Dataframe to be written
-            :param smiles_column: SMILES column in the dataframe to be processed
-            :param outfile_name: output file name
+    def select_cols(self) -> list:
         """
+            Select the output columns taking into account the metadata if available.
 
-        output_name_format = '.'.join([outfile_name,'sdf'])
-        cur_data = self.prepare_data_for_sdf(data, smiles_column, copy=True)
+            :return selected_columns: selection of columns from curated data to be used in the final output if metadata is selected.
+        """
         
-        PandasTools.WriteSDF(cur_data, output_name_format, molColName='ROMol', properties=list(cur_data.columns), idName=self.identifier)
-
-    def prepare_data_for_sdf(self, data: pd.DataFrame, smiles_column: str, copy: bool = False) -> Optional[pd.DataFrame]:
-        """
-            Prepares the data to be converted to sdf.
-            If copy, it copies the dataframe so it's not overwritten with new columns before being processed as sdf.
-            Else, it directly uses self.curated_data. This option is used mostly in jupyter or CLI mode to keep the new columns
-            in the python object so it can be manipulated directly in the backend.
-
-            :param data: Dataframe to be treated
-            :param smiles_column: SMILES column in the dataframe to be processed
-            :param copy: boolean accepting True or False
-
-            :return cur_data: dataframe with new columns added before being converted into sdf.
-        """
-
-        if copy:
-            cur_data = self.add_mol_column_to_df(data, smiles_column)
-            return cur_data
+        if self.metadata:
+            format_meta = self.metadata.split(',')
+            selected_columns = [self.identifier,self.structure_column,'structure_curated','substance_type_name']
+            selected_columns.extend(format_meta)
         else:
-            self.add_mol_column_to_df(data, smiles_column)
+            selected_columns = self.curated_data.columns
 
-    def add_mol_column_to_df(self, data: pd.DataFrame, smiles_column: str) -> pd.DataFrame:
-        """
-            Applies PandasTools functionalities to process the structure into a valid format for the sdf transformation.
-
-            :param data: dataframe to be modified
-            :param smiles_column: SMILES column in the dataframe to be processed
-
-            :return data: modified data
-            :return no_mol: data that hasn't been modified
-        """
-
-        PandasTools.AddMoleculeColumnToFrame(data, smiles_column)
-        no_mol = data[data['ROMol'].isna()]
-        data.drop(no_mol.index, axis=0, inplace=True)
-        data.loc[:,'ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
-        
-        if no_mol.empty is False:
-            self.get_output_file(outfile_type='xlsx', data=no_mol, outfile_name='Non_processed_molecules')
-
-        return data
+        return selected_columns
 
     def get_substance_types(self) -> pd.DataFrame:
         """
@@ -308,13 +227,14 @@ class DataCuration(object):
             curated_data.loc[curated_data.index == i,'substance_type_name'] = sub_type
 
         if self.remove_problematic:
-            self.remove_problematic_structures(curated_data)
-            self.get_output_file(outfile_type='xlsx', data=self.problematic_structures, outfile_name='Problematic_structures_removed')
+            self.curated_data, self.problematic_structures = self.remove_problematic_structures(curated_data)
+            problematic_path = '/'.join([self.output_dir,'problematic_structures_removed.pkl'])
+            self.problematic_structures.to_pickle(problematic_path)
+            
         else:
             self.curated_data = curated_data
 
         self.calculate_data_stats(self.curated_data)
-        self.save_output_header()
         
     def remove_problematic_structures(self, data: pd.DataFrame = None) -> pd.DataFrame:
         """
@@ -323,7 +243,7 @@ class DataCuration(object):
 
             :param data: input data to be cleaned
 
-            :return data_cleaned: data without problematic structures
+            :return curated_data: data without problematic structures
             :return problematic_structures: data with the problematic structures
 
             TODO: add option to select specific substance types to be removed.
@@ -336,8 +256,10 @@ class DataCuration(object):
                               'inorganic', 'inorganic_metal', 'no_sanitizable_organic',
                               'no_sanitizable_inorganic', 'no_sanitizable_organometallic']
 
-        self.curated_data = data.loc[~data['substance_type_name'].isin(problem_struc_list)]
-        self.problematic_structures = data.loc[data['substance_type_name'].isin(problem_struc_list)]
+        curated_data = data.loc[~data['substance_type_name'].isin(problem_struc_list)]
+        problematic_structures = data.loc[data['substance_type_name'].isin(problem_struc_list)]
+
+        return curated_data, problematic_structures
 
     def split_dataset(self, train_proportion: float, test_proportion: float, activity_field: str):
         """

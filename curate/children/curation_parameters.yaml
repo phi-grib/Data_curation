@@ -5,4 +5,3 @@ endpoint: curation endpoint
 metadata: metadata of the curation input file
 separator: column separator
 remove_problematic: true/false
-outfile_type: xlsx, csv, tsv, sdf, json.

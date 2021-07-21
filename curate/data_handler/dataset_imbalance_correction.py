@@ -13,7 +13,7 @@ import pandas as pd
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
-from typing import Union, Optional, Tuple
+from typing import Tuple
 
 class ImbalanceData(object):
 

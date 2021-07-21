@@ -10,9 +10,6 @@ import os
 import sys
 
 import curate.context as context
-# from curate.chem import chembl_extraction
-
-
 
 from curate.util import utils, config
 
@@ -38,7 +35,7 @@ def main():
     parser.add_argument('-a', '--action',
                         action='store',
                         help='Manage action.',
-                        choices=['silent','new','list','remove','chembl'],
+                        choices=['silent','new','list','remove','chembl','export', 'download'],
                         required=False)
     
     parser.add_argument('-c', '--command',
@@ -60,6 +57,10 @@ def main():
                         help='Column name where the SMILES string is found.',
                         required=False)
     
+    parser.add_argument('-m', '--metadata',
+                        help='Selects the metadata columns to be processed. Optional.',
+                        required=False)
+
     parser.add_argument('-sep', '--separator',
                         help='If added, takes this argument as the file separator.',
                         required=False)
@@ -91,8 +92,8 @@ def main():
         else:
             input_file = args.infile
 
-        if (input_file is None) or (args.format is None) or (args.endpoint is None):
-            sys.stderr.write("datacur curate : input, output format and endpoint arguments are compulsory\n")
+        if (input_file is None) or (args.endpoint is None):
+            sys.stderr.write("datacur curate : input and endpoint arguments are compulsory\n")
             return
         
         if args.id_column is None:
@@ -110,12 +111,17 @@ def main():
         else:
             sep = None
 
+        if args.metadata:
+            meta_ = args.metadata
+        else:
+            meta_ = None
+        
         command = {'data_input':args.infile,
                     'molecule_identifier':id_,
                     'structure_column':smiles_,
+                    'metadata':meta_,
                     'separator':sep,
                     'remove_problematic':args.remove,
-                    'outfile_type':args.format,
                     'endpoint':args.endpoint}
 
         context.curation_cmd(command)

@@ -39,14 +39,14 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
     
     # check of metadata
 
-    if 'metadata' in commnad_dict.keys():
-        metadata_ = commnad_dict['metadata'].split(',')
+    if commnad_dict['metadata']:
+        metadata_ = commnad_dict['metadata']
         if (commnad_dict['molecule_identifier'] in metadata_) or (commnad_dict['structure_column'] in metadata_):
             sys.stderr.write("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
             return
     else:
         metadata_ = None
-
+    
     # call of curation functions
 
     curating = datacur.DataCuration(data_input=commnad_dict['data_input'], 
@@ -56,12 +56,10 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                                     endpoint=commnad_dict['endpoint'],
                                     metadata=metadata_,
                                     separator=commnad_dict['separator'],
-                                    remove_problematic=commnad_dict['remove_problematic'],
-                                    outfile_type=commnad_dict['outfile_type'])
+                                    remove_problematic=commnad_dict['remove_problematic'])
 
     curating.curate_data()
-
-    curating.get_output_file(smiles_column='structure_curated')
+    curating.write_output_curation_data()
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """
@@ -79,6 +77,10 @@ def manage_cmd(arguments: dict) -> Tuple[bool, str]:
         success, results = manage.action_list(arguments.endpoint)
     elif arguments.action == 'remove':
         success, results = manage.action_remove(arguments.endpoint)
+    elif arguments.action == 'export':
+        success, results = manage.action_export(arguments.endpoint)
+    elif arguments.action == 'download':
+        success, results = manage.action_curation_results(arguments)
     else: 
         success = False
         results = "Specified manage action is not defined\n"

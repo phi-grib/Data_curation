@@ -5,7 +5,6 @@
     On: 18/02/2021, 17:49 PM
 """
 
-import json
 import os
 import pandas as pd
 import pathlib
@@ -14,9 +13,9 @@ import shutil
 import sys
 import tarfile
 
-from rdkit.Chem import PandasTools
 from typing import Tuple, Union
 
+from curate.parameters import Parameters
 from curate.util import utils
 
 def set_curation_repository(path: str = None):
@@ -127,8 +126,6 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
         num_files = 0
         sys.stderr.write('Files found in curation endpoint {}:\n'.format(curation_dir))
         for x in os.listdir(base_path):
-            if x.endswith('.json'):
-                continue
             num_files += 1
             xpath = os.path.join(base_path,x)
             creation_date = get_creation_date(xpath)
@@ -195,10 +192,6 @@ def action_dir() -> Tuple[bool,Union[str,list]]:
         results.append(dir_dict)
     
     return True, results
-
-
-
-
 
 def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     """
@@ -322,52 +315,73 @@ def action_header_curation(endpoint: str) -> Tuple[bool, Union[str,dict]]:
     
     return True, head_
 
-def action_curation_results(endpoint: str) -> Tuple[bool, str]:
+def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
     """
-        Returns the output file
+        Returns the output file in the specified format and problematic structures file if the option was selected
 
-        :param endpoint: curation endpoint
+        :param args:
         
         :return bool:
         :return str:
-        :return head_:
+        :return dict:
     """
+
+    # get current working directory to store curated data
+    current_path = os.getcwd()
+    curation_output_file = os.path.join(current_path,'curated_data')
     
     # get curation endpoint path
-    endpoint_curation = pathlib.Path(utils.curation_tree_path(endpoint))
+    endpoint_curation = pathlib.Path(utils.curation_tree_path(args.endpoint))
     if endpoint_curation.is_dir() is False:
         return False,  'Curation endpoint path does not exist.\n'
     
     # get curation file in curation endpint
-    curation_file = [f for f in os.listdir(endpoint_curation) if f.startswith('curated_data') and 'head' not in f]
-
-    if not curation_file:
-        return False, {'code':0, 'message': 'curations not found for {} directory'.format(endpoint)}
-    else:
-        curation_file_path = os.path.join(endpoint_curation, curation_file[0])
+    curation_file_pickle = [f for f in os.listdir(endpoint_curation) if f == 'curated_data.pkl']
     
-    # curation_ = []
-    # if curation_file_path.endswith('.csv'):
-    #     with (open(curation_file_path, "rb")) as openfile:
-    #         curation_ = pd.read_csv(curation_file_path, delimiter=',')
-    #         curation_ = curation_.to_dict('list')
-    # elif curation_file_path.endswith('.tsv'):
-    #     with (open(curation_file_path, "rb")) as openfile:
-    #         curation_ = pd.read_csv(curation_file_path, delimiter='\t')
-    #         curation_ = curation_.to_dict('list')
-    # elif curation_file_path.endswith('.xlsx'):
-    #     curation_ = pd.read_excel(curation_file_path, engine='openpyxl')
-    #     curation_ = curation_.to_dict('list')
-    # elif curation_file_path.endswith('.json'):
-    #     with (open(curation_file_path)) as openfile:
-    #         curation_.append(json.load(openfile))
-    # elif curation_file_path.endswith('.sdf'):
-    #     curation_ = PandasTools.LoadSDF(curation_file_path, smilesName='structure_curated',molColName='name', removeHs=False, strictParsing=True)
-    #     curation_ = curation_.to_dict('list')
+    if not curation_file_pickle:
+        return False, {'code':0, 'message': 'curations not found for {} directory'.format(args.endpoint)}
+    
+    # get curation parameters
+    params = Parameters()
+    success, curation_parameters = params.get_parameters(endpoint_curation)
+    
+    if not success:
+        return success, curation_parameters
 
-        return True, curation_file_path
+    identifier = curation_parameters['molecule_identifier']
+    smiles_column = curation_parameters['structure_column']
 
-def action_parameters(curation_path: str, oformat: str ='text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
+    curation_pickle_path = os.path.join(endpoint_curation,curation_file_pickle[0])
+    curated_data = pd.read_pickle(curation_pickle_path)
+    
+    utils.format_output(data = curated_data, 
+                        outfile_type = args.format, 
+                        outfile_path = curation_output_file, 
+                        smiles_column = smiles_column, 
+                        identifier = identifier)
+
+    # check if remove problematic is true or false.
+    # if True, it downloads problematic structures file.
+    if curation_parameters['remove_problematic'] == 'true':
+        problematic_pickle = os.path.join(endpoint_curation,'problematic_structures_removed.pkl')
+
+        if not os.path.isfile(problematic_pickle):
+            return False, 'Problematic structures pickle does not exist. Please use -r option when curating a dataset.\n'
+        
+        problematic_data = pd.read_pickle(problematic_pickle)
+        problematic_output_file = os.path.join(current_path,'problematic_structures_removed')
+        
+        utils.format_output(data = problematic_data, 
+                        outfile_type = 'xlsx', 
+                        outfile_path = problematic_output_file, 
+                        smiles_column = smiles_column, 
+                        identifier = identifier)
+        
+        return True, "Curated data and problematic structures downloaded successfully as curated_data.{} and problematic_structures_removed.xlsx".format(format)
+    else:
+        return True, "Curated data downloaded successfully as {}".format(args.format)
+
+def action_parameters(curation_path: str, oformat: str = 'text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """
         Returns an object with the curation parameters for a given endpoint
 
