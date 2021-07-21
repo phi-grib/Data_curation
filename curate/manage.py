@@ -377,7 +377,18 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
                         smiles_column = smiles_column, 
                         identifier = identifier)
         
-        return True, "Curated data and problematic structures downloaded successfully as curated_data.{} and problematic_structures_removed.xlsx".format(format)
+        exportfile = os.path.join(current_path,'curation.tgz')
+
+        itemend = os.listdir()
+        itemend.sort()
+
+        with tarfile.open(exportfile, 'w:gz') as tar:
+            for iversion in itemend:
+                if not os.path.isdir(iversion):
+                    continue
+                tar.add(iversion)
+
+        return True, "Curated data and problematic structures downloaded successfully in a tarfile as curation.tgz"
     else:
         return True, "Curated data downloaded successfully as {}".format(args.format)
 
