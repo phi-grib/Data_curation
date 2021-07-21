@@ -326,6 +326,10 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
         :return dict:
     """
 
+    # get current working directory to store curated data
+    current_path = os.getcwd()
+    curation_output_file = os.path.join(current_path,'curated_data')
+    
     # get curation endpoint path
     endpoint_curation = pathlib.Path(utils.curation_tree_path(args.endpoint))
     if endpoint_curation.is_dir() is False:
@@ -352,7 +356,7 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
     
     utils.format_output(data = curated_data, 
                         outfile_type = args.format, 
-                        outfile_path = 'curated_data', 
+                        outfile_path = curation_output_file, 
                         smiles_column = smiles_column, 
                         identifier = identifier)
 
@@ -365,9 +369,11 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
             return False, 'Problematic structures pickle does not exist. Please use -r option when curating a dataset.\n'
         
         problematic_data = pd.read_pickle(problematic_pickle)
+        problematic_output_file = os.path.join(current_path,'problematic_structures_removed')
+        
         utils.format_output(data = problematic_data, 
                         outfile_type = 'xlsx', 
-                        outfile_path = 'problematic_structures_removed', 
+                        outfile_path = problematic_output_file, 
                         smiles_column = smiles_column, 
                         identifier = identifier)
         
