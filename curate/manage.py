@@ -378,15 +378,13 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
                         identifier = identifier)
         
         exportfile = os.path.join(current_path,'curation.tgz')
-
-        itemend = os.listdir()
-        itemend.sort()
-
+        list_of_files = ['.'.join(['curated_data',args.format]),'problematic_structures_removed.xlsx']
+        
         with tarfile.open(exportfile, 'w:gz') as tar:
-            for iversion in itemend:
-                if not os.path.isdir(iversion):
+            for file_ in list_of_files:
+                if not os.path.isfile(file_):
                     continue
-                tar.add(iversion)
+                tar.add(file_)
 
         return True, "Curated data and problematic structures downloaded successfully in a tarfile as curation.tgz"
     else:
