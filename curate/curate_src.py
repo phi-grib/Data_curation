@@ -136,5 +136,9 @@ def main():
         if not success:
             sys.stderr.write(results)
 
+    elif args.command == 'split':
+        sys.stderr.write('Section under construction\n')
+        sys.exit()
+        
 if __name__ == '__main__':
     main()

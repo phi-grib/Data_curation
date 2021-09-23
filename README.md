@@ -139,8 +139,8 @@ The output file will be stored in the local directory where the command has been
 | -i/ --infile |  Name of the input file used by the command. |
 | -e/ --endpoint |  Name of the endpoint of our curation files. |
 | -f/ --format | Output file formats that can be provided. Acceptable values are *xlsx*, *csv*, *tsv*, *sdf* and *json*. |
-| -a/ --action | Management action to be carried out. Acceptable value are *silent*, *new*, *list* and *remove*. The meaning of these actions and examples of use are provided below. |
-| -c/ --command | Specific action to be done. Acceptable values are *curate*, *split* and *config*. |
+| -a/ --action | Management action to be carried out. Acceptable value are *silent*, *new*, *list*, *remove*, *export* and *download*. The meaning of these actions and examples of use are provided below. |
+| -c/ --command | Specific action to be done. Acceptable values are *curate*, *split*, *config* and *manage*. |
 | -d/ --directory | Defines the root directory for the curation repository. |
 | -id/ --id_column | Column name containing the molecule identifier. |
 | -s/ --smiles_col | Column name containing the SMILES string. |
