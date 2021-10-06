@@ -27,9 +27,9 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                 - separator: file separator if input file is a csv or a tsv
                 - remove_problematic: boolean indicating the option of removing problematic structures or not
                 - outfile_type: output file type: xlsx, csv, tsv, sdf or json
+                - curation_type: chooses wheter to perform the classical chemical curation ('chem') or 
+                a more specific one for htt files ('htt')
     """
-    
-    import curate.dataset_curation as datacur
     
     # safety check if curation endpoint exists
     output_dir = utils.curation_tree_path(commnad_dict['endpoint'])
@@ -48,6 +48,22 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
         metadata_ = None
     
     # call of curation functions
+    if commnad_dict['curation_type'] == 'chem':
+        chemical_curation(commnad_dict=commnad_dict, output_dir=output_dir, metadata_=metadata_)
+    elif commnad_dict['curation_type'] == 'htt':
+        high_througput_curation(commnad_dict=commnad_dict, output_dir=output_dir, metadata_=metadata_)
+
+def chemical_curation(commnad_dict: dict, output_dir: str, metadata_: str):
+    """
+        Performs the chemical curation of the file.
+        Checks SMILES and fixes them if possible and adds a substance type based on the structure.
+
+        :param command_dict:
+        :param output_dir:
+        :param metadata_:
+    """
+
+    import curate.dataset_curation as datacur
 
     curating = datacur.DataCuration(data_input=commnad_dict['data_input'], 
                                     molecule_identifier=commnad_dict['molecule_identifier'],
@@ -60,6 +76,28 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
 
     curating.curate_data()
     curating.write_output_curation_data()
+
+def high_througput_curation(commnad_dict: dict, output_dir: str, metadata_: str):
+    """
+        Performs the curation of htt input files alongside with a chemical curation of the SMILES
+
+        :param command_dict:
+        :param output_dir:
+    """
+
+    import curate.htt.htt_curation as httcur
+
+    htt_cur = httcur.htt_curation(data_input=commnad_dict['data_input'], 
+                                    molecule_identifier=commnad_dict['molecule_identifier'],
+                                    structure_column=commnad_dict['structure_column'],
+                                    output_dir=output_dir,
+                                    endpoint=commnad_dict['endpoint'],
+                                    metadata=metadata_,
+                                    separator=commnad_dict['separator'],
+                                    remove_problematic=commnad_dict['remove_problematic'])
+
+
+    print(htt_cur.input_data)
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """

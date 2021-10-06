@@ -35,7 +35,7 @@ def main():
     parser.add_argument('-a', '--action',
                         action='store',
                         help='Manage action.',
-                        choices=['silent','new','list','remove','chembl','export', 'download'],
+                        choices=['silent','new','list','remove','chembl','chem','htt','export', 'download'],
                         required=False)
     
     parser.add_argument('-c', '--command',
@@ -92,8 +92,8 @@ def main():
         else:
             input_file = args.infile
 
-        if (input_file is None) or (args.endpoint is None):
-            sys.stderr.write("datacur curate : input and endpoint arguments are compulsory\n")
+        if (input_file is None) or (args.endpoint is None) or (args.action is None):
+            sys.stderr.write("datacur curate : input, endpoint and action arguments are compulsory\n")
             return
         
         if args.id_column is None:
@@ -122,7 +122,8 @@ def main():
                     'metadata':meta_,
                     'separator':sep,
                     'remove_problematic':args.remove,
-                    'endpoint':args.endpoint}
+                    'endpoint':args.endpoint,
+                    'curation_type':args.action}
 
         context.curation_cmd(command)
     
