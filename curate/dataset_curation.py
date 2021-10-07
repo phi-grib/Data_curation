@@ -28,7 +28,8 @@ class DataCuration(object):
     """
     
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
-                        endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None):
+                        endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None, 
+                        curation_type: str = None):
         """
             Initialize class getting substance types for structure curation.
         """
@@ -55,7 +56,8 @@ class DataCuration(object):
                         'endpoint':self.endpoint,
                         'metadata':self.metadata,
                         'separator':self.separator,
-                        'remove_problematic':self.remove_problematic}
+                        'remove_problematic':self.remove_problematic,
+                        'curation_type':curation_type}
 
         param_string = json.dumps(param_string)
         

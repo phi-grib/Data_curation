@@ -362,6 +362,9 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
 
     # check if remove problematic is true or false.
     # if True, it downloads problematic structures file.
+    if curation_parameters['curation_type'] == 'htt':
+        print('yeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeah')
+        
     if curation_parameters['remove_problematic'] == 'true':
         problematic_pickle = os.path.join(endpoint_curation,'problematic_structures_removed.pkl')
 

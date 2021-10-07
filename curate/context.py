@@ -72,7 +72,8 @@ def chemical_curation(commnad_dict: dict, output_dir: str, metadata_: str):
                                     endpoint=commnad_dict['endpoint'],
                                     metadata=metadata_,
                                     separator=commnad_dict['separator'],
-                                    remove_problematic=commnad_dict['remove_problematic'])
+                                    remove_problematic=commnad_dict['remove_problematic'],
+                                    curation_type=commnad_dict['curation_type'])
 
     curating.curate_data()
     curating.write_output_curation_data()
@@ -86,7 +87,7 @@ def high_througput_curation(commnad_dict: dict, output_dir: str, metadata_: str)
     """
 
     import curate.htt.htt_curation as httcur
-
+    
     htt_cur = httcur.htt_curation(data_input=commnad_dict['data_input'], 
                                     molecule_identifier=commnad_dict['molecule_identifier'],
                                     structure_column=commnad_dict['structure_column'],
@@ -94,7 +95,8 @@ def high_througput_curation(commnad_dict: dict, output_dir: str, metadata_: str)
                                     endpoint=commnad_dict['endpoint'],
                                     metadata=metadata_,
                                     separator=commnad_dict['separator'],
-                                    remove_problematic=commnad_dict['remove_problematic'])
+                                    remove_problematic=commnad_dict['remove_problematic'],
+                                    curation_type=commnad_dict['curation_type'])
 
 
     htt_cur.chemical_curation()

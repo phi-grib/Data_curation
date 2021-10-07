@@ -159,7 +159,7 @@ class Parameters:
         yaml_out = []
 
         order = ['data_input','molecule_identifier','structure_column','endpoint',
-                 'metadata','separator','remove_problematic','curation_path']
+                 'metadata','separator','remove_problematic','curation_type','curation_path']
 
         for ik in order:
             if ik in self.p:
