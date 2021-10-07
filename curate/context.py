@@ -97,7 +97,8 @@ def high_througput_curation(commnad_dict: dict, output_dir: str, metadata_: str)
                                     remove_problematic=commnad_dict['remove_problematic'])
 
 
-    print(htt_cur.input_data)
+    htt_cur.chemical_curation()
+    htt_cur.write_chem_output_and_x_matrix()
 
 def manage_cmd(arguments: dict) -> Tuple[bool, str]:
     """
