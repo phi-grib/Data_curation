@@ -43,7 +43,7 @@ class DataCuration(object):
         self.endpoint = endpoint
         self.metadata = metadata
         self.remove_problematic = remove_problematic
-
+        
         ## Stores a copy of the input data in the curation endpoint directory
         self.write_input_data()
         
@@ -105,7 +105,7 @@ class DataCuration(object):
 
         input_path = '/'.join([self.output_dir,'input_data'])
         data_copy = self.input_data.copy()
-
+        
         utils.format_output(data = data_copy, outfile_type = 'sdf', outfile_path = input_path, smiles_column = self.structure_column)
 
     def write_output_curation_data(self):

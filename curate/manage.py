@@ -360,38 +360,82 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
                         smiles_column = smiles_column, 
                         identifier = identifier)
 
-    # check if remove problematic is true or false.
-    # if True, it downloads problematic structures file.
-    if curation_parameters['curation_type'] == 'htt':
-        print('yeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeah')
-        
-    if curation_parameters['remove_problematic'] == 'true':
-        problematic_pickle = os.path.join(endpoint_curation,'problematic_structures_removed.pkl')
+    # check if remove problematic is true or false and if curation type is htt.
+    # if flag = 1, it downloads problematic structures file and/or x matrix in a tarball.
 
-        if not os.path.isfile(problematic_pickle):
-            return False, 'Problematic structures pickle does not exist. Please use -r option when curating a dataset.\n'
+    flag = 0
+    list_of_files = []
+
+    if curation_parameters['curation_type'] == 'htt':
+        flag = 1
+        log = 'X matrix pickle does not exist. Please use -a htt option when curating a dataset.\n'
+
+        output_handling(endpoint=endpoint_curation,
+                        filename='x_matrix',
+                        log=log,
+                        currpath=current_path,
+                        outfile_type='tsv',
+                        smiles=None,
+                        id=None)
         
-        problematic_data = pd.read_pickle(problematic_pickle)
-        problematic_output_file = os.path.join(current_path,'problematic_structures_removed')
-        
-        utils.format_output(data = problematic_data, 
-                        outfile_type = 'xlsx', 
-                        outfile_path = problematic_output_file, 
-                        smiles_column = smiles_column, 
-                        identifier = identifier)
-        
+        list_of_files.append('x_matrix.tsv')
+
+    if curation_parameters['remove_problematic'] == 'true':
+        flag = 1
+        log = 'Problematic structures pickle does not exist. Please use -r option when curating a dataset.\n'
+
+        output_handling(endpoint=endpoint_curation,
+                        filename='problematic_structures_removed',
+                        log=log,
+                        currpath=current_path,
+                        outfile_type='xlsx',
+                        smiles=smiles_column,
+                        id=identifier)
+
+        list_of_files.append('problematic_structures_removed.xlsx')
+    
+    if flag == 1:
         exportfile = os.path.join(current_path,'curation.tgz')
-        list_of_files = ['.'.join(['curated_data',args.format]),'problematic_structures_removed.xlsx']
+        list_of_files.append('.'.join(['curated_data',args.format]))
         
         with tarfile.open(exportfile, 'w:gz') as tar:
             for file_ in list_of_files:
                 if not os.path.isfile(file_):
                     continue
                 tar.add(file_)
-
-        return True, "Curated data and problematic structures downloaded successfully in a tarfile as curation.tgz"
+        
+        outfile_name = 'curation.tgz'
     else:
-        return True, "Curated data downloaded successfully as {}".format(args.format)
+        outfile_name = '.'.join(['curated_data',args.format])
+
+    return True, "Curated data downloaded successfully as {}".format(outfile_name)
+
+def output_handling(endpoint: str, filename: str, log: str, currpath: str, outfile_type: str, smiles: str, id: str):
+    """
+        Writes the proper output file given the parameters.
+
+        :param endpoint: endpoint directory path
+        :param filename: name of the output file wihtout the format
+        :param log: log to show if the file is not found
+        :param currpath: current working directory path
+        :param outfile_type: format of the output file
+        :param smiles: smiles column name
+        :param id: modelcule identifier column name
+    """
+
+    pickle = os.path.join(endpoint, '.'.join([filename,'pkl']))
+
+    if not os.path.isfile(pickle):
+        return False, log
+    
+    data = pd.read_pickle(pickle)
+    output_file = os.path.join(currpath,filename)
+    
+    utils.format_output(data = data, 
+                    outfile_type = outfile_type, 
+                    outfile_path = output_file, 
+                    smiles_column = smiles, 
+                    identifier = id)
 
 def action_parameters(curation_path: str, oformat: str = 'text') -> Union[Tuple[bool, str],Tuple[bool, object]]:
     """

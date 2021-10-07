@@ -31,7 +31,7 @@ class htt_curation(DataCuration):
                             endpoint, metadata, separator, remove_problematic, curation_type)
         
         self.x_matrix = self.get_x_matrix()
-        self.y_matrix = pd.DataFrame()
+        #self.y_matrix = pd.DataFrame()
 
     def get_x_matrix(self) -> pd.DataFrame:
         """
@@ -55,10 +55,12 @@ class htt_curation(DataCuration):
     def get_y_matrix(self) -> pd.DataFrame:
         """
         """
+
         pass
 
     def chemical_curation(self):
         """
+            Performs the chemical curation of the input data. Only includes the identifier and the SMILES
         """
 
         self.input_data = self.input_data[[self.identifier, self.structure_column]]
@@ -66,6 +68,7 @@ class htt_curation(DataCuration):
     
     def write_chem_output_and_x_matrix(self):
         """
+            Writes x matrix into a pickle in the output directory
         """
 
         self.write_output_curation_data()
