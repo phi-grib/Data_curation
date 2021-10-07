@@ -90,26 +90,26 @@ Now the curation repository is totally configured and ready to store the outputs
 Let's curate a sample file:
 
 ```sh
-datacur -i sample_file.xlsx -e myEndpoint -c curate -r
+datacur -i sample_file.xlsx -e myEndpoint -c curate -r -a chem
 ```
 
-This will take the input file sample_file.xlsx and store the curated data as a pickle file in the curation repository (curated_data.pkl). With -r we asked the program to remove problematic structures and store them in a separate file for further revision. Since we haven't specified SMILES column nor ID column, the program uses a predifined name for each, being 'structure' for SMILES and 'name' for ID. If we want to specify those columns, which is recommended, we have to type:
+This will take the input file sample_file.xlsx and store the curated data as a pickle file in the curation repository (curated_data.pkl). With -r we asked the program to remove problematic structures and store them in a separate file for further revision. With -a chem we perform only a chemical curation (i.e. only the SMILES are treated). Since we haven't specified SMILES column nor ID column, the program uses a predifined name for each, being 'structure' for SMILES and 'name' for ID. If we want to specify those columns, which is recommended, we have to type:
 
 ```sh
-datacur -i sample_file.xlsx -e myEndpoint -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.xlsx -e myEndpoint -c curate -a chem -s smiles_colname -id id_colname -r
 ```
 
 In that case, our input is an Excel file and the code handles this internally using Pandas option read_excel().
 If we want to use another accepted format, like csv or tsv and we know we have a specific separator that is not a comma nor a tab, we can also specify the separator using the -sep option:
 
 ```sh
-datacur -i sample_file.csv -e myEndpoint -sep ':' -c curate -s smiles_colname -id id_colname -r
+datacur -i sample_file.csv -e myEndpoint -sep ':' -c curate -a chem -s smiles_colname -id id_colname -r
 ```
 
 If we have a large file containing lots of columns but we only want to keep some of them, then the --metadata or -m option is available. It will generate
 an output only containing the most important columns for the curation plus the ones selected as metadata. Imagine that our file contains the columns meta1 and meta 2:
 ```sh
-datacur -i sample_file.csv -e myEndpoint -c curate -s smiles_colname -id id_colname -r -m 'meta1,meta2'
+datacur -i sample_file.csv -e myEndpoint -c curate -a chem -s smiles_colname -id id_colname -r -m 'meta1,meta2'
 ```
 
 Our output will be stored containig the columns id_colname, smiles_colname, structure_curated, substance_type_name, meta1 and meta2. If this option is not selected, all the columns are stored by default.
@@ -127,6 +127,17 @@ datacur -a download -c manage -e myEndpoint -f sdf
 ```
 
 The output file will be stored in the local directory where the command has been executed.
+
+## HTT-like files
+
+This special curation option is specified with -a htt. It basically detects which columns include floats and puts them into a file called x_matrix which is returned as a tsv.
+It performs the chemical curation only taking into account the molecule identifier and the SMILES column and it can be executed typing the following:
+
+```sh
+datacur -i sample_file_htt.xlsx -e myEndpoint -c curate -a htt -s smiles_colname -id id_colname -r
+```
+
+We can recover the output using the download option mentioned above.
 
 ## ChEMBL download
 
