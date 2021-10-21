@@ -41,7 +41,7 @@ class Curator(object):
 
         self.smiles = smiles
         self.smiles_mol = self.smiles_to_rdkit_mol(smiles)
-
+        
     def smiles_to_rdkit_mol(self, smiles: str) -> Optional[Chem.Mol]:
         """
             Converts a SMILES string to a RDKit molecule.
@@ -127,12 +127,15 @@ class Curator(object):
             :return final_smi: canonicalized SMILES
         """
 
-        try:
-            final_smi = standardizer.standardize_mol(smi)
-        except:
-            final_smi = smi
-        final_smi = Chem.MolToSmiles(final_smi)
-        final_smi = self.salt_remover(final_smi)
+        if smi is None:
+            final_smi = self.smiles
+        else:
+            try:
+                final_smi = standardizer.standardize_mol(smi)
+            except:
+                final_smi = smi
+            final_smi = Chem.MolToSmiles(final_smi)
+            final_smi = self.salt_remover(final_smi)
 
         return final_smi
 
