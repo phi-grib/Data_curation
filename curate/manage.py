@@ -328,18 +328,11 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
 
     # get current working directory to store curated data
     current_path = os.getcwd()
-    curation_output_file = os.path.join(current_path,'curated_data')
     
     # get curation endpoint path
-    endpoint_curation = pathlib.Path(utils.curation_tree_path(args.endpoint))
-    if endpoint_curation.is_dir() is False:
+    endpoint_curation = utils.curation_tree_path(args.endpoint)
+    if not os.path.exists(os.path.dirname(endpoint_curation)):
         return False,  'Curation endpoint path does not exist.\n'
-    
-    # get curation file in curation endpint
-    curation_file_pickle = [f for f in os.listdir(endpoint_curation) if f == 'curated_data.pkl']
-    
-    if not curation_file_pickle:
-        return False, {'code':0, 'message': 'curations not found for {} directory'.format(args.endpoint)}
     
     # get curation parameters
     params = Parameters()
@@ -350,15 +343,15 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
 
     identifier = curation_parameters['molecule_identifier']
     smiles_column = curation_parameters['structure_column']
+    log = 'curations not found for {} directory'.format(args.endpoint)
 
-    curation_pickle_path = os.path.join(endpoint_curation,curation_file_pickle[0])
-    curated_data = pd.read_pickle(curation_pickle_path)
-    
-    utils.format_output(data = curated_data, 
-                        outfile_type = args.format, 
-                        outfile_path = curation_output_file, 
-                        smiles_column = smiles_column, 
-                        identifier = identifier)
+    output_handling(endpoint=endpoint_curation,
+                    filename='curated_data',
+                    log=log,
+                    currpath=endpoint_curation,
+                    outfile_type=args.format,
+                    smiles=smiles_column,
+                    id=identifier)
 
     # check if remove problematic is true or false and if curation type is htt.
     # if flag = 1, it downloads problematic structures file and/or x matrix in a tarball.
@@ -373,7 +366,7 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
         output_handling(endpoint=endpoint_curation,
                         filename='x_matrix',
                         log=log,
-                        currpath=current_path,
+                        currpath=endpoint_curation,
                         outfile_type='tsv',
                         smiles=None,
                         id=None)
@@ -387,7 +380,7 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
         output_handling(endpoint=endpoint_curation,
                         filename='problematic_structures_removed',
                         log=log,
-                        currpath=current_path,
+                        currpath=endpoint_curation,
                         outfile_type='xlsx',
                         smiles=smiles_column,
                         id=identifier)
@@ -398,15 +391,23 @@ def action_curation_results(args: list) -> Tuple[bool, Union[dict,str]]:
         exportfile = os.path.join(current_path,'curation.tgz')
         list_of_files.append('.'.join(['curated_data',args.format]))
         
+        os.chdir(endpoint_curation)
+
         with tarfile.open(exportfile, 'w:gz') as tar:
             for file_ in list_of_files:
                 if not os.path.isfile(file_):
                     continue
                 tar.add(file_)
+                os.remove(file_)
         
         outfile_name = 'curation.tgz'
+        os.chdir(current_path)
     else:
         outfile_name = '.'.join(['curated_data',args.format])
+        source_curation = os.path.join(endpoint_curation,outfile_name)
+        output_curation = os.path.join(current_path,outfile_name)
+        shutil.copy(source_curation, output_curation)
+        os.remove(source_curation)
 
     return True, "Curated data downloaded successfully as {}".format(outfile_name)
 
@@ -424,7 +425,7 @@ def output_handling(endpoint: str, filename: str, log: str, currpath: str, outfi
     """
 
     pickle = os.path.join(endpoint, '.'.join([filename,'pkl']))
-
+    
     if not os.path.isfile(pickle):
         return False, log
     
