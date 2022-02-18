@@ -56,9 +56,8 @@ def curation_cmd(commnad_dict: dict) -> Optional[bool]:
                                     endpoint=commnad_dict['endpoint'],
                                     metadata=metadata_,
                                     separator=commnad_dict['separator'],
-                                    remove_problematic=commnad_dict['remove_problematic'],
-                                    curation_type=commnad_dict['curation_type'])
-
+                                    remove_problematic=commnad_dict['remove_problematic'])
+    
     if commnad_dict['curation_type'] == 'chem':
         curation.curate_data()
         curation.write_output_curation_data()

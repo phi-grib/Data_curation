@@ -13,6 +13,7 @@ import sys
 from rdkit.Chem import PandasTools
 from typing import Optional, Union
 
+from curate.chem import chembl_extraction
 from curate.parameters import Parameters
 from curate.util import utils
 
@@ -58,7 +59,7 @@ class DataCuration(object):
                         'separator':self.separator,
                         'remove_problematic':self.remove_problematic,
                         'curation_type':curation_type}
-
+        
         param_string = json.dumps(param_string)
         
         success, message = self.param.delta_curation(endpoint, param_string, iformat='JSONS')
@@ -71,8 +72,9 @@ class DataCuration(object):
         """
             Checks if input is an Excel file and converts it into pandas dataframe.
             If it already is a pandas dataframe, nothing changes.
+            If it's a ChEMBL ID it extracts its information from ChEMBL and returns a Dataframe.
 
-            :param data_input: it can be either a pandas dataframe or an excel file
+            :param data_input: it can be either a pandas dataframe, a file or a ChEMBL ID.
 
             :return i_data: input data to be curated
         """
@@ -92,8 +94,10 @@ class DataCuration(object):
                 i_data = pd.read_csv(data_input, sep=self.separator)
             elif data_input.endswith('.sdf'):
                 i_data = PandasTools.LoadSDF(data_input)
+            elif data_input.startswith('CHEMBL'):
+                i_data = chembl_extraction.get_dataframe_from_target(data_input)
             else:
-                sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf)\n')
+                sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf) or a valid ChEMBL ID\n')
                 sys.exit()
 
         return i_data

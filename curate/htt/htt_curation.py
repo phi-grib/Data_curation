@@ -21,14 +21,13 @@ class htt_curation(DataCuration):
     """
 
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
-                endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None, 
-                curation_type: str = None):
+                endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None):
         """
             Initializes class with main arguments of Data curation
         """
         
         super().__init__(data_input, molecule_identifier, structure_column, output_dir, 
-                            endpoint, metadata, separator, remove_problematic, curation_type)
+                            endpoint, metadata, separator, remove_problematic)
         
         self.x_matrix = self.get_x_matrix()
         #self.y_matrix = pd.DataFrame()

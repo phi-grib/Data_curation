@@ -85,10 +85,10 @@ def main():
     if args.command == 'curate':
 
         if args.action == 'chembl':
-            from curate.chem import chembl_extraction
-            input_file = chembl_extraction.get_dataframe_from_target(args.infile)
+            input_file = args.infile
             args.id_column = 'molecule_chembl_id'
             args.smiles_col = 'canonical_smiles'
+            args.action = 'chem'
         else:
             input_file = args.infile
 
@@ -116,7 +116,7 @@ def main():
         else:
             meta_ = None
         
-        command = {'data_input':args.infile,
+        command = {'data_input':input_file,
                     'molecule_identifier':id_,
                     'structure_column':smiles_,
                     'metadata':meta_,
@@ -124,7 +124,7 @@ def main():
                     'remove_problematic':args.remove,
                     'endpoint':args.endpoint,
                     'curation_type':args.action}
-
+        
         context.curation_cmd(command)
     
     elif args.command == 'config':
