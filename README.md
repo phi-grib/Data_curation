@@ -141,7 +141,13 @@ We can recover the output using the download option mentioned above.
 
 ## ChEMBL download
 
-@TODO
+To use this option we have to pass to the -i command a valid ChEMBL ID (i.e CHEMBL230). Then select the -a option chembl. This will connect with the ChEMBL API and download the associated data to the ID in a pandas dataframe and the program will curate the structures present there.
+
+```sh
+datacur -i CHEMBL230 -a chembl -e myEndpoint -c curate -r
+```
+
+We can choose to add -r or not to remove the problematic structures. To retrieve the results we just have to use the download option mentioned above.
 
 ## Data curation commands
 
