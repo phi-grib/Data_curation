@@ -89,8 +89,10 @@ def main():
             args.id_column = 'molecule_chembl_id'
             args.smiles_col = 'canonical_smiles'
             args.action = 'chem'
+            flag = 'chembl'
         else:
             input_file = args.infile
+            flag = None
 
         if (input_file is None) or (args.endpoint is None) or (args.action is None):
             sys.stderr.write("datacur curate : input, endpoint and action arguments are compulsory\n")
@@ -123,7 +125,8 @@ def main():
                     'separator':sep,
                     'remove_problematic':args.remove,
                     'endpoint':args.endpoint,
-                    'curation_type':args.action}
+                    'curation_type':args.action,
+                    'flag':flag}
         
         context.curation_cmd(command)
     

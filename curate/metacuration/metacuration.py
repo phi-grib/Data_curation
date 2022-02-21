@@ -10,24 +10,26 @@ import pandas as pd
 
 from curate.dataset_curation import DataCuration
 
-from typing import Union
+from typing import Union, Optional
 
-class htt_curation(DataCuration):
+class Metacuration(DataCuration):
 
     """
         Child class of dataset curation.
         It uses the same input for inizialization and adds specific methods
-        for handling HTT files.
+        for handling different curation tasks.
     """
 
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
-                endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None):
+                endpoint: str, metadata: Union[list,str], curation_type: str, separator: str = None, remove_problematic: bool = None, 
+                flag: Optional[str] = None):
         """
             Initializes class with main arguments of Data curation
         """
         
-        super().__init__(data_input, molecule_identifier, structure_column, output_dir, 
-                            endpoint, metadata, separator, remove_problematic)
+        super().__init__(data_input = data_input, molecule_identifier = molecule_identifier, structure_column = structure_column, 
+                            output_dir = output_dir, endpoint = endpoint, metadata = metadata, curation_type = curation_type, 
+                            separator = separator, remove_problematic = remove_problematic, flag = flag)
         
         self.x_matrix = self.get_x_matrix()
         #self.y_matrix = pd.DataFrame()

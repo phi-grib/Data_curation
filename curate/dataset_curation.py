@@ -30,14 +30,14 @@ class DataCuration(object):
     
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
                         endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None, 
-                        curation_type: str = None):
+                        curation_type: str = None, flag: Optional[str] = None):
         """
             Initialize class getting substance types for structure curation.
         """
 
         self.substance_types = self.get_substance_types()
         self.separator = separator
-        self.input_data = self.process_input(data_input)
+        self.input_data = self.process_input(data_input, flag)
         self.identifier = molecule_identifier
         self.structure_column = structure_column
         self.output_dir = output_dir
@@ -50,7 +50,7 @@ class DataCuration(object):
         
         ## Stores parameters in curation_parameters.yaml file
         self.param = Parameters()
-
+        
         param_string = {'data_input': data_input, 
                         'molecule_identifier': self.identifier,
                         'structure_column': self.structure_column,
@@ -68,7 +68,7 @@ class DataCuration(object):
             sys.stderr.write('Unable to load curation parameters. {}. Aborting...\n'.format(message))
             sys.exit(1)
 
-    def process_input(self, data_input: Union[pd.DataFrame,str]) -> pd.DataFrame:
+    def process_input(self, data_input: Union[pd.DataFrame,str], flag: Optional[str] = None) -> pd.DataFrame:
         """
             Checks if input is an Excel file and converts it into pandas dataframe.
             If it already is a pandas dataframe, nothing changes.
@@ -99,6 +99,9 @@ class DataCuration(object):
             else:
                 sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf) or a valid ChEMBL ID\n')
                 sys.exit()
+
+        if flag == 'chembl':
+            print('flag detected')
 
         return i_data
     
