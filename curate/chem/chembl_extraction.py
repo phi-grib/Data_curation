@@ -1,8 +1,8 @@
 """
     Code for extracting ChEMBL datasets using
-    a target.
+    a ChEMBL ID.
 
-    Target has to be a ChEMBL ID (e.g: CHEMBL230).
+    ChEMBL ID has to point to a target or protein (e.g: CHEMBL230 is Cox2).
 
     TODO:Might incoporate other arguments like species (e.g: Homo sapiens)
 
@@ -102,9 +102,17 @@ def concatenate_dataframes_from_different_chembl_ids(raw_df: pd.DataFrame) -> pd
     chembl_id_list = process_list_of_chembl_ids(raw_df)
     
     chembl_targets_concat = pd.DataFrame()
+    not_valid_ids = []
     for chembl_id in chembl_id_list:
         df_to_add = get_dataframe_from_target(chembl_id)
         if isinstance(df_to_add, pd.DataFrame):
             chembl_targets_concat = pd.concat([chembl_targets_concat, df_to_add], ignore_index=True)
+        else:
+            not_valid_ids.append(chembl_id)
     
-    return chembl_targets_concat
+    if not_valid_ids:
+        warning = "WARNING: The following CHEMBLIDs were not processed: {}\nPlease, check that your IDs point to a target/protein that has enough compounds assayed".format(not_valid_ids)
+    else:
+        warning = 'All IDs were processed successfully\n'
+
+    return chembl_targets_concat, warning

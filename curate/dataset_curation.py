@@ -102,8 +102,9 @@ class DataCuration(object):
 
         if flag == 'chembl':
             concatenated_chembl_target_compounds = chembl_extraction.concatenate_dataframes_from_different_chembl_ids(i_data)
-            i_data = concatenated_chembl_target_compounds
-
+            i_data, warning = concatenated_chembl_target_compounds
+            sys.stderr.write(warning)
+            
         return i_data
     
     def write_input_data(self):
