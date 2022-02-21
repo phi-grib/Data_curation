@@ -96,6 +96,10 @@ class DataCuration(object):
                 i_data = PandasTools.LoadSDF(data_input)
             elif data_input.startswith('CHEMBL'):
                 i_data = chembl_extraction.get_dataframe_from_target(data_input)
+                if not isinstance(i_data, pd.DataFrame):
+                    warning = 'Unable to retrieve data from {}. Make sure you are using a target/protein with enough compounds assayed. Aborting...\n'.format(data_input)
+                    sys.stderr.write(warning)
+                    sys.exit(1)
             else:
                 sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf) or a valid ChEMBL ID\n')
                 sys.exit()
@@ -104,7 +108,7 @@ class DataCuration(object):
             concatenated_chembl_target_compounds = chembl_extraction.concatenate_dataframes_from_different_chembl_ids(i_data)
             i_data, warning = concatenated_chembl_target_compounds
             sys.stderr.write(warning)
-            
+
         return i_data
     
     def write_input_data(self):
