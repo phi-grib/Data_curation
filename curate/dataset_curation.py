@@ -101,7 +101,8 @@ class DataCuration(object):
                 sys.exit()
 
         if flag == 'chembl':
-            print('flag detected')
+            concatenated_chembl_target_compounds = chembl_extraction.concatenate_dataframes_from_different_chembl_ids(i_data)
+            i_data = concatenated_chembl_target_compounds
 
         return i_data
     

@@ -10,6 +10,7 @@
     On: 21/04/2021, 11:13 PM
 """
 
+import numpy as np
 import pandas as pd
 
 from chembl_webresource_client.new_client import new_client
@@ -18,16 +19,16 @@ def get_dataframe_from_target(chembl_id: str) -> pd.DataFrame:
     """
         Creates a client to ChEMBL and uses chembl_id to extract
         all the compounds related to that target.
-        Returns a dataframe with all the information
+        Returns a dataframe with all the information.
 
         :param target_name: string with a valid chembl_id
 
-        :return df_res: dataframe containing the results
+        :return curated_df: dataframe containing the results
     """
 
     # Create an activity query
     activities = new_client.activity
-
+    
     # Make chembl_id uppercase
     chembl_id_upper = chembl_id.upper()
     
@@ -35,6 +36,22 @@ def get_dataframe_from_target(chembl_id: str) -> pd.DataFrame:
     # We also use the chembl flags to remove the duplicates and the records where there is a validity comment
     response = activities.filter(target_chembl_id=chembl_id_upper, pchembl_value__isnull=False,\
                                 potential_duplicate=False, data_validity_comment__isnull=True )
+    
+    if not response:
+        curated_df = None
+    else:
+        curated_df = get_dataframe_from_response(response)
+        curated_df.loc[:,'chembl_id'] = chembl_id_upper
+
+    return curated_df
+
+def get_dataframe_from_response(response: list) -> pd.DataFrame:
+    """
+        Checks response when True and returns a curated dataframe with the information from ChEMBL.
+
+        :param response: list of dictionaries with the information from ChEMBL
+        :return curated_df: dataframe with all the information
+    """
 
     # create a dataframe with the activity data
     df_activities = pd.DataFrame(response)
@@ -60,3 +77,34 @@ def get_dataframe_from_target(chembl_id: str) -> pd.DataFrame:
     curated_df = df_res.drop(df_res[df_res['canonical_smiles'].isna()].index, axis=0)
 
     return curated_df
+
+def process_list_of_chembl_ids(raw_df: pd.DataFrame) -> np.ndarray:
+    """
+        Gets the CHEMBLIDs from the column where they're stored and returns them as a numpy array.
+
+        :param raw_df: dataframe with the CHEMBLIDs
+        :return chembl_id_list: list of CHEMBLIDs
+    """
+
+    chembl_id_column = [name for name in raw_df.columns if 'chembl' in name.lower()]
+    chembl_id_list = raw_df[chembl_id_column].values.flatten()
+
+    return chembl_id_list
+
+def concatenate_dataframes_from_different_chembl_ids(raw_df: pd.DataFrame) -> pd.DataFrame:
+    """
+        Concatenates all the dataframes from different CHEMBLIDs.
+
+        :param raw_df: dataframe with the CHEMBLIDs
+        :return chembl_targets_concat: dataframe with all the information
+    """
+
+    chembl_id_list = process_list_of_chembl_ids(raw_df)
+    
+    chembl_targets_concat = pd.DataFrame()
+    for chembl_id in chembl_id_list:
+        df_to_add = get_dataframe_from_target(chembl_id)
+        if isinstance(df_to_add, pd.DataFrame):
+            chembl_targets_concat = pd.concat([chembl_targets_concat, df_to_add], ignore_index=True)
+    
+    return chembl_targets_concat
