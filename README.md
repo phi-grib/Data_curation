@@ -141,10 +141,19 @@ We can recover the output using the download option mentioned above.
 
 ## ChEMBL download
 
-To use this option we have to pass to the -i command a valid ChEMBL ID (i.e CHEMBL230). Then select the -a option chembl. This will connect with the ChEMBL API and download the associated data to the ID in a pandas dataframe and the program will curate the structures present there.
+To use this option we have to pass to the -i command a valid ChEMBL ID (i.e CHEMBL230) or a tabular file (csv, tsv, xlsx) containing a field with ChEMBL IDs. Then select the -a option chembl. This will connect with the ChEMBL API and download the associated data to the ID in a pandas dataframe and the program will curate the structures present there.
+If the input is a file, the dataframes will be concatenated and each register will be tagged with the corresponding ChEMBL ID.
 
+Important note: this option works only for ChEMBL targets or proteins with enough assayed compounds. If you pass a compound or a non assayed target it will return a warning but it will continue working.
+
+- Single ID:
 ```sh
 datacur -i CHEMBL230 -a chembl -e myEndpoint -c curate -r
+```
+
+- Input file:
+```sh
+datacur -i input_file.csv -a chembl -e myEndpoint -c curate -r
 ```
 
 We can choose to add -r or not to remove the problematic structures. To retrieve the results we just have to use the download option mentioned above.
