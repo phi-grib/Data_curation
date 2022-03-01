@@ -111,7 +111,7 @@ def concatenate_dataframes_from_different_chembl_ids(raw_df: pd.DataFrame) -> pd
             not_valid_ids.append(chembl_id)
     
     if not_valid_ids:
-        warning = "WARNING: The following CHEMBLIDs were not processed: {}\nPlease, check that your IDs point to a target/protein that has enough compounds assayed".format(not_valid_ids)
+        warning = "WARNING: The following CHEMBLIDs were not processed: {}\nPlease, check that your IDs point to a target/protein that has enough compounds assayed\n".format(not_valid_ids)
     else:
         warning = 'All IDs were processed successfully\n'
 
