@@ -5,7 +5,6 @@
     On: 23/02/2021, 13:16 PM
 """
 
-from distutils import command
 import os
 import sys
 
