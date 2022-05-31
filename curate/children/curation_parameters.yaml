@@ -5,3 +5,4 @@ endpoint: curation endpoint
 metadata: metadata of the curation input file
 separator: column separator
 remove_problematic: true/false
+curation_type: type of curation (chemical or htt file)

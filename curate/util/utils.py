@@ -173,7 +173,7 @@ def format_output(data: pd.DataFrame, outfile_type: str, outfile_path: str, smil
             :param outfile_path: output file path
             :param smiles_column: SMILES column in the dataframe to be processed (optional)
         """
-
+        
         if 'sdf' in outfile_type.lower():
             write_sdf(data, outfile_path, smiles_column, identifier)
         elif 'xlsx' in outfile_type.lower() or 'excel' in outfile_type.lower():
@@ -198,7 +198,7 @@ def write_sdf(data: pd.DataFrame, outfile_name: str, smiles_column: str, identif
             :param smiles_column: SMILES column in the dataframe to be processed
             :param outfile_name: output file name
         """
-
+        
         output_name_format = '.'.join([outfile_name,'sdf'])
         cur_data = prepare_data_for_sdf(data, smiles_column)
         
@@ -213,7 +213,7 @@ def prepare_data_for_sdf(data: pd.DataFrame, smiles_column: str) -> Optional[pd.
 
         :return data: dataframe with new columns added before being converted into sdf.
     """
-
+    
     PandasTools.AddMoleculeColumnToFrame(data, smiles_column)
     no_mol = data[data['ROMol'].isna()]
     data.drop(no_mol.index, axis=0, inplace=True)

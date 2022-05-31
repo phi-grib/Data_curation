@@ -13,6 +13,7 @@ import sys
 from rdkit.Chem import PandasTools
 from typing import Optional, Union
 
+from curate.chem import chembl_extraction
 from curate.parameters import Parameters
 from curate.util import utils
 
@@ -28,35 +29,37 @@ class DataCuration(object):
     """
     
     def __init__(self, data_input: Union[pd.DataFrame,str], molecule_identifier: str, structure_column: str, output_dir: str, 
-                        endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None):
+                        endpoint: str, metadata: Union[list,str], separator: str = None, remove_problematic: bool = None, 
+                        curation_type: str = None, flag: Optional[str] = None):
         """
             Initialize class getting substance types for structure curation.
         """
 
         self.substance_types = self.get_substance_types()
         self.separator = separator
-        self.input_data = self.process_input(data_input)
+        self.input_data = self.process_input(data_input, flag)
         self.identifier = molecule_identifier
         self.structure_column = structure_column
         self.output_dir = output_dir
         self.endpoint = endpoint
         self.metadata = metadata
         self.remove_problematic = remove_problematic
-
+        
         ## Stores a copy of the input data in the curation endpoint directory
         self.write_input_data()
         
         ## Stores parameters in curation_parameters.yaml file
         self.param = Parameters()
-
+        
         param_string = {'data_input': data_input, 
                         'molecule_identifier': self.identifier,
                         'structure_column': self.structure_column,
                         'endpoint':self.endpoint,
                         'metadata':self.metadata,
                         'separator':self.separator,
-                        'remove_problematic':self.remove_problematic}
-
+                        'remove_problematic':self.remove_problematic,
+                        'curation_type':curation_type}
+        
         param_string = json.dumps(param_string)
         
         success, message = self.param.delta_curation(endpoint, param_string, iformat='JSONS')
@@ -65,12 +68,13 @@ class DataCuration(object):
             sys.stderr.write('Unable to load curation parameters. {}. Aborting...\n'.format(message))
             sys.exit(1)
 
-    def process_input(self, data_input: Union[pd.DataFrame,str]) -> pd.DataFrame:
+    def process_input(self, data_input: Union[pd.DataFrame,str], flag: Optional[str] = None) -> pd.DataFrame:
         """
             Checks if input is an Excel file and converts it into pandas dataframe.
             If it already is a pandas dataframe, nothing changes.
+            If it's a ChEMBL ID it extracts its information from ChEMBL and returns a Dataframe.
 
-            :param data_input: it can be either a pandas dataframe or an excel file
+            :param data_input: it can be either a pandas dataframe, a file or a ChEMBL ID.
 
             :return i_data: input data to be curated
         """
@@ -90,9 +94,20 @@ class DataCuration(object):
                 i_data = pd.read_csv(data_input, sep=self.separator)
             elif data_input.endswith('.sdf'):
                 i_data = PandasTools.LoadSDF(data_input)
+            elif data_input.startswith('CHEMBL'):
+                i_data = chembl_extraction.get_dataframe_from_target(data_input)
+                if not isinstance(i_data, pd.DataFrame):
+                    warning = 'Unable to retrieve data from {}. Make sure you are using a target/protein with enough compounds assayed. Aborting...\n'.format(data_input)
+                    sys.stderr.write(warning)
+                    sys.exit(1)
             else:
-                sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf)\n')
+                sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf) or a valid ChEMBL ID\n')
                 sys.exit()
+
+        if flag == 'chembl':
+            concatenated_chembl_target_compounds = chembl_extraction.concatenate_dataframes_from_different_chembl_ids(i_data)
+            i_data, warning = concatenated_chembl_target_compounds
+            sys.stderr.write(warning)
 
         return i_data
     
@@ -103,7 +118,7 @@ class DataCuration(object):
 
         input_path = '/'.join([self.output_dir,'input_data'])
         data_copy = self.input_data.copy()
-
+        
         utils.format_output(data = data_copy, outfile_type = 'sdf', outfile_path = input_path, smiles_column = self.structure_column)
 
     def write_output_curation_data(self):
