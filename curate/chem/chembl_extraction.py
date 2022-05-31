@@ -41,7 +41,11 @@ def get_dataframe_from_target(chembl_id: str) -> pd.DataFrame:
         curated_df = None
     else:
         curated_df = get_dataframe_from_response(response)
-        curated_df.loc[:,'chembl_id'] = chembl_id_upper
+
+        if curated_df.empty:
+            curated_df = None
+        else:
+            curated_df.loc[:,'chembl_id'] = chembl_id_upper
 
     return curated_df
 
