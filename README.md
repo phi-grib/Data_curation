@@ -75,7 +75,7 @@ Data curation provides a command-line interface (CLI), dataset_curation.py, whic
 
 You can run the following commands from any terminal, in a computer where Data curation has been installed and the environment (datacuration) was activated (`source activate datacuration` in Linux).
 
-Firs of all, we need to define an endpoint for our curated files:
+First of all, we need to define an endpoint for our curated files:
 
 ```sh
 datacur -c manage -a new -e myEndpoint
