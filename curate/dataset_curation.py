@@ -109,8 +109,34 @@ class DataCuration(object):
             i_data, warning = concatenated_chembl_target_compounds
             sys.stderr.write(warning)
 
+        self.check_nans(i_data)
+        
         return i_data
     
+    def check_nans(self, input_data: pd.DataFrame) -> str:
+        """
+            Checks if molecule identifier and structure columns have NaN's a reports them.
+            Throws an exception and stops the execution until NaN's are removed from original file.
+
+            :param input_data: Dataframe containing the processed input data into a pandas dataframe.
+        """
+
+        flag = 0
+
+        if input_data.loc[input_data[self.identifier].isna()]:
+            flag = 1
+            sys.stderr.write("Molecule identifier column {} has NaN's\n".format(self.identifier))
+        
+        if input_data.loc[input_data[self.structure_column].isna()]:
+            flag = 1
+            sys.stderr.write("Structure column {} has NaN's\n".format(self.structure_column))
+
+        if flag == 1:
+            sys.stderr.write("Plase remove NaN's from input file and run again the code\n")
+            sys.exit()
+        else:
+            sys.stderr.write("NaN check correct. Input file has been processed succesfully\n")
+
     def write_input_data(self):
         """
             Uses the get_output_file function to write a copy of the input data in sdf
