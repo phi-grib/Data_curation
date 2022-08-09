@@ -17,10 +17,6 @@ def main():
 
     parser = argparse.ArgumentParser(description='Curation tool CLI for handling structure \
                                     curation and data selection from input files.\n')
-
-    parser.add_argument('-test','--testarr',
-                        help='testing argument',
-                        required=False)
                         
     parser.add_argument('-i', '--infile',
                         help='Input file.',
@@ -121,7 +117,6 @@ def main():
         else:
             meta_ = None
         
-        print('does this even show?')
         command = {'data_input':input_file,
                     'molecule_identifier':id_,
                     'structure_column':smiles_,

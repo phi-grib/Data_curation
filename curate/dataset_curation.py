@@ -37,9 +37,9 @@ class DataCuration(object):
 
         self.substance_types = self.get_substance_types()
         self.separator = separator
-        self.input_data = self.process_input(data_input, flag)
         self.identifier = molecule_identifier
         self.structure_column = structure_column
+        self.input_data = self.process_input(data_input, flag)
         self.output_dir = output_dir
         self.endpoint = endpoint
         self.metadata = metadata
@@ -123,11 +123,11 @@ class DataCuration(object):
 
         flag = 0
 
-        if input_data.loc[input_data[self.identifier].isna()]:
+        if not input_data.loc[input_data[self.identifier].isna()].empty:
             flag = 1
             sys.stderr.write("Molecule identifier column {} has NaN's\n".format(self.identifier))
         
-        if input_data.loc[input_data[self.structure_column].isna()]:
+        if not input_data.loc[input_data[self.structure_column].isna()].empty:
             flag = 1
             sys.stderr.write("Structure column {} has NaN's\n".format(self.structure_column))
 
