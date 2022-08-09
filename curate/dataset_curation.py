@@ -99,10 +99,10 @@ class DataCuration(object):
                 if not isinstance(i_data, pd.DataFrame):
                     warning = 'Unable to retrieve data from {}. Make sure you are using a target/protein with enough compounds assayed. Aborting...\n'.format(data_input)
                     sys.stderr.write(warning)
-                    sys.exit(1)
+                    sys.exit(0)
             else:
                 sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf) or a valid ChEMBL ID\n')
-                sys.exit()
+                sys.exit(0)
 
         if flag == 'chembl':
             concatenated_chembl_target_compounds = chembl_extraction.concatenate_dataframes_from_different_chembl_ids(i_data)
@@ -133,7 +133,7 @@ class DataCuration(object):
 
         if flag == 1:
             sys.stderr.write("Plase remove NaN's from input file and run again the code\n")
-            sys.exit()
+            sys.exit(0)
         else:
             sys.stderr.write("NaN check correct. Input file has been processed succesfully\n")
 
