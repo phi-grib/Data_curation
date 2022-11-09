@@ -17,7 +17,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Curation tool CLI for handling structure \
                                     curation and data selection from input files.\n')
-                        
+
     parser.add_argument('-i', '--infile',
                         help='Input file.',
                         required=False)
