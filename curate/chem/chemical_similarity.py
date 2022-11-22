@@ -6,6 +6,7 @@
     On: 18/11/2022, 11:35 AM
 """
 
+import numpy as np
 import pandas as pd
 
 from rdkit import Chem
@@ -110,6 +111,8 @@ class Similarity(object):
         comp_df.loc[comp_df['similarity'] < self.threshold, 'similar'] = 0
 
         similars = comp_df.loc[comp_df['similar'] == 1, 'name'].unique()
+        
+        similars = np.append(similars, comp_df.loc[comp_df['similar'] == 1, 'target_name'].unique())
 
         self.compound_dataframe.loc[self.compound_dataframe['name'].isin(similars), 'similar'] = 1
         self.compound_dataframe.loc[~self.compound_dataframe['name'].isin(similars), 'similar'] = 0
