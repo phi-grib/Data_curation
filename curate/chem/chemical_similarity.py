@@ -111,7 +111,6 @@ class Similarity(object):
         comp_df.loc[comp_df['similarity'] < self.threshold, 'similar'] = 0
 
         similars = comp_df.loc[comp_df['similar'] == 1, 'name'].unique()
-        
         similars = np.append(similars, comp_df.loc[comp_df['similar'] == 1, 'target_name'].unique())
 
         self.compound_dataframe.loc[self.compound_dataframe['name'].isin(similars), 'similar'] = 1
