@@ -16,7 +16,9 @@ import tarfile
 from typing import Tuple, Union
 
 from curate.parameters import Parameters
-from curate.util import utils
+from curate.util import utils, get_logger
+
+LOG = get_logger(__name__)
 
 def set_curation_repository(path: str = None):
     """
@@ -27,9 +29,9 @@ def set_curation_repository(path: str = None):
 
     utils.set_curation_repository(path)
 
-    sys.stderr.write('Model repository updated to {}\n'.format(path))
+    LOG.info('Model repository updated to {}\n'.format(path))
 
-    return True, 'curation repository updatedn'
+    return True, 'curation repository updated\n'
 
 #### API functions
 
@@ -50,7 +52,7 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     # try to use this name. This is a simple workaround to prevent creating paths 
     # with this name 
     if curation_path == 'test':
-        return False, 'the name "test" is disallowed, please use any other name'
+        return False, 'the name "test" is disallowed, please use any other name\n'
 
     # curation endpoint directory
     ndir = pathlib.Path(utils.curation_tree_path(curation_path))
@@ -61,9 +63,9 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
 
     try:
         ndir.mkdir(parents=True)
-        sys.stderr.write("{} created\n".format(ndir))
+        LOG.info("{} created\n".format(ndir))
     except:
-        return False, "Unable to create path for {} endpoint".format(curation_path)
+        return False, "Unable to create path for {} endpoint\n".format(curation_path)
 
     # Copy classes skeletons to ndir
     wkd = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
@@ -72,7 +74,7 @@ def action_new(curation_path: str) -> Tuple[bool, str]:
     params_path = wkd / 'children' / 'curation_parameters.yaml'
     shutil.copy(params_path, ndir)
 
-    sys.stderr.write("New endpoint {} created\n".format(curation_path))
+    LOG.info("New endpoint {} created\n".format(curation_path))
     
     return True, "new endpoint {} created".format(curation_path)
 
@@ -106,7 +108,7 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
             return False, 'the curation repository path does not exist. Please run "datacur -c config".\n'
 
         num_curs = 0
-        sys.stderr.write('Curation endpoints found in repository:\n')
+        LOG.info('Curation endpoints found in repository:\n')
         for x in os.listdir(rdir):
             xpath = os.path.join(rdir,x)
             # discard if the item is not a directory
@@ -114,9 +116,9 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
                 continue
             num_curs += 1
             creation_date = get_creation_date(xpath)
-            sys.stderr.write("\n{} {}\n".format(x, creation_date))
+            LOG.info("\n{} {}\n".format(x, creation_date))
             
-        sys.stderr.write("\nRetrieved list of curation endpoints from {}\n".format(rdir))
+        LOG.info("\nRetrieved list of curation endpoints from {}\n".format(rdir))
 
         return True, "{} endpoints found".format(num_curs)
 
@@ -124,12 +126,12 @@ def action_list(curation_dir: str) -> Tuple[bool, str]:
         # if a path name is provided, list files
         base_path = utils.curation_tree_path(curation_dir)
         num_files = 0
-        sys.stderr.write('Files found in curation endpoint {}:\n'.format(curation_dir))
+        LOG.info('Files found in curation endpoint {}:\n'.format(curation_dir))
         for x in os.listdir(base_path):
             num_files += 1
             xpath = os.path.join(base_path,x)
             creation_date = get_creation_date(xpath)
-            sys.stderr.write("\n{} {}\n".format(x, creation_date))
+            LOG.info("\n{} {}\n".format(x, creation_date))
 
         return True, "Endpoint {} has {} files".format(curation_dir, num_files)
 
@@ -149,7 +151,7 @@ def action_remove(curation_endpoint: str) -> Tuple[bool, str]:
         return False, '{} not found'.format(curation_endpoint)
 
     shutil.rmtree(rdir, ignore_errors=True)
-    sys.stderr.write("Curation endpoint dir {} has been removed\n".format(curation_endpoint))
+    LOG.info("Curation endpoint dir {} has been removed\n".format(curation_endpoint))
 
     return True, "Curation endpoint dir {} has been removed".format(curation_endpoint)
 
@@ -216,7 +218,7 @@ def action_kill(curation_endpoint: str) -> Tuple[bool,str]:
     except:
         return False, "Failed to remove model {}".format(curation_endpoint)
 
-    sys.stderr.write("Model {} removed\n".format(curation_endpoint))
+    LOG.info("Model {} removed\n".format(curation_endpoint))
     
     return True, "Model {} removed".format(curation_endpoint)
 
@@ -253,7 +255,7 @@ def action_export(curation_endpoint: str) -> Tuple[bool,str]:
 
     # return to current directory
     os.chdir(current_path)
-    sys.stderr.write("Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint))
+    LOG.info("Endpoint {} exported as {}.tgz\n".format(curation_endpoint,curation_endpoint))
 
     return True, "Endpoint {} exported as {}.tgz".format(curation_endpoint,curation_endpoint)
 
@@ -455,7 +457,7 @@ def action_parameters(curation_path: str, oformat: str = 'text') -> Union[Tuple[
     success, results = param.loadYaml_curation(curation_path)
 
     if not success:
-        sys.stderr.write("Error obtaining parametes for curation endpoint {} : {}\n".format(curation_path, results))
+        LOG.error("Error obtaining parametes for curation endpoint {} : {}\n".format(curation_path, results))
         return False, results
 
     if oformat != 'text':

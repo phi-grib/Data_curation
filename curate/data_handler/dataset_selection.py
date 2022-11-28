@@ -8,6 +8,9 @@ import sys
 
 from sklearn.model_selection import train_test_split
 
+from curate.util import get_logger
+LOG = get_logger(__name__)
+
 class Selection(object):
     
     """
@@ -27,8 +30,8 @@ class Selection(object):
 
         train_test_proportion = train_prop + test_prop
         if train_test_proportion != 1.0:
-            sys.stderr.write('Please introduce a valid proportion of train and test set. The sum of both should be equal to 1.0.\n')
-            sys.exit()
+            LOG.error('Please introduce a valid proportion of train and test set. The sum of both should be equal to 1.0.\n')
+            return
         else:
             self.train_prop = train_prop
             self.test_prop = test_prop

@@ -15,7 +15,9 @@ from typing import Optional, Union
 
 from curate.chem import chembl_extraction
 from curate.parameters import Parameters
-from curate.util import utils
+from curate.util import utils, get_logger
+
+LOG = get_logger(__name__)
 
 class DataCuration(object):
 
@@ -65,7 +67,7 @@ class DataCuration(object):
         success, message = self.param.delta_curation(endpoint, param_string, iformat='JSONS')
         
         if not success:
-            sys.stderr.write('Unable to load curation parameters. {}. Aborting...\n'.format(message))
+            LOG.error('Unable to load curation parameters. {}. Aborting...\n'.format(message))
             sys.exit(1)
 
     def process_input(self, data_input: Union[pd.DataFrame,str], flag: Optional[str] = None) -> pd.DataFrame:
@@ -98,16 +100,16 @@ class DataCuration(object):
                 i_data = chembl_extraction.get_dataframe_from_target(data_input)
                 if not isinstance(i_data, pd.DataFrame):
                     warning = 'Unable to retrieve data from {}. Make sure you are using a target/protein with enough compounds assayed. Aborting...\n'.format(data_input)
-                    sys.stderr.write(warning)
+                    LOG.warning(warning)
                     sys.exit(0)
             else:
-                sys.stderr.write('Please provide a file with a valid format (xlsx, csv, tsv, sdf) or a valid ChEMBL ID\n')
+                LOG.error('Please provide a file with a valid format (xlsx, csv, tsv, sdf) or a valid ChEMBL ID\n')
                 sys.exit(0)
 
         if flag == 'chembl':
             concatenated_chembl_target_compounds = chembl_extraction.concatenate_dataframes_from_different_chembl_ids(i_data)
             i_data, warning = concatenated_chembl_target_compounds
-            sys.stderr.write(warning)
+            LOG.warning(warning)
 
         self.check_nans(i_data)
         
@@ -125,17 +127,17 @@ class DataCuration(object):
 
         if not input_data.loc[input_data[self.identifier].isna()].empty:
             flag = 1
-            sys.stderr.write("Molecule identifier column {} has NaN's\n".format(self.identifier))
+            LOG.warning("Molecule identifier column {} has NaN's\n".format(self.identifier))
         
         if not input_data.loc[input_data[self.structure_column].isna()].empty:
             flag = 1
-            sys.stderr.write("Structure column {} has NaN's\n".format(self.structure_column))
+            LOG.warning("Structure column {} has NaN's\n".format(self.structure_column))
 
         if flag == 1:
-            sys.stderr.write("Plase remove NaN's from input file and run again the code\n")
+            LOG.error("Plase remove NaN's from input file and run again the code\n")
             sys.exit(0)
         else:
-            sys.stderr.write("NaN check correct. Input file has been processed succesfully\n")
+            LOG.info("NaN check correct. Input file has been processed succesfully\n")
 
     def write_input_data(self):
         """

@@ -14,6 +14,10 @@ from rdkit import DataStructs
 from rdkit.Chem.Fingerprints import FingerprintMols
 from typing import Optional
 
+from curate.util import get_logger
+
+LOG = get_logger(__name__)
+
 class Similarity(object):
     """
         Calculates the similarity of all the compounds in the input dataframe.
@@ -81,7 +85,7 @@ class Similarity(object):
             try:
                 s = DataStructs.BulkTanimotoSimilarity(fps, fps_to_compare)
             except TypeError:
-                print(self.compound_dataframe[self.compound_dataframe.index.isin([i])])
+                LOG.error(self.compound_dataframe[self.compound_dataframe.index.isin([i])])
                 raise
             for sim,idx in zip(s,index_to_consider):
                 comparison_dict['name'].append(name)

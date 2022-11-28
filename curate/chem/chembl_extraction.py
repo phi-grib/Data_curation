@@ -15,6 +15,9 @@ import pandas as pd
 
 from chembl_webresource_client.new_client import new_client
 
+from curate.util import get_logger
+LOG = get_logger(__name__)
+
 def get_dataframe_from_target(chembl_id: str) -> pd.DataFrame:
     """
         Creates a client to ChEMBL and uses chembl_id to extract
@@ -118,5 +121,7 @@ def concatenate_dataframes_from_different_chembl_ids(raw_df: pd.DataFrame) -> pd
         warning = "WARNING: The following CHEMBLIDs were not processed: {}\nPlease, check that your IDs point to a target/protein that has enough compounds assayed\n".format(not_valid_ids)
     else:
         warning = 'All IDs were processed successfully\n'
+
+    LOG.warning(warning)
 
     return chembl_targets_concat, warning
