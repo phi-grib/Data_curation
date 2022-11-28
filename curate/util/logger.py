@@ -21,6 +21,11 @@ def supress_log(logger: logging.Logger) -> Callable:
         Logs we are entering a supress log routine and
         disables the logger setting the minimum message level at
         interpreter level.
+
+        :param logger: logger object
+
+        :return supressor: supressor function defined inside the decorator function
+        :return decorator: decorator function acting recursively
     """
     def decorator(func):
         @functools.wraps(func)
@@ -41,6 +46,8 @@ def get_log_file() -> Path:
         Returns the log file path
         The path of the log file is given by
         appdirs.user_log_dir
+
+        :return log_filename: file name and path of the log file
     """
     
     log_filename_path = './'
@@ -64,6 +71,10 @@ def get_logger(name: str) -> logging.Logger:
         Inits a logger and adds the handlers.
         If the logger is already created doesn't adds new handlers
         since those are set at interpreter level and already exists.
+
+        :param name: name of the code executing the logger.
+
+        :return logger: logger obtained after calling LOG() object functions
     """
 
     # create logger
