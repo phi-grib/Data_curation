@@ -13,7 +13,8 @@ import curate.manage as manage
 
 from typing import Tuple, Optional
 
-from curate.util import utils
+from curate.util import utils, get_logger
+LOG = get_logger(__name__)
 
 def curation_cmd(command_dict: dict) -> Optional[bool]:
     """
@@ -37,7 +38,7 @@ def curation_cmd(command_dict: dict) -> Optional[bool]:
     # safety check if curation endpoint exists
     output_dir = utils.curation_tree_path(command_dict['endpoint'])
     if not os.path.isdir(output_dir):
-        sys.stderr.write("Endpoint name not found in model repository.\n")
+        LOG.error("Endpoint name not found in model repository.\n")
         return
     
     # check of metadata
@@ -45,7 +46,7 @@ def curation_cmd(command_dict: dict) -> Optional[bool]:
     if command_dict['metadata']:
         metadata_ = command_dict['metadata']
         if (command_dict['molecule_identifier'] in metadata_) or (command_dict['structure_column'] in metadata_):
-            sys.stderr.write("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
+            LOG.error("datacur curate : metadata can't contain the ID nor the SMILES column names.\n")
             return
     else:
         metadata_ = None

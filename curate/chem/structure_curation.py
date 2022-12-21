@@ -20,6 +20,8 @@ from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union
 
 from curate.chem import process_smiles as ps
+from curate.util import get_logger
+LOG = get_logger(__name__)
 
 class Curator(object):
     """
@@ -55,7 +57,7 @@ class Curator(object):
         try:
             mol = Chem.MolFromSmiles(smiles)
         except TypeError:
-            sys.stderr.write('Please check your structures and remove the NaNs\n')
+            LOG.error('Please check your structures and remove the NaNs\n')
             raise
         
         #  Sanitization check (detects invalid valence)

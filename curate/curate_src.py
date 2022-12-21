@@ -11,7 +11,8 @@ import sys
 
 import curate.context as context
 
-from curate.util import utils, config
+from curate.util import utils, config, get_logger
+LOG = get_logger(__name__)
 
 def main():
 
@@ -75,7 +76,7 @@ def main():
         if args.action == 'chembl':
             pass
         elif not os.path.isfile(args.infile):
-            sys.stderr.write('Input file {} not found\n'.format(args.infile))
+            LOG.error('Input file {} not found\n'.format(args.infile))
             return
     
     if args.command != 'config':
@@ -94,7 +95,7 @@ def main():
             flag = None
 
         if (input_file is None) or (args.endpoint is None) or (args.action is None):
-            sys.stderr.write("datacur curate : input, endpoint and action arguments are compulsory\n")
+            LOG.error("datacur curate : input, endpoint and action arguments are compulsory\n")
             return
         
         if args.id_column is None:
@@ -132,15 +133,15 @@ def main():
     elif args.command == 'config':
         success, results = config.configure(args.directory, (args.action == 'silent'))
         if not success:
-            sys.stderr.write("{}, configuration unchanged\n".format(results))
+            LOG.info("{}, configuration unchanged\n".format(results))
     
     elif args.command == 'manage':
         success, results = context.manage_cmd(args)
         if not success:
-            sys.stderr.write(results)
+            LOG.info(results)
 
     elif args.command == 'split':
-        sys.stderr.write('Section under construction\n')
+        LOG.info('Section under construction\n')
         sys.exit()
         
 if __name__ == '__main__':

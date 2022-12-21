@@ -11,7 +11,8 @@ import sys
 
 from typing import Union, Tuple
 
-from curate.util import utils
+from curate.util import utils, get_logger
+LOG = get_logger(__name__)
 
 def ask_user() -> bool:
     """
@@ -20,7 +21,7 @@ def ask_user() -> bool:
     userinput = input()
 
     if userinput.lower() not in ['yes', 'no', 'y', 'n']:
-        sys.stderr.write('Please write "yes", "no", "y" or "n"\n')
+        LOG.info('Please write "yes", "no", "y" or "n"\n')
         return False
     elif userinput.lower() in ['yes', 'y']:
         return True
@@ -57,7 +58,7 @@ def configure(path: str = None, silent: bool = False) -> Union[Tuple[bool, str],
         
         utils.set_repositories(curation_path)
         
-        sys.stderr.write('Curation repository set to {}\n'.format(curation_path))
+        LOG.info('Curation repository set to {}\n'.format(curation_path))
 
         return True, config
 
@@ -74,7 +75,7 @@ def configure(path: str = None, silent: bool = False) -> Union[Tuple[bool, str],
             except Exception as e:
                 return False, e
 
-            sys.stderr.write("Current curation repository is {}\n".format(curation_path))
+            LOG.info("Current curation repository is {}\n".format(curation_path))
 
             return True, config
 
@@ -91,8 +92,8 @@ def configure(path: str = None, silent: bool = False) -> Union[Tuple[bool, str],
         curation_path = os.path.join(source_dir,'curation')
 
     # at this point, paths must has been assigned
-    sys.stderr.write("Curation repository will be set to {}\n".format(curation_path))
-    sys.stderr.write("Continue?(y/n)\n")
+    LOG.info("Curation repository will be set to {}\n".format(curation_path))
+    LOG.info("Continue?(y/n)\n")
 
     if ask_user():
 
@@ -104,9 +105,9 @@ def configure(path: str = None, silent: bool = False) -> Union[Tuple[bool, str],
         
         utils.set_repositories(curation_path)
 
-        sys.stderr.write("Curation repository set to {}\n".format(curation_path))
+        LOG.info("Curation repository set to {}\n".format(curation_path))
         return True, config
 
     else:
-        sys.stderr.write("Aborting...\n")
+        LOG.info("Aborting...\n")
         return False, "Configuration aborted"
