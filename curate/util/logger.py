@@ -27,6 +27,7 @@ def supress_log(logger: logging.Logger) -> Callable:
         :return supressor: supressor function defined inside the decorator function
         :return decorator: decorator function acting recursively
     """
+    
     def decorator(func):
         @functools.wraps(func)
         def supressor(*args, **kwargs):
