@@ -23,9 +23,11 @@ class Similarity(object):
         Calculates the similarity of all the compounds in the input dataframe.
     """
 
-    def __init__(self, dataframe: pd.DataFrame, smiles_column: str, similarity_threshold: float) -> None:
+    def __init__(self, dataframe: pd.DataFrame, molecule_id: str ,smiles_column: str, activity: str, similarity_threshold: float) -> None:
         
-        self.compound_dataframe = dataframe
+        self.compound_dataframe = dataframe.copy()
+        self.molecule_id = molecule_id
+        self.activity = activity
         self.smiles_column = smiles_column
         self.threshold = similarity_threshold
 
@@ -75,9 +77,9 @@ class Similarity(object):
 
         index_to_avoid = []
         for i, row in self.compound_dataframe.iterrows():
-            name = row['name']
+            name = row[self.molecule_id]
             struc = row['canon_smiles']
-            activity = row['activity']
+            activity = row[self.activity]
             fps = row['fps']
             index_to_avoid.append(i)
             fps_to_compare = self.compound_dataframe.loc[~self.compound_dataframe.index.isin(index_to_avoid),'fps'].values
@@ -90,10 +92,10 @@ class Similarity(object):
             for sim,idx in zip(s,index_to_consider):
                 comparison_dict['name'].append(name)
                 comparison_dict['name_structure'].append(struc)
-                comparison_dict['target_name'].append(self.compound_dataframe.loc[self.compound_dataframe.index.isin([idx]),'name'].values[0])
+                comparison_dict['target_name'].append(self.compound_dataframe.loc[self.compound_dataframe.index.isin([idx]),self.molecule_id].values[0])
                 comparison_dict['target_structure'].append(self.compound_dataframe.loc[self.compound_dataframe.index.isin([idx]),'canon_smiles'].values[0])
                 comparison_dict['activity'].append(activity)
-                comparison_dict['target_activity'].append(self.compound_dataframe.loc[self.compound_dataframe.index.isin([idx]),'activity'].values[0])
+                comparison_dict['target_activity'].append(self.compound_dataframe.loc[self.compound_dataframe.index.isin([idx]),self.activity].values[0])
                 comparison_dict['similarity'].append(sim)
         
         comp_df = pd.DataFrame(data=comparison_dict)
@@ -117,8 +119,8 @@ class Similarity(object):
         similars = comp_df.loc[comp_df['similar'] == 1, 'name'].unique()
         similars = np.append(similars, comp_df.loc[comp_df['similar'] == 1, 'target_name'].unique())
 
-        self.compound_dataframe.loc[self.compound_dataframe['name'].isin(similars), 'similar'] = 1
-        self.compound_dataframe.loc[~self.compound_dataframe['name'].isin(similars), 'similar'] = 0
+        self.compound_dataframe.loc[self.compound_dataframe[self.molecule_id].isin(similars), 'similar'] = 1
+        self.compound_dataframe.loc[~self.compound_dataframe[self.molecule_id].isin(similars), 'similar'] = 0
         self.compound_dataframe['similar'] = self.compound_dataframe['similar'].astype(int)
 
-        self.compound_dataframe['new_class'] = self.compound_dataframe['activity'].astype(str) + "_" + self.compound_dataframe['similar'].astype(str)
+        self.compound_dataframe['new_class'] = self.compound_dataframe[self.activity].astype(str) + "_" + self.compound_dataframe['similar'].astype(str)
