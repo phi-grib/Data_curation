@@ -4,6 +4,9 @@ authors:
 - family-names: "March-Vila"
   given-names: "Eric"
   orcid: "https://orcid.org/0000-0002-3161-1213"
+- family-names: "Pastor"
+  given-names: "Manuel"
+  orcid: "https://orcid.org/0000-0001-8850-1341"
 title: "Data curation"
 version: 1.0.0
 date-released: 2020-07-01
