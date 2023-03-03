@@ -6,7 +6,6 @@
 """
 
 import os
-import sys
 
 import curate.metacuration.metacuration as metacur
 import curate.manage as manage

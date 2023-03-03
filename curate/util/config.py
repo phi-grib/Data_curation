@@ -7,7 +7,6 @@
 
 import appdirs
 import os
-import sys
 
 from typing import Union, Tuple
 

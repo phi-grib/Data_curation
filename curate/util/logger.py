@@ -6,7 +6,6 @@
     On: 25/11/2022, 12:06 PM
 """
 
-import appdirs
 import functools
 import logging
 import sys
@@ -17,20 +16,20 @@ from typing import Callable
 
 def supress_log(logger: logging.Logger) -> Callable:
     """
-        Decorator for suprerss logs during objects workflow
-        Logs we are entering a supress log routine and
+        Decorator for suppress logs during objects workflow
+        Logs we are entering a suppress log routine and
         disables the logger setting the minimum message level at
         interpreter level.
 
         :param logger: logger object
 
-        :return supressor: supressor function defined inside the decorator function
+        :return suppressor: suppressor function defined inside the decorator function
         :return decorator: decorator function acting recursively
     """
     
     def decorator(func):
         @functools.wraps(func)
-        def supressor(*args, **kwargs):
+        def suppressor(*args, **kwargs):
             logger.warning('Entering OBJECTS workflow. Logger will be disabled'
                            ' below error level')
             logging.disable(logging.WARNING)
@@ -38,7 +37,7 @@ def supress_log(logger: logging.Logger) -> Callable:
             logging.disable(logging.NOTSET)
             logger.debug('Logger enabled again!')
             return func_results
-        return supressor
+        return suppressor
     return decorator
 
 

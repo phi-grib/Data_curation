@@ -11,7 +11,6 @@
 
 import re
 import rdkit
-import sys
 
 from chembl_structure_pipeline import standardizer
 from rdkit import Chem
@@ -104,11 +103,11 @@ class Curator(object):
             if not checker:
                 checker = self.check_peptide(self.smiles)
             if not checker:
-                checker = self.check_salt(self.smiles, sub_type)
+                checker = self.check_salt(sub_type)
         elif sub_type == 'inorganic':
             checker = self.check_inorganic_metal(self.smiles)
             if not checker:
-                checker = self.check_salt(self.smiles, sub_type)
+                checker = self.check_salt(sub_type)
         
         if not checker:
             substance_type = sub_type
@@ -284,7 +283,7 @@ class Curator(object):
         
         return metal
 
-    def check_salt(self, molecule: str, subType: str) -> str:
+    def check_salt(self, subType: str) -> str:
         """
             Checks if the molecule is salt.
 
