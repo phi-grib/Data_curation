@@ -88,7 +88,7 @@ class Curator(object):
         if self.no_san:
             sub_type = 'no_sanitizable'
             sub_type_ns = self.check_organic_inorganic(self.smiles, self.smiles_mol, no_sanitizable=True)
-            checker = self.check_organometallic(self.smiles)
+            checker = self.check_organometallic()
             if checker:
                 checker = '_'.join([sub_type,checker])
             else:
@@ -99,7 +99,7 @@ class Curator(object):
         checker = None
 
         if sub_type == 'organic':
-            checker = self.check_organometallic(self.smiles)
+            checker = self.check_organometallic()
             if not checker:
                 checker = self.check_peptide(self.smiles)
             if not checker:
@@ -224,7 +224,7 @@ class Curator(object):
 
         return hal_check
 
-    def check_organometallic(self, molecule: str) -> Optional[str]:
+    def check_organometallic(self) -> Optional[str]:
         """
             Checks if the molecule has metal ions.
 
@@ -242,7 +242,7 @@ class Curator(object):
             for metal in ps._metals:
                 if metal in self.smiles:
                     metals = metal
-
+                    
         if metals:
             metal_molecule = 'organometallic'
 

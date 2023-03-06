@@ -9,12 +9,13 @@ _metal_non = Chem.MolFromSmarts('[Al,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Y,Zr,Nb,Mo,Tc,
 _metals = ['[Al]','[Sc]','[Ti]','[V]','[Cr]','[Mn]','[Fe]','[Co]','[Ni]','[Cu]','[Zn]','[Y]','[Zr]','[Nb]','[Mo]','[Tc]',
 '[Ru]','[Rh]','[Pd]','[Pd++]','[Ag]','[Cd]','[Cd++]','[Hf]','[Ta]','[W]','[Re]','[Os]','[Ir]','[Pt]','[Au]','[Sn]','[Pb]','[Hg]','[Cd+2]','[Cr+3]','[Cr+6]',
 '[Sn+3]','[Mg++]','[Sb+3]','[Al+3]','[Ba++]','[Fe+3]','[Mg+2]','[B+3]','[B]','[Pb++]','[Zr-2]','[Mn+2]','[Mn+3]','[Sb]','[Ti+4]','[Fe++]','[Pd++]',
-'[Rb+]','[Mg]','[Ca++]','[As]','[Si]','[Ge]','[Te]','[Bi]','[Cu+]']
+'[Rb+]','[Mg]','[Ca++]','[As]','[Si]','[Ge]','[Te]','[Bi]','[Cu+]', '[Se]', '[se]']
 
 def disconnect(mol):
     """
-    Adapated from molVS standardizer module. Now it returns the list of metals it has disconnected
+        Adapated from molVS standardizer module. Now it returns the list of metals it has disconnected
     """
+
     metals = set([])
     for metal_atom in _metals:
         rwmol = Chem.RWMol(mol)
