@@ -219,7 +219,7 @@ def prepare_data_for_sdf(data: pd.DataFrame, smiles_column: str) -> Optional[pd.
     no_mol = data[data['ROMol'].isna()]
     data.drop(no_mol.index, axis=0, inplace=True)
     data.loc[:,'ROMol'] = [Chem.AddHs(x) for x in data['ROMol'].values.tolist()]
-    print(no_mol)
+    
     # if no_mol.empty is False:
     #     non_processed_path = '/'.join([output_dir,'Non_processed_molecules'])
     #     format_output(data = no_mol, outfile_type = 'xlsx', outfile_path = non_processed_path)
