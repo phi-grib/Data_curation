@@ -7,9 +7,10 @@ timeout = -1
 _metal_nof = Chem.MolFromSmarts('[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]~[N,n,O,o,F]')
 _metal_non = Chem.MolFromSmarts('[Al,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Y,Zr,Nb,Mo,Tc,Ru,Rh,Pd,Ag,Cd,Hf,Ta,W,Re,Os,Ir,Pt,Au]~[B,C,c,Si,P,As,Sb,S,Se,Te,Cl,Br,I,At]')
 _metals = ['[Al]','[Sc]','[Ti]','[V]','[Cr]','[Mn]','[Fe]','[Co]','[Ni]','[Cu]','[Zn]','[Y]','[Zr]','[Nb]','[Mo]','[Tc]',
-'[Ru]','[Rh]','[Pd]','[Pd++]','[Ag]','[Cd]','[Cd++]','[Hf]','[Ta]','[W]','[Re]','[Os]','[Ir]','[Pt]','[Au]','[Sn]','[Pb]','[Hg]','[Cd+2]','[Cr+3]','[Cr+6]',
-'[Sn+3]','[Mg++]','[Sb+3]','[Al+3]','[Ba++]','[Fe+3]','[Mg+2]','[B+3]','[B]','[Pb++]','[Zr-2]','[Mn+2]','[Mn+3]','[Sb]','[Ti+4]','[Fe++]','[Pd++]',
-'[Rb+]','[Mg]','[Ca++]','[As]','[Si]','[Ge]','[Te]','[Bi]','[Cu+]', '[Se]', '[se]']
+'[Ru]','[Rh]','[Pd]','[Pd++]','[Pd+2]','[Ag]','[Cd]','[Cd++]','[Hf]','[Ta]','[W]','[Re]','[Os]','[Ir]','[Pt]','[Au]','[Sn]',
+'[Pb]','[Hg]','[Cd+2]','[Cr+3]','[Cr+6]','[Sn+3]','[Mg++]','[Sb+3]','[Al+3]','[Ba++]','[Ba+2]','[Fe+3]','[Mg+2]','[B+3]','[B]',
+'[Pb++]','[Pb+2]','[Zr-2]','[Mn+2]','[Mn+3]','[Sb]','[Ti+4]','[Fe+2]','[Fe++]','[Rb+]','[Mg]','[Ca++]','[Ca+2]','[As]','[Si]','[Ge]',
+'[Te]','[Bi]','[Cu+]','[Se]','[se]']
 
 def disconnect(mol):
     """
