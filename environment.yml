@@ -22,6 +22,8 @@ dependencies:
   - appdirs
   - lxml
   - pip:
+     - jupyter
+     - jupyterlab
      - xgboost
      - django==2.2.8
      - djangorestframework
