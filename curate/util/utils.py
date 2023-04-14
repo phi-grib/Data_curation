@@ -5,8 +5,6 @@
     On: 22/02/2021, 13:00 PM
 """
 
-__modules__ = None
-
 import os
 import pandas as pd
 import pathlib
