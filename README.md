@@ -3,7 +3,7 @@
 This Data curation tool provides a user-friendly CLI for treating raw data. It classifies the substances passed as input by filtering the SMILES and also applies a pre-processing of those structures to make them available for QSAR modelling.
 It can be used in Jupyter Notebook as well, including data selection funcionalities that still need to be implemented in the CLI.
 
-It has also been implemented as a part of Flame modelling software (https://github.com/phi-grib/flame).
+In the future, we plan to implement it as a part of Flame modelling software (https://github.com/phi-grib/flame).
 
 ## Installation:
 
