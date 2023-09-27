@@ -13,7 +13,6 @@ import sys
 from rdkit.Chem import PandasTools
 from typing import Optional, Union
 
-from curate.chem import chembl_extraction
 from curate.parameters import Parameters
 from curate.util import utils, get_logger
 
@@ -81,6 +80,11 @@ class DataCuration(object):
             :return i_data: input data to be curated
         """
         
+        try:
+            from curate.chem import chembl_extraction
+        except:
+            LOG.error('ChEMBL is not accessible at this moment.\n')
+
         if isinstance(data_input,pd.DataFrame):
             i_data = data_input
         elif isinstance(data_input,str):

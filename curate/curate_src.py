@@ -99,7 +99,10 @@ def main():
             return
         
         if args.id_column is None:
-            id_ = 'name'
+            if args.infile.endswith('.sdf'):
+                id_ = 'ID'
+            else:
+                id_ = 'name'
         else:
             id_ = args.id_column
 
