@@ -9,14 +9,9 @@
 import numpy as np
 import pandas as pd
 
-from rdkit import Chem
 from rdkit import DataStructs
-from rdkit.Chem.Fingerprints import FingerprintMols
-from rdkit.ML.Descriptors import MoleculeDescriptors
-from sklearn.preprocessing import StandardScaler
 
-from typing import Optional
-
+from .chemical_description import Description
 from curate.util import get_logger
 
 LOG = get_logger(__name__)
@@ -34,69 +29,18 @@ class Similarity(object):
         self.smiles_column = smiles_column
         self.threshold = similarity_threshold
 
-    def prepare_dataframe_for_similarity(self):
+    def describe_compound_dataframe(self) -> pd.DataFrame:
         """
-            Gets the similarity dataframe between all the compounds.
+            Initializes the descriptor object and obtains RDKit descriptors and FPs
 
-            :return comparison_df:
-        """
-
-        # Adds canonical SMILES
-        self.compound_dataframe.loc[:, 'canon_smiles'] = self.compound_dataframe.loc[:,self.smiles_column].apply(lambda x: self.get_canonical_smiles(x))
-
-        # Adds mol object from canonical SMILES
-        self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'canon_smiles'].apply(lambda x: Chem.MolFromSmiles(x))
-
-        # Adds Fingerprints
-        self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'fps'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'].apply(lambda x: FingerprintMols.FingerprintMol(x))
-
-        # Adds RDKit Descriptors
-        self.compound_dataframe, self.descriptor_dataframe = self.get_rdkit_descriptors(self.compound_dataframe, self.molecule_id, 'mols_rdkit')
-
-    def get_canonical_smiles(self, smiles: str) -> Optional[str]:
-        """
-            Gets the canonical SMILES from the structure in the dataframe
-
-            :return canonical_smiles: canonical smiles
+            :return compound_dataframe_described:
         """
 
-        try:
-            canonical_smiles = Chem.CanonSmiles(smiles)
-        except:
-            canonical_smiles = None
-
-        return canonical_smiles
-
-    def get_rdkit_descriptors(self, dataframe: pd.DataFrame, id_col: str, mol_col: str) -> pd.DataFrame:
-        """
-            Gets a dataframe with RDKit descriptors
-
-            :return df_descriptor:
-        """
-
-        names=[x[0] for x in Chem.Descriptors._descList]
-        calculator=MoleculeDescriptors.MolecularDescriptorCalculator(names)
-        desc = [calculator.CalcDescriptors(mol) for mol in dataframe[mol_col].values]
+        description = Description(self.compound_dataframe, self.molecule_id, self.smiles_column)
         
-        df_descriptor=pd.DataFrame(desc,columns=names,index=dataframe[id_col].values)
-        df_descriptor=df_descriptor.drop(columns='Ipc')
+        description.add_descriptors_and_fingerprints()
 
-        idx, idy = np.where(pd.isnull(df_descriptor))
-
-        not_procesed=list(np.unique(df_descriptor.index[idx]))
-        df_descriptor.drop(index=not_procesed,inplace=True)
-
-        df_descriptor.reset_index(inplace=True)
-
-        df_descriptor.rename(columns={'index':id_col},inplace=True)
-
-        rob=StandardScaler().fit(df_descriptor.iloc[:,1:])
-        X_trans_rdk_sc=rob.transform(df_descriptor.iloc[:,1:])
-        X_trans_rdk_sc=pd.DataFrame(np.c_[df_descriptor.iloc[:,0],X_trans_rdk_sc],index=df_descriptor.index.values,columns=df_descriptor.columns)
-        
-        final_df = dataframe.merge(X_trans_rdk_sc, how='left', on=id_col)
-
-        return final_df, X_trans_rdk_sc
+        self.compound_dataframe = description.compound_dataframe
 
     def get_similarities_between_all_compounds(self) -> pd.DataFrame:
         """

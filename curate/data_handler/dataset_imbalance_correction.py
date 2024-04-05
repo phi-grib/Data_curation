@@ -12,31 +12,41 @@ import pandas as pd
 
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import RandomOverSampler
-from imblearn.under_sampling import RandomUnderSampler
-from typing import Tuple
+from imblearn.under_sampling import RandomUnderSampler, NearMiss, ClusterCentroids, EditedNearestNeighbours, RepeatedEditedNearestNeighbours, AllKNN, InstanceHardnessThreshold
+from sklearn.linear_model import LogisticRegression
+from typing import Tuple, Optional
 
 class ImbalanceData(object):
 
     """
         Class that includes the different imbalance correction algorithms, mainly
-        from imblearn module and some handcrafted at phi-lab.
+        from imblearn module and some written at phi-lab.
     """
 
-    def __init__(self, imbalanced_data: pd.DataFrame, activity_field: str, imbalance_algorithm: str):
+    def __init__(self, imbalanced_data: pd.DataFrame, molecule_id: str ,activity_field: str, imbalance_algorithm: str, descriptors: Optional[str] = None):
         """
             Initializes class. Needs the data to be processed and the algorithm/technique to be applied.
 
             :param imbalanced_data: dataframe with imbalanced classes
+            :param molecule_id: column name for molecule identifier, such as CAS, ChEMBL ID, InChi
             :param activity field: column name that includes the activity
-            :param imbalance_algorithm: algorithm to be used in the datasets. {oversampling, subsampling, SMOTEEN, SMOTETomek}
+            :param imbalance_algorithm: algorithm to be used in the datasets. {oversampling, subsampling, SMOTEEN, SMOTETomek, NearMiss1,
+            NearMiss2, NearMiss3, cluster_centroid, edited_knn, rep_edited_knn, all_knn, iht}
+            :param descriptors: it can either be empty of filled with a string. Currently only works with rdkit.
 
             TODO: SMOTETomek and ensemble modelling will be added as options in imbalance_algorithms.
         """
 
         self.imbalanced_data = imbalanced_data
+        self.molecule_id = molecule_id
         self.activity_field = activity_field
         self.imbalance_algorithm = imbalance_algorithm
         self.sampler = self.select_sampler_algorithm(imbalance_algorithm)
+
+        if descriptors.lower() == 'rdkit':
+            from rdkit import Chem
+            self.descriptors = [x[0] for x in Chem.Descriptors._descList]
+            self.descriptors.remove('Ipc')
 
     def select_sampler_algorithm(self, imbalance_algorithm: str) -> imblearn.base.BaseSampler:
         """
@@ -57,7 +67,25 @@ class ImbalanceData(object):
                 sampler = SMOTEENN(random_state=42)
             elif imbalance_algorithm.lower() == 'smotetomek':
                 sampler = SMOTETomek(random_state=42)
-        
+            elif imbalance_algorithm.lower() == 'NearMiss1':
+                sampler = NearMiss(version=1)
+            elif imbalance_algorithm.lower() == 'NearMiss2':
+                sampler = NearMiss(version=2)
+            elif imbalance_algorithm.lower() == 'NearMiss3':
+                sampler = NearMiss(version=3)
+            elif imbalance_algorithm.lower() == 'cluster_centroid':
+                sampler = ClusterCentroids(random_state=42)
+            elif imbalance_algorithm.lower() == 'edited_knn':
+                sampler = EditedNearestNeighbours()
+            elif imbalance_algorithm.lower() == 'rep_edited_knn':
+                sampler = RepeatedEditedNearestNeighbours()
+            elif imbalance_algorithm.lower() == 'all_knn':
+                sampler = AllKNN()
+            elif imbalance_algorithm.lower() == 'iht':
+                sampler = InstanceHardnessThreshold(random_state=42,
+                                estimator=LogisticRegression(
+                                solver='lbfgs', multi_class='auto'))
+
         return sampler
             
     ### Imbalance correction
@@ -66,7 +94,7 @@ class ImbalanceData(object):
         """
             Applies the selected sampler into the data and returns a resampled dataset
             
-            Random Undersampling
+            Random Undersampling, NearMiss, Cluster Centroids, Edited KNN, Repited Edited KNN, All KNN, IHT
             https://imbalanced-learn.org/stable/under_sampling.html
 
             Random Oversampling
@@ -80,6 +108,9 @@ class ImbalanceData(object):
         
         if self.imbalance_algorithm.lower() in ('smoteenn','smotetomek'):
             x_, y_ = self.process_datasets(self.imbalanced_data)
+        elif self.imbalance_algorithm.lower() in ('nearmiss1','nearMmss2', 'nearmiss3', 
+                                                  'cluster_centroid', 'edited_knn', 'rep_edited_knn', 'all_knn', 'iht'):
+            x_, y_ = self.get_numerical_descriptors_only(self.imbalanced_data)
         else:
             y_ = self.imbalanced_data[self.activity_field]
             x_ = self.imbalanced_data.drop(columns=self.activity_field)
@@ -90,6 +121,9 @@ class ImbalanceData(object):
         if self.imbalance_algorithm.lower() in ('smoteenn','smotetomek'):
             x_flatten = x_resampled.flatten()
             resampled_set = self.get_proper_datasets(self.imbalanced_data, x_flatten)
+        elif self.imbalance_algorithm.lower() in ('nearmiss1','nearMmss2', 'nearmiss3', 
+                                                  'cluster_centroid', 'edited_knn', 'rep_edited_knn', 'all_knn', 'iht'):
+            resampled_set = self.recover_former_indexes_from_sampler(self.imbalanced_data, self.sampler)
         else:
             resampled_set = pd.DataFrame(data=x_resampled, columns=regular_cols)
             resampled_set.loc[:,self.activity_field] = y_resampled
@@ -207,3 +241,31 @@ class ImbalanceData(object):
         proper_dataset.drop(proper_dataset.loc[proper_dataset['index'].isin(index_to_drop)].index, inplace=True)
         
         return proper_dataset    
+    
+
+    #### Undersampling algorithms dataset preparation
+
+    def get_numerical_descriptors_only(self, dataset:pd.DataFrame) -> pd.DataFrame:
+        """
+            Splits the dataset into X and y, both containing only numerical data
+
+            :return X:
+            :return y:
+        """
+        
+        X = dataset[self.descriptors]
+        y = dataset[self.activity_field]
+
+        return X, y
+
+    def recover_former_indexes_from_sampler(self, dataset: pd.DataFrame, sampler: imblearn.base.BaseSampler) -> pd.DataFrame:
+        """
+            Uses the built-in function sample_indices_ to recover the indexes from the sampler
+            and rebuilt the new dataframe once resampled
+
+            :return resampled_dataset:
+        """
+
+        resampled_dataset = dataset.loc[dataset.index.isin(sampler.sample_indices_)]
+
+        return resampled_dataset
