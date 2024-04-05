@@ -12,6 +12,9 @@ import pandas as pd
 from rdkit import Chem
 from rdkit import DataStructs
 from rdkit.Chem.Fingerprints import FingerprintMols
+from rdkit.ML.Descriptors import MoleculeDescriptors
+from sklearn.preprocessing import StandardScaler
+
 from typing import Optional
 
 from curate.util import get_logger
@@ -47,10 +50,8 @@ class Similarity(object):
         # Adds Fingerprints
         self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'fps'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'].apply(lambda x: FingerprintMols.FingerprintMol(x))
 
-        # Get Dataframe with similarities
-        comparison_df = self.get_similarities_between_all_compounds()
-
-        return comparison_df
+        # Adds RDKit Descriptors
+        self.compound_dataframe, self.descriptor_dataframe = self.get_rdkit_descriptors(self.compound_dataframe, self.molecule_id, 'mols_rdkit')
 
     def get_canonical_smiles(self, smiles: str) -> Optional[str]:
         """
@@ -65,6 +66,37 @@ class Similarity(object):
             canonical_smiles = None
 
         return canonical_smiles
+
+    def get_rdkit_descriptors(self, dataframe: pd.DataFrame, id_col: str, mol_col: str) -> pd.DataFrame:
+        """
+            Gets a dataframe with RDKit descriptors
+
+            :return df_descriptor:
+        """
+
+        names=[x[0] for x in Chem.Descriptors._descList]
+        calculator=MoleculeDescriptors.MolecularDescriptorCalculator(names)
+        desc = [calculator.CalcDescriptors(mol) for mol in dataframe[mol_col].values]
+        
+        df_descriptor=pd.DataFrame(desc,columns=names,index=dataframe[id_col].values)
+        df_descriptor=df_descriptor.drop(columns='Ipc')
+
+        idx, idy = np.where(pd.isnull(df_descriptor))
+
+        not_procesed=list(np.unique(df_descriptor.index[idx]))
+        df_descriptor.drop(index=not_procesed,inplace=True)
+
+        df_descriptor.reset_index(inplace=True)
+
+        df_descriptor.rename(columns={'index':id_col},inplace=True)
+
+        rob=StandardScaler().fit(df_descriptor.iloc[:,1:])
+        X_trans_rdk_sc=rob.transform(df_descriptor.iloc[:,1:])
+        X_trans_rdk_sc=pd.DataFrame(np.c_[df_descriptor.iloc[:,0],X_trans_rdk_sc],index=df_descriptor.index.values,columns=df_descriptor.columns)
+        
+        final_df = dataframe.merge(X_trans_rdk_sc, how='left', on=id_col)
+
+        return final_df, X_trans_rdk_sc
 
     def get_similarities_between_all_compounds(self) -> pd.DataFrame:
         """
