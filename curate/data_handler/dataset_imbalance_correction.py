@@ -9,13 +9,16 @@
 import imblearn
 import numpy as np
 import pandas as pd
+import sys
 
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler, NearMiss, ClusterCentroids, EditedNearestNeighbours, RepeatedEditedNearestNeighbours, AllKNN, InstanceHardnessThreshold
-from sklearn.linear_model import LogisticRegression
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 
+from curate.util import get_logger
+
+LOG = get_logger(__name__)
 class ImbalanceData(object):
 
     """
@@ -23,7 +26,8 @@ class ImbalanceData(object):
         from imblearn module and some written at phi-lab.
     """
 
-    def __init__(self, imbalanced_data: pd.DataFrame, molecule_id: str ,activity_field: str, imbalance_algorithm: str, descriptors: Optional[str] = None):
+    def __init__(self, imbalanced_data: pd.DataFrame, molecule_id: str, activity_field: str, imbalance_algorithm: str, descriptors: Optional[str] = None,
+                 sampling_strategy: Union[float, str, dict, callable] = 'auto'):
         """
             Initializes class. Needs the data to be processed and the algorithm/technique to be applied.
 
@@ -41,6 +45,7 @@ class ImbalanceData(object):
         self.molecule_id = molecule_id
         self.activity_field = activity_field
         self.imbalance_algorithm = imbalance_algorithm
+        self.sampling_strategy = sampling_strategy
         self.sampler = self.select_sampler_algorithm(imbalance_algorithm)
 
         if descriptors.lower() == 'rdkit':
@@ -60,31 +65,35 @@ class ImbalanceData(object):
 
         if imbalance_algorithm:
             if imbalance_algorithm.lower() == 'oversampling':
-                sampler = RandomOverSampler(random_state=42)
+                sampler = RandomOverSampler(random_state=42, sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'subsampling':
-                sampler = RandomUnderSampler(random_state=42)
+                sampler = RandomUnderSampler(random_state=42, sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'smoteenn':
-                sampler = SMOTEENN(random_state=42)
+                sampler = SMOTEENN(random_state=42, sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'smotetomek':
-                sampler = SMOTETomek(random_state=42)
+                sampler = SMOTETomek(random_state=42, sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'NearMiss1':
-                sampler = NearMiss(version=1)
+                sampler = NearMiss(version=1, sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'NearMiss2':
-                sampler = NearMiss(version=2)
+                sampler = NearMiss(version=2, sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'NearMiss3':
-                sampler = NearMiss(version=3)
+                sampler = NearMiss(version=3, sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'cluster_centroid':
-                sampler = ClusterCentroids(random_state=42)
+                """ TODO: check how to recover indexes from cluster centroid sampler"""
+                LOG.error('Cluster centroid still not available. Please consider another sampling strategy\n')
+                # sampler = ClusterCentroids(random_state=42, sampling_strategy=self.sampling_strategy)
+                sys.exit(1)
             elif imbalance_algorithm.lower() == 'edited_knn':
-                sampler = EditedNearestNeighbours()
+                sampler = EditedNearestNeighbours(sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'rep_edited_knn':
-                sampler = RepeatedEditedNearestNeighbours()
+                sampler = RepeatedEditedNearestNeighbours(sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'all_knn':
-                sampler = AllKNN()
+                sampler = AllKNN(sampling_strategy=self.sampling_strategy)
             elif imbalance_algorithm.lower() == 'iht':
+                from sklearn.linear_model import LogisticRegression
                 sampler = InstanceHardnessThreshold(random_state=42,
                                 estimator=LogisticRegression(
-                                solver='lbfgs', multi_class='auto'))
+                                solver='lbfgs', multi_class='auto'), sampling_strategy=self.sampling_strategy)
 
         return sampler
             
