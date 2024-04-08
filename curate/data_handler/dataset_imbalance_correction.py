@@ -48,10 +48,11 @@ class ImbalanceData(object):
         self.sampling_strategy = sampling_strategy
         self.sampler = self.select_sampler_algorithm(imbalance_algorithm)
 
-        if descriptors.lower() == 'rdkit':
-            from rdkit import Chem
-            self.descriptors = [x[0] for x in Chem.Descriptors._descList]
-            self.descriptors.remove('Ipc')
+        if descriptors:
+            if descriptors.lower() == 'rdkit':
+                from rdkit import Chem
+                self.descriptors = [x[0] for x in Chem.Descriptors._descList]
+                self.descriptors.remove('Ipc')
 
     def select_sampler_algorithm(self, imbalance_algorithm: str) -> imblearn.base.BaseSampler:
         """
