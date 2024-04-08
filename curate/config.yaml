@@ -1,10 +1,6 @@
 admin_email: admin@domain.org
 admin_name: Admin Name
 config_status: true
-<<<<<<< HEAD
-curation_repository_path: /home/emarch/Documents/risk_hunter/targets/priority_one/prio1_cur/curation
-=======
-curation_repository_path: /home/eric/phi_lab/datacuration_paper/paper_curation/curation
->>>>>>> 2ab0f860c0070e182861b192f31a2c5d1498bd34
+curation_repository_path: /home/emarch/Documents/Inditex/CII/proyecto2023/paper_2/chemcur/curation
 homepage: homepage@domain.org
 provider: My Organization
