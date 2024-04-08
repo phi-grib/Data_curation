@@ -126,7 +126,12 @@ class ImbalanceData(object):
             x_ = self.imbalanced_data.drop(columns=self.activity_field)
             regular_cols = x_.columns
         
-        x_resampled, y_resampled = self.sampler.fit_resample(x_, y_)
+        try:
+            x_resampled, y_resampled = self.sampler.fit_resample(x_, y_)
+        except:
+            print(x_resampled)
+            print(y_resampled)
+            raise
         
         if self.imbalance_algorithm.lower() in ('smoteenn','smotetomek'):
             x_flatten = x_resampled.flatten()
