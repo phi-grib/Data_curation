@@ -35,7 +35,9 @@ class Description(object):
         """
             Gets the canonical SMILES from the structure in the dataframe
 
-            :return canonical_smiles: canonical smiles
+            :param smiles: SMILES to be processed
+
+            :return canonical_smiles: canonical SMILES
         """
 
         try:
@@ -44,6 +46,7 @@ class Description(object):
             canonical_smiles = None
 
         return canonical_smiles
+    
     def get_morgan_fingerprints_ecfp6(self, dataframe: pd.DataFrame, id_col: str, nbits: int, radius: int, mol_col: str) -> pd.DataFrame:
         """
             Adds Morgan fingerprints in the dataframe with its proper name in each column
@@ -72,7 +75,12 @@ class Description(object):
         """
             Gets a dataframe with RDKit descriptors
 
-            :return df_descriptor:
+            :param dataframe: Pandas dataframe input
+            :param id_col: column name in the dataframe that has de chemical identifier
+            :param mol_col: column name in the dataframe that contains the RDKit mol object
+
+            :return final_df: initial dataframe with descriptors included
+            :return df_descriptor_complete: dataframe only containing rdkit descriptors and chemical identifier
         """
 
         names=[x[0] for x in Chem.Descriptors._descList]
@@ -92,12 +100,12 @@ class Description(object):
         df_descriptor.rename(columns={'index':id_col},inplace=True)
 
         rob=StandardScaler().fit(df_descriptor.iloc[:,1:])
-        X_trans_rdk_sc=rob.transform(df_descriptor.iloc[:,1:])
-        X_trans_rdk_sc=pd.DataFrame(np.c_[df_descriptor.iloc[:,0],X_trans_rdk_sc],index=df_descriptor.index.values,columns=df_descriptor.columns)
+        df_descriptor_complete=rob.transform(df_descriptor.iloc[:,1:])
+        df_descriptor_complete=pd.DataFrame(np.c_[df_descriptor.iloc[:,0],df_descriptor_complete],index=df_descriptor.index.values,columns=df_descriptor.columns)
         
-        final_df = dataframe.merge(X_trans_rdk_sc, how='left', on=id_col)
+        final_df = dataframe.merge(df_descriptor_complete, how='left', on=id_col)
 
-        return final_df, X_trans_rdk_sc
+        return final_df, df_descriptor_complete
     
     def add_descriptors_and_fingerprints(self, morgan_bits: int = None, morgan_radius: int = None):
         """
@@ -106,7 +114,9 @@ class Description(object):
             :param morgan_bits: number of bits of Morgan FPs. If None, 2048 bits are selected.
             :param morgan_radius: radius to select the Morgan FPs. If None, 3 radius is selected
 
-            :return comparison_df:
+            :return compound_dataframe: dataframe containing all the information plus RDKit descriptors and Morgan FPs
+            :return descriptor_dataframe: dataframe containing only the RDKit descriptors plus the chemical identifier
+            :return morgan_dataframe: dataframe containing only the Morgan FPs plus the chemical identifier
         """
 
         # Checks if morgan_bits and morgan_radius are None
