@@ -1,6 +1,6 @@
 admin_email: admin@domain.org
 admin_name: Admin Name
 config_status: true
-curation_repository_path: /home/emarch/Documents/Inditex/CII/proyecto2023/paper_2/chemcur/curation
+curation_repository_path: /home/eric/phi_lab/risk_hunter/targets/priority_one/prio1_cur/curation
 homepage: homepage@domain.org
 provider: My Organization

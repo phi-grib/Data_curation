@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from rdkit import Chem
+from rdkit.Chem import AllChem
 from rdkit.Chem.Fingerprints import FingerprintMols
 from rdkit.ML.Descriptors import MoleculeDescriptors
 from sklearn.preprocessing import StandardScaler
@@ -43,6 +44,29 @@ class Description(object):
             canonical_smiles = None
 
         return canonical_smiles
+    def get_morgan_fingerprints_ecfp6(self, dataframe: pd.DataFrame, id_col: str, nbits: int, radius: int, mol_col: str) -> pd.DataFrame:
+        """
+            Adds Morgan fingerprints in the dataframe with its proper name in each column
+
+            :param dataframe: Pandas dataframe to work with
+            :param nbits: number of bits of Morgan FPs.
+            :param radius: radius to select the Morgan FPs.
+            :param mol_col: column in the df containing the RDKit mol object
+
+            :return final_df: intial dataframe with the FPs inlcuded
+            :return df_morgan: df only including FPs and chemical identifier
+        """
+
+        ECFP6 = [AllChem.GetMorganFingerprintAsBitVect(x,radius=radius, nBits=nbits) for x in dataframe[mol_col]]
+
+        ecfp6_name = [f'Bit_{i}' for i in range(nbits)]
+        ecfp6_bits = [list(l) for l in ECFP6]
+        df_morgan = pd.DataFrame(ecfp6_bits, index = dataframe[id_col], columns=ecfp6_name)
+        df_morgan = df_morgan.reset_index()
+        
+        final_df = dataframe.merge(df_morgan, how='left', on=id_col)
+
+        return final_df, df_morgan
 
     def get_rdkit_descriptors(self, dataframe: pd.DataFrame, id_col: str, mol_col: str) -> pd.DataFrame:
         """
@@ -75,12 +99,22 @@ class Description(object):
 
         return final_df, X_trans_rdk_sc
     
-    def add_descriptors_and_fingerprints(self):
+    def add_descriptors_and_fingerprints(self, morgan_bits: int = None, morgan_radius: int = None):
         """
             Adds RDKit descriptors and FPs into the dataframe
 
+            :param morgan_bits: number of bits of Morgan FPs. If None, 2048 bits are selected.
+            :param morgan_radius: radius to select the Morgan FPs. If None, 3 radius is selected
+
             :return comparison_df:
         """
+
+        # Checks if morgan_bits and morgan_radius are None
+        if morgan_bits is None:
+            morgan_bits = 2048
+        
+        if morgan_radius is None:
+            morgan_radius = 3
 
         # Adds canonical SMILES
         self.compound_dataframe.loc[:, 'canon_smiles'] = self.compound_dataframe.loc[:,self.smiles_column].apply(lambda x: self.get_canonical_smiles(x))
@@ -93,3 +127,7 @@ class Description(object):
 
         # Adds RDKit Descriptors
         self.compound_dataframe, self.descriptor_dataframe = self.get_rdkit_descriptors(self.compound_dataframe, self.molecule_id, 'mols_rdkit')
+
+        # Adds Morgan Fingerprints
+
+        self.compound_dataframe, self.morgan_dataframe = self.get_morgan_fingerprints_ecfp6(self.compound_dataframe, id_col= self.molecule_id, nbits=morgan_bits, radius=morgan_radius, mol_col='mols_rdkit')
