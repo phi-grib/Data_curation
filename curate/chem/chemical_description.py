@@ -132,12 +132,14 @@ class Description(object):
         # Adds mol object from canonical SMILES
         self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'canon_smiles'].apply(lambda x: Chem.MolFromSmiles(x))
 
-        # Adds Fingerprints
+        # Adds RDKit Fingerprints for direct bulk similarity
         self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'fps'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'].apply(lambda x: FingerprintMols.FingerprintMol(x))
 
-        # Adds RDKit Descriptors
+        # Adds Morgan Fingerprints for direct bulk similarity
+        self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(), 'morgan_fps'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'].apply(lambda x: AllChem.GetMorganFingerprintAsBitVect(x,radius=morgan_radius, nBits=morgan_bits))
+        
+        # Adds RDKit Descriptors for modelling
         self.compound_dataframe, self.descriptor_dataframe = self.get_rdkit_descriptors(self.compound_dataframe, self.molecule_id, 'mols_rdkit')
 
-        # Adds Morgan Fingerprints
-
+        # Adds Morgan Fingerprints for modelling
         self.compound_dataframe, self.morgan_dataframe = self.get_morgan_fingerprints_ecfp6(self.compound_dataframe, id_col= self.molecule_id, nbits=morgan_bits, radius=morgan_radius, mol_col='mols_rdkit')
