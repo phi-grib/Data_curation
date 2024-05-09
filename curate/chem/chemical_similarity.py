@@ -14,6 +14,8 @@ from rdkit import DataStructs
 from .chemical_description import Description
 from curate.util import get_logger
 
+from typing import Union
+
 LOG = get_logger(__name__)
 
 class Similarity(object):
@@ -100,3 +102,27 @@ class Similarity(object):
         self.compound_dataframe['similar'] = self.compound_dataframe['similar'].astype(int)
 
         self.compound_dataframe['new_class'] = self.compound_dataframe[self.activity].astype(str) + "_" + self.compound_dataframe['similar'].astype(str)
+
+    def calculate_tanimoto_similarity_manual_index(fp1: Union[DataStructs.cDataStructs.ExplicitBitVect, np.ndarray], 
+                                                    fp2: Union[DataStructs.cDataStructs.ExplicitBitVect, np.ndarray]) -> float:
+        """
+            Calculate Tanimoto similarity between two Morgan fingerprints given as bit vectors.
+            
+            :param fp1: First Morgan fingerprint as an array of bits.
+            :param fp2: Second Morgan fingerprint as an array of bits.
+                
+            :returns similarity: Tanimoto similarity between the two fingerprints.
+        """
+        
+        # Convert the fingerprints to sets of indexes where the fingerprint is 1
+        fp1_set = set(i for i, bit in enumerate(fp1) if bit == 1)
+        fp2_set = set(i for i, bit in enumerate(fp2) if bit == 1)
+
+        # Calculate the intersection and union sizes
+        intersection_size = len(fp1_set.intersection(fp2_set))
+        union_size = len(fp1_set.union(fp2_set))
+
+        # Calculate Tanimoto similarity
+        similarity = intersection_size / union_size if union_size != 0 else 0.0
+        
+        return similarity
