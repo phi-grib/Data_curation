@@ -14,7 +14,7 @@ from rdkit.Chem.Fingerprints import FingerprintMols
 from rdkit.ML.Descriptors import MoleculeDescriptors
 from sklearn.preprocessing import StandardScaler
 
-from typing import Optional
+from typing import Optional, Union
 
 from curate.util import get_logger
 
@@ -70,6 +70,48 @@ class Description(object):
         final_df = dataframe.merge(df_morgan, how='left', on=id_col)
 
         return final_df, df_morgan
+
+    def select_specific_fingerprints(self, dataframe: pd.DataFrame, list_of_selected_fps: Union[list,str], number_of_top_features: int, sep: str = None) -> np.ndarray:
+        """
+            This function accepts a list of indexes of selected fingerprints so they can be retrieved from
+            the whole set of bits and used to calculate similarities.
+            Since the bits are an RDKit object they need to be converted into an array in order to perform the selection.
+            
+            :param dataframe: input dataframe to obtain and add the bit selection
+            :param list_of_selected_fps: A list of the selected bits.
+            :param top_features: integer indicating the number of features to select
+            :param sep: separator to take into account from the input file
+
+            :return final_df: Copy from the original dataframe inlcuding the selected fingerprints as a numpy array in one column
+        """
+
+        data_copy = dataframe.copy()
+
+        if isinstance(list_of_selected_fps, list):
+            """
+                TODO:  need to process a list as argument
+            """
+            pass
+        elif isinstance(list_of_selected_fps, str):
+            features = pd.read_csv(list_of_selected_fps, sep=sep)
+            top_features = features.sort_values(by='value', ascending=False).head(number_of_top_features).index
+
+        feature_column = 'top_{}_features'.format(number_of_top_features)
+
+        train_df = pd.DataFrame(columns=['CAS',feature_column])
+
+        for i, row in data_copy.iterrows():
+            small_list = []
+            cas = row[self.molecule_id]
+            morgan = row['morgan_fps']
+            for j, bit in enumerate(list(morgan)):
+                if j in top_features:
+                    small_list.append(bit)
+            train_df = train_df.append({'CAS': cas, feature_column: np.array(small_list)}, ignore_index=True)
+        
+        final_df = data_copy.merge(train_df, on='CAS')
+
+        return final_df
 
     def get_rdkit_descriptors(self, dataframe: pd.DataFrame, id_col: str, mol_col: str) -> pd.DataFrame:
         """

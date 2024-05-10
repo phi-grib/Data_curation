@@ -103,8 +103,8 @@ class Similarity(object):
 
         self.compound_dataframe['new_class'] = self.compound_dataframe[self.activity].astype(str) + "_" + self.compound_dataframe['similar'].astype(str)
 
-    def calculate_tanimoto_similarity_manual_index(fp1: Union[DataStructs.cDataStructs.ExplicitBitVect, np.ndarray], 
-                                                    fp2: Union[DataStructs.cDataStructs.ExplicitBitVect, np.ndarray]) -> float:
+    def calculate_tanimoto_similarity_manual_index(self, fp1: Union[DataStructs.cDataStructs.ExplicitBitVect, np.ndarray], 
+                                                   fp2: Union[DataStructs.cDataStructs.ExplicitBitVect, np.ndarray]) -> float:
         """
             Calculate Tanimoto similarity between two Morgan fingerprints given as bit vectors.
             
