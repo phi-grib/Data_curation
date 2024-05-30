@@ -9,7 +9,7 @@
 import numpy as np
 import pandas as pd
 
-from rdkit import DataStructs
+from rdkit import Chem, DataStructs
 
 from .chemical_description import Description
 from curate.util import get_logger
@@ -23,7 +23,7 @@ class Similarity(object):
         Calculates the similarity of all the compounds in the input dataframe.
     """
 
-    def __init__(self, dataframe: pd.DataFrame, molecule_id: str ,smiles_column: str, activity: str, similarity_threshold: float) -> None:
+    def __init__(self, dataframe: pd.DataFrame, molecule_id: str ,smiles_column: str, similarity_threshold: float, activity:str = None) -> None:
         
         self.compound_dataframe = dataframe.copy()
         self.molecule_id = molecule_id
@@ -43,6 +43,8 @@ class Similarity(object):
         description.add_descriptors_and_fingerprints()
 
         self.compound_dataframe = description.compound_dataframe
+        self.descriptor_dataframe = description.descriptor_dataframe
+        self.morgan_dataframe = description.morgan_dataframe
 
     def get_similarities_between_all_compounds(self) -> pd.DataFrame:
         """
@@ -126,3 +128,56 @@ class Similarity(object):
         similarity = intersection_size / union_size if union_size != 0 else 0.0
         
         return similarity
+
+    def calculate_similarity_between_two_datasets(self, df1: pd.DataFrame, df2: pd.DataFrame, smiles1: str, smiles2:str, 
+                                                  molid1:str, molid2:str, top_feat= None):
+        """
+            Calculates the tanimoto similarity between two datasets using Morgan FPs obtained from chemical_description.py.
+
+            :param df1: dataframe 1
+            :param df2: dataframe 2
+            :param smiles1: SMILES column name of dataframe 1
+            :param smiles2: SMILES column name of dataframe 2
+            :param molid1: Molecule ID column name of dataframe 1
+            :param molid2: Molecule ID column name of dataframe 2
+            :param top_feat: optional feature. If True, it means the dataframes include the top_10 Morgan FPs 
+                            that most contribute to the modelling of the dataframe previously done.
+
+            :return similarity_df:
+        """
+        # Initialize a list to store the similarities
+        similarity_data = []
+
+        # Iterate over each compound in the first dataframe
+        for idx1, row1 in df1.iterrows():
+            # Get the molecule object from SMILES notation
+            mol1 = Chem.MolFromSmiles(row1[smiles1])
+            
+            if top_feat:
+                fp1 = row1['top_10_features']
+            else:
+                fp1 = row1['morgan_fps']
+
+            # Iterate over each compound in the second dataframe
+            for idx2, row2 in df2.iterrows():
+                # Get the molecule object from SMILES notation
+                mol2 = Chem.MolFromSmiles(row2[smiles2])
+                
+                if top_feat:
+                    fp2 = row2['top_10_features']
+                else:
+                    fp2 = row2['morgan_fps']
+                
+                if top_feat:
+                    similarity = self.calculate_tanimoto_similarity_manual_index(fp1,fp2)
+                else:
+                    # Calculate the Tanimoto similarity between the fingerprints
+                    similarity = DataStructs.TanimotoSimilarity(fp1, fp2)
+                
+                # Append the similarity data to the list
+                similarity_data.append([row1[molid1], row2[molid2], similarity, mol1, mol2])
+
+        # Create a new dataframe from the similarity data
+        similarity_df = pd.DataFrame(similarity_data, columns=['Compound_ID_1', 'Compound_ID_2', 'Similarity', 'Structure_1', 'Structure_2'])
+        
+        return similarity_df
