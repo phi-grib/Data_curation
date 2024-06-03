@@ -130,7 +130,7 @@ class Similarity(object):
         return similarity
 
     def calculate_similarity_between_two_datasets(self, df1: pd.DataFrame, df2: pd.DataFrame, smiles1: str, smiles2:str, 
-                                                  molid1:str, molid2:str, top_feat= None):
+                                                  molid1:str, molid2:str, activity1: str, activity2: str, top_feat= None):
         """
             Calculates the tanimoto similarity between two datasets using Morgan FPs obtained from chemical_description.py.
 
@@ -152,7 +152,8 @@ class Similarity(object):
         for idx1, row1 in df1.iterrows():
             # Get the molecule object from SMILES notation
             mol1 = Chem.MolFromSmiles(row1[smiles1])
-            
+            act1 = row1[activity1]
+
             if top_feat:
                 fp1 = row1['top_10_features']
             else:
@@ -162,7 +163,8 @@ class Similarity(object):
             for idx2, row2 in df2.iterrows():
                 # Get the molecule object from SMILES notation
                 mol2 = Chem.MolFromSmiles(row2[smiles2])
-                
+                act2 = row2[activity2]
+
                 if top_feat:
                     fp2 = row2['top_10_features']
                 else:
@@ -175,9 +177,9 @@ class Similarity(object):
                     similarity = DataStructs.TanimotoSimilarity(fp1, fp2)
                 
                 # Append the similarity data to the list
-                similarity_data.append([row1[molid1], row2[molid2], similarity, mol1, mol2])
+                similarity_data.append([row1[molid1], act1, row2[molid2], act2, similarity, mol1, mol2])
 
         # Create a new dataframe from the similarity data
-        similarity_df = pd.DataFrame(similarity_data, columns=['Compound_ID_1', 'Compound_ID_2', 'Similarity', 'Structure_1', 'Structure_2'])
+        similarity_df = pd.DataFrame(similarity_data, columns=['Compound_ID_1','Activity_1', 'Compound_ID_2', 'Activity_2','Similarity', 'Structure_1', 'Structure_2'])
         
         return similarity_df
