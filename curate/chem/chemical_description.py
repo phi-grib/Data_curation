@@ -71,7 +71,7 @@ class Description(object):
 
         return final_df, df_morgan
 
-    def select_specific_fingerprints(self, dataframe: pd.DataFrame, list_of_selected_fps: Union[list,str], number_of_top_features: int, sep: str = None) -> np.ndarray:
+    def select_specific_fingerprints(self, list_of_selected_fps: Union[list,str], number_of_top_features: int, sep: str = None) -> np.ndarray:
         """
             This function accepts a list of indexes of selected fingerprints so they can be retrieved from
             the whole set of bits and used to calculate similarities.
@@ -85,7 +85,7 @@ class Description(object):
             :return final_df: Copy from the original dataframe inlcuding the selected fingerprints as a numpy array in one column
         """
 
-        data_copy = dataframe.copy()
+        data_copy = self.compound_dataframe.copy()
 
         if isinstance(list_of_selected_fps, list):
             """
@@ -98,7 +98,7 @@ class Description(object):
 
         feature_column = 'top_{}_features'.format(number_of_top_features)
 
-        train_df = pd.DataFrame(columns=['CAS',feature_column])
+        train_df = pd.DataFrame(columns=[self.molecule_id,feature_column])
 
         for i, row in data_copy.iterrows():
             small_list = []
@@ -107,11 +107,11 @@ class Description(object):
             for j, bit in enumerate(list(morgan)):
                 if j in top_features:
                     small_list.append(bit)
-            train_df = train_df.append({'CAS': cas, feature_column: np.array(small_list)}, ignore_index=True)
+            train_df = train_df.append({self.molecule_id: cas, feature_column: np.array(small_list)}, ignore_index=True)
         
-        final_df = data_copy.merge(train_df, on='CAS')
+        final_df = data_copy.merge(train_df, on=self.molecule_id)
 
-        return final_df
+        self.compound_dataframe = final_df
 
     def get_rdkit_descriptors(self, dataframe: pd.DataFrame, id_col: str, mol_col: str) -> pd.DataFrame:
         """
