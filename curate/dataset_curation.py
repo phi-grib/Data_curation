@@ -268,7 +268,7 @@ class DataCuration(object):
         
         for i, row in curated_data.iterrows():
             smi = row[self.structure_column]
-            data_cur.get_rdkit_mol(smi)
+            data_cur.smiles_to_rdkit_mol(smi)
             sub_type, san_smi = data_cur.filter_smiles()
             curated_data.loc[curated_data.index == i,'structure_curated'] = san_smi
             curated_data.loc[curated_data.index == i,'substance_type_name'] = sub_type
