@@ -14,7 +14,7 @@ import rdkit
 
 from chembl_structure_pipeline import standardizer
 from rdkit import Chem
-from rdkit.Chem.MolStandardize import rdMolStandardize
+from rdkit.Chem.MolStandardize import rdMolStandardize 
 from rdkit.Chem.SaltRemover import SaltRemover
 from typing import Optional, Union
 
@@ -522,29 +522,36 @@ class Curator(object):
             salt = '_'.join([subType,'salt'])
 
         return salt
-    
+
     def salt_remover(self, mol_object: Chem.Mol) -> str:
         """
-            Removes salts and counterions. Non sanitizable molecules can't be processed
+            Removes salts and counterions from a molecule object, returning the cleaned SMILES string.
 
-            :param smiles: smiles string
+            This function uses RDKit's LargestFragmentChooser to select the largest fragment,
+            then standardizes the molecule using standardizer.standardize_mol.
 
-            :return cleaned_smiles: 
+            Args:
+                mol_object: The RDKit molecule object to process.
+
+            Returns:
+                The cleaned SMILES string, or uncleaned_smiles if an error occurred during processing.
+                Prints an error message to standard output if an error occurs.
         """
-        
-        # Always apply LargestFragmentChooser, even if there's no "."
+
         remover = rdMolStandardize.LargestFragmentChooser()
-        largest_mol = remover.choose(mol_object)
 
-        # Standardize the molecule
-        standardized_mol = standardizer.standardize_mol(largest_mol)
+        try:
+            largest_mol = remover.choose(mol_object)  # Select largest fragment
+            standardized_mol = standardizer.standardize_mol(largest_mol)  # Standardize the molecule
+            cleaned_smiles = Chem.MolToSmiles(standardized_mol, isomericSmiles=True)  # Convert to SMILES
+            return cleaned_smiles
 
-         # Convert back to SMILES
-        cleaned_smiles = Chem.MolToSmiles(standardized_mol, isomericSmiles=True)
+        except rdkit.Chem.rdchem.AtomValenceException as e:
+            print(f"Valence error during salt removal: {e}")  # Print valence error message
+            # uncleaned_smiles = Chem.MolToSmiles(standardized_mol, isomericSmiles=True)
+            return None
 
-        # if "." in smiles and Chem.MolFromSmiles(smiles):
-        #     cleaned_smiles = Chem.MolToSmiles(rmv.choose(self.smiles_mol))
-        # else:
-        #     cleaned_smiles = smiles
-
-        return cleaned_smiles
+        except Exception as e:
+            print(f"An unexpected error occurred during salt removal: {e}") # Print unexpected error message
+            # uncleaned_smiles = Chem.MolToSmiles(standardized_mol, isomericSmiles=True)
+            return None
