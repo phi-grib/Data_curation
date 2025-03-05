@@ -174,6 +174,9 @@ class Description(object):
         # Adds mol object from canonical SMILES
         self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'canon_smiles'].apply(lambda x: Chem.MolFromSmiles(x))
 
+        # Adds a check for mols_rdkit NaN values
+        self.compound_dataframe = self.compound_dataframe.loc[~self.compound_dataframe['mols_rdkit'].isna()]
+
         # Adds RDKit Fingerprints for direct bulk similarity
         self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'fps'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'].apply(lambda x: FingerprintMols.FingerprintMol(x))
 

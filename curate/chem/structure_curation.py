@@ -172,31 +172,37 @@ class Curator(object):
         
         return substance_type
 
-    def hydrogen_check(self, molecule_object: Chem.Mol) -> Union[bool,str]:
+    def hydrogen_check(self, molecule_object: Chem.Mol) -> Union[bool, str]:
         """
-            This function checks the presence of Hydrogen atoms in a molecule with
-            Carbons.
+        Checks for the presence of hydrogen atoms bonded to carbon atoms in a molecule.
 
-            :param molecule_object:
+        This function examines a given RDKit molecule object to determine if it contains
+        any carbon atoms with hydrogen atoms attached. It's used to distinguish between
+        organic compounds (which typically have C-H bonds) and certain inorganic carbon-
+        containing compounds (like CO2 or CO) which lack C-H bonds.
 
-            :return h_check:
+        Args:
+            molecule_object (Chem.Mol): An RDKit molecule object to be checked.
+
+        Returns:
+            Union[bool, str]: 
+                - 'organic' if the molecule contains carbon atoms with hydrogen attached.
+                - False if no C-H bonds are found.
+
+        Method:
+        1. Adds explicit hydrogens to the molecule.
+        2. Iterates through all atoms in the molecule.
+        3. For each carbon atom, checks if it has any hydrogen neighbors.
+        4. Returns 'organic' if any C-H bond is found, False otherwise.
         """
-
-        # Hydrogen check
-        hs_pattern_1 = re.compile(r'\(\[H\]\).?[Cc]')
-        hs_pattern_2 = re.compile(r'\[H\].?[Cc]')
-        hs_pattern_3 = re.compile(r'[Cc]\(\[H\]\)')
-
-        mol_hs = Chem.AddHs(molecule_object)
-        smi_hs = Chem.MolToSmiles(mol_hs)
-        if re.search(hs_pattern_1, smi_hs) or re.search(hs_pattern_2, smi_hs) or re.search(hs_pattern_3, smi_hs):
-            # This pattern here will always be true since C or c will be present even if there is no H surrounding them. 
-            # Need to check that at least ONE H is near the C
-            h_check = 'organic'
-        else:
-            h_check = False
         
-        return h_check
+        mol_with_h = Chem.AddHs(molecule_object)
+        for atom in mol_with_h.GetAtoms():
+            if atom.GetAtomicNum() == 6:  # Carbon
+                for neighbor in atom.GetNeighbors():
+                    if neighbor.GetAtomicNum() == 1:  # Hydrogen
+                        return 'organic'
+        return False
 
     def halogen_check(self, molecule_string: str) -> str:
         """
