@@ -141,7 +141,19 @@ class Description(object):
 
         df_descriptor.rename(columns={'index':id_col},inplace=True)
 
+        ### Handling of problematic rows (infinite or very large numbers)
+
+        problematic_rows_partial = self.find_problematic_rows(df_descriptor.iloc[:, 1:])
+
+        if not problematic_rows_partial.empty:
+            # Create a new DataFrame with the original rows
+            self.problematic_rows_full = df_descriptor.loc[problematic_rows_partial.index].copy() # .copy() to avoid SettingWithCopyWarning
+
+            # Remove problematic rows from df_descriptor
+            df_descriptor = df_descriptor.drop(problematic_rows_partial.index)
+
         rob=StandardScaler().fit(df_descriptor.iloc[:,1:])
+    
         df_descriptor_complete=rob.transform(df_descriptor.iloc[:,1:])
         df_descriptor_complete=pd.DataFrame(np.c_[df_descriptor.iloc[:,0],df_descriptor_complete],index=df_descriptor.index.values,columns=df_descriptor.columns)
         
@@ -149,6 +161,25 @@ class Description(object):
 
         return final_df, df_descriptor_complete
     
+    def find_problematic_rows(self, df, threshold=1e15):
+        """
+        Finds rows containing infinity or values exceeding a threshold.
+
+        Args:
+            df (pd.DataFrame): The DataFrame to check.
+            threshold (float): The threshold for large values.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the problematic rows.
+        """
+
+        inf_mask = np.isinf(df)
+        large_value_mask = abs(df) > threshold
+        combined_mask = inf_mask | large_value_mask
+        problematic_rows = df[combined_mask.any(axis=1)]
+        
+        return problematic_rows
+
     def add_descriptors_and_fingerprints(self, morgan_bits: int = None, morgan_radius: int = None):
         """
             Adds RDKit descriptors and FPs into the dataframe
@@ -175,8 +206,9 @@ class Description(object):
         self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'canon_smiles'].apply(lambda x: Chem.MolFromSmiles(x))
 
         # Adds a check for mols_rdkit NaN values
+        self.nan_mols = self.compound_dataframe.loc[self.compound_dataframe['mols_rdkit'].isna()]
         self.compound_dataframe = self.compound_dataframe.loc[~self.compound_dataframe['mols_rdkit'].isna()]
-
+        
         # Adds RDKit Fingerprints for direct bulk similarity
         self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'fps'] = self.compound_dataframe.loc[~self.compound_dataframe['canon_smiles'].isna(),'mols_rdkit'].apply(lambda x: FingerprintMols.FingerprintMol(x))
 
