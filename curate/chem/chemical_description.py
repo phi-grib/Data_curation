@@ -9,12 +9,12 @@ import numpy as np
 import pandas as pd
 
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, Descriptors
 from rdkit.Chem.Fingerprints import FingerprintMols
 from rdkit.ML.Descriptors import MoleculeDescriptors
 from sklearn.preprocessing import StandardScaler
 
-from typing import Optional, Union
+from typing import Optional, Union, List, Tuple
 
 from curate.util import get_logger
 
@@ -127,8 +127,9 @@ class Description(object):
 
         names=[x[0] for x in Chem.Descriptors._descList]
         calculator=MoleculeDescriptors.MolecularDescriptorCalculator(names)
+                
         desc = [calculator.CalcDescriptors(mol) for mol in dataframe[mol_col].values]
-        
+
         df_descriptor=pd.DataFrame(desc,columns=names,index=dataframe[id_col].values)
         df_descriptor=df_descriptor.drop(columns='Ipc')
 
@@ -161,6 +162,80 @@ class Description(object):
 
         return final_df, df_descriptor_complete
     
+    # def calculate_descriptors_with_error_handling(self, mols: List[Optional[Chem.Mol]], 
+    # descriptor_names: List[str]) -> Tuple[List[List[Optional[float]]], List[Optional[Chem.Mol]]]:
+    #  NOT WORKNG. IT DOESN'T CAPTURE THE EXCEPTION, WHICH IS THROWN BY RDKIT AND NOT CAPTURED BY THE PYTHON WRAPPER
+    #     """
+    #         Calculates molecular descriptors for a list of RDKit molecules, handling potential ZeroDivisionErrors 
+    #         that can occur when calculating FpDensityMorgan descriptors for molecules with zero heavy atoms.
+
+    #         Args:
+    #             mols: A list of RDKit Mol objects. Molecules may be None or represent empty molecules.
+    #             descriptor_names: A list of descriptor names (strings) to calculate.
+
+    #         Returns:
+    #             A tuple containing:
+    #                 - all_results: A list of lists, where each inner list contains the calculated descriptor values 
+    #                             for a molecule. If a ZeroDivisionError (or another error) occurred during calculation,
+    #                             the corresponding inner list will contain None values.
+    #                 - problematic_mols: A list of RDKit Mol objects that caused a ZeroDivisionError (or other issue)
+    #                                     during descriptor calculation.
+
+    #         Raises:
+    #             (No exceptions are raised by this function itself. Exceptions during descriptor calculation are caught and handled)
+
+    #         Example:
+    #             >>> from rdkit import Chem
+    #             >>> from rdkit.Chem import Descriptors
+    #             >>> mols = [Chem.MolFromSmiles("C"), Chem.MolFromSmiles(""), Chem.MolFromSmiles("[H][H]")] #Example Molecules
+    #             >>> descriptor_names = ["MolWt", "FpDensityMorgan1", "NumHAcceptors"]
+    #             >>> results, problematic = calculate_descriptors_with_error_handling(mols, descriptor_names)
+    #             >>> print(results)
+    #             [[16.043, 1.0, 0], [None, None, None], [2.016, None, 0]]
+    #             >>> print([Chem.MolToSmiles(x) if x else None for x in problematic])
+    #             [None, '[H][H]']
+    #     """
+        
+    #     descriptor_calculator = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names)
+        
+    #     all_results: List[List[Optional[float]]] = []
+    #     problematic_mols: List[Optional[Chem.Mol]] = []
+
+    #     for mol in mols:
+    #         try:
+    #             if mol is None:
+    #                 raise ValueError("Mol object is None") #Explicitly handle None molecules.
+    #             results = descriptor_calculator.CalcDescriptors(mol)
+    #             all_results.append(results)
+    #         except ZeroDivisionError:
+    #             print('why not here?')
+    #             problematic_mols.append(mol)
+    #             print(f"Error: ZeroDivisionError encountered for molecule: {Chem.MolToSmiles(mol) if mol else 'Empty Molecule'}")
+
+    #             # Find the descriptor that caused the problem.
+    #             for desc_name in descriptor_names:
+    #                 try:
+    #                     desc_func = getattr(Descriptors, desc_name)
+    #                     desc_func(mol) # Attempt calculation to see which one fails
+    #                 except ZeroDivisionError:
+    #                     print(f"   Problematic Descriptor: {desc_name}")
+    #                     break # Break after finding the problem descriptor.
+    #                 except Exception:
+    #                     pass # Skip other exceptions during descriptor identification.
+    #             all_results.append([None] * len(descriptor_names)) #Append None to keep data structure consistent.
+
+    #         except (ValueError, AttributeError) as e:
+    #             problematic_mols.append(mol)
+    #             print(f"Error: {e} encountered for molecule: {Chem.MolToSmiles(mol) if mol else 'Empty Molecule'}")
+    #             all_results.append([None] * len(descriptor_names))
+
+    #         except Exception as e:
+    #             problematic_mols.append(mol)
+    #             print(f"Unexpected Error: {e} encountered for molecule: {Chem.MolToSmiles(mol) if mol else 'Empty Molecule'}")
+    #             all_results.append([None] * len(descriptor_names))
+
+    #     return all_results, problematic_mols
+
     def find_problematic_rows(self, df, threshold=1e15):
         """
         Finds rows containing infinity or values exceeding a threshold.
