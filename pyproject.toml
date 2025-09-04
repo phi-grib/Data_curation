@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-curation"
+version = "2.0"
+description = "Data curation package. Optimized for pandas Dataframes"
+readme = "README.md"
+authors = [
+{ name = "Eric March Vila", email = "eric.march@upf.edu" }
+]
+license = { text = "GPL-3.0-only" }
+requires-python = ">=3.6"
+classifiers = [
+"Programming Language :: Python :: 3",
+"License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+"Operating System :: OS Independent",
+]
+dependencies = [
+"setuptools>=38.4.0",
+"numpy<2",
+"pandas<2",
+"scikit-learn==1.2.2",
+"imbalanced-learn==0.10.1",
+"requests",
+"rdkit==2023.9.1",
+"pyyaml",
+"psycopg2-binary",
+"chembl_structure_pipeline",
+"chembl_webresource_client",
+"xlrd",
+"openpyxl",
+"appdirs",
+"lxml",
+"standardiser @ git+https://github.com/phi-grib/standardiser.git",
+"nonconformist @ git+https://github.com/phi-grib/nonconformist.git",
+"phitools @ git+https://github.com/phi-grib/phitools.git",
+"epa @ git+https://github.com/phi-grib/EPA_simplified.git#egg=epa",
+]
+
+[project.urls]
+Homepage = "https://github.com/phi-grib/Data_curation"
+Download = "https://github.com/phi-grib/Data_curation.git"
+
+[project.scripts]
+datacur = "curate.curate_src:main"
+
+[project.optional-dependencies]
+dev = [
+"pytest",
+"jupyter",
+"jupyterlab",
+"xgboost",
+"django==2.2.8",
+"djangorestframework",
+"django-cors-headers",
+"djangorestframework-yaml"
+]
+
+[tool.setuptools.package-data]
+"curate" = [
+    "config.yaml", 
+    "children/*.yaml"
+]

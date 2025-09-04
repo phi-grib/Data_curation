@@ -22,9 +22,9 @@ Go to the repository directory:
 cd Data_curation/
 ```
 
-Create the **conda environment**:
+Create a **new conda environment** and install the core scientific libraries using `conda`. This is the most crucial step as it will handle the complex binary dependencies correctly:
 ```bash
-conda env create -f environment.yml
+conda create -n datacuration python=3.10 numpy pandas rdkit -c conda-forge
 ```
 
 Then activate the environment:
@@ -36,7 +36,12 @@ conda activate datacuration
 Install Data curation:
 
 ```bash
-pip install -e .
+pip install ".[dev]"
+```
+
+If you want to install it in editable mode, just add -e
+```bash
+pip install -e ".[dev]"
 ```
 
 ## Configuration
