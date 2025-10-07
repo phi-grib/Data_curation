@@ -9,8 +9,9 @@ import numpy as np
 import pandas as pd
 
 from rdkit import Chem
-from rdkit.Chem import AllChem, Descriptors
+from rdkit.Chem import AllChem
 from rdkit.Chem.Fingerprints import FingerprintMols
+# from rdkit.Chem.rdMorganFingerprint import MorganGenerator
 from rdkit.ML.Descriptors import MoleculeDescriptors
 from sklearn.preprocessing import StandardScaler
 
@@ -130,6 +131,9 @@ class Description(object):
                 
         desc = [calculator.CalcDescriptors(mol) for mol in dataframe[mol_col].values]
 
+        #### FIX for mixed data types in id col and future df_descriptor index
+        dataframe[id_col] = dataframe[id_col].astype(str)
+        
         df_descriptor=pd.DataFrame(desc,columns=names,index=dataframe[id_col].values)
         df_descriptor=df_descriptor.drop(columns='Ipc')
 
@@ -153,10 +157,19 @@ class Description(object):
             # Remove problematic rows from df_descriptor
             df_descriptor = df_descriptor.drop(problematic_rows_partial.index)
 
-        rob=StandardScaler().fit(df_descriptor.iloc[:,1:])
-    
-        df_descriptor_complete=rob.transform(df_descriptor.iloc[:,1:])
-        df_descriptor_complete=pd.DataFrame(np.c_[df_descriptor.iloc[:,0],df_descriptor_complete],index=df_descriptor.index.values,columns=df_descriptor.columns)
+        # Separate the ID column from the feature columns
+        id_series = df_descriptor.iloc[:, 0]
+        feature_df = df_descriptor.iloc[:, 1:]
+
+        # Fit and transform the numeric features ONLY
+        scaler = StandardScaler().fit(feature_df)
+        scaled_features = scaler.transform(feature_df)
+
+        # Create the final DataFrame with the scaled numeric data and correct columns/index
+        df_descriptor_complete = pd.DataFrame(scaled_features, index=feature_df.index, columns=feature_df.columns)
+
+        # Re-insert the ID column at the beginning, preserving its type
+        df_descriptor_complete.insert(0, id_col, id_series)
         
         final_df = dataframe.merge(df_descriptor_complete, how='left', on=id_col)
 
